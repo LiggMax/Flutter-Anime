@@ -21,14 +21,25 @@ class MaApp extends StatelessWidget {
         alignment: Alignment.center,
         width: 200,
         height: 200,
-        decoration: const BoxDecoration(
-          color: Colors.green,
-          borderRadius: BorderRadius.all(Radius.circular(20)),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black54,
+              blurRadius: 20,
+            )
+          ],
+          gradient: const LinearGradient(
+            colors: [
+              Colors.green,
+              Colors.cyanAccent,
+            ],
+          ),
         ),
         child: const Text(
           "hello flutter",
           style: TextStyle(
-            color: Colors.black87,
+            color: Colors.white,
             fontSize: 30,
             fontWeight: FontWeight.bold,
           ),
