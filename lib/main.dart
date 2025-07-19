@@ -16,27 +16,17 @@ class MaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.cyanAccent,
-              blurRadius: 20,
-            )
+    return Column(
+      children: [
+        Row(
+          //横向布局
+          children: const [
+            Icon(Icons.account_circle,size: 100,color: Colors.amber),
+            Icon(Icons.apps_sharp)
           ],
         ),
-        child: const Text(
-          "hello flutter",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+        const Text("hello world")
+      ],
     );
   }
 }
