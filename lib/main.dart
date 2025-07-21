@@ -22,7 +22,8 @@ class MaApp extends StatelessWidget {
           //横向布局
           children: const [
             Icon(Icons.account_circle,size: 100,color: Colors.amber),
-            Icon(Icons.apps_sharp)
+            Icon(Icons.apps_sharp),
+            Icon(Icons.add)
           ],
         ),
         const Text("hello world")
