@@ -1,37 +1,22 @@
 import 'package:flutter/material.dart';
+import './page/Tabs.dart';
 
 void main() {
-  runApp(MaterialApp(home: Tabs()));
+  runApp(const MyApp());
 }
 
-class Tabs extends StatefulWidget {
-  const Tabs({super.key});
-
-  @override
-  State<Tabs> createState() => _TabsState();
-}
-
-class _TabsState extends State<Tabs> {
-  int _currentIndex = 0;
+class MyApp extends StatelessWidget {
+  const MyApp({Key? ket}) : super(key: ket);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("hello world")),
-      body: const Text("Flutter"),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: '搜索'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
-        ],
-      ),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      home: const Tabs()
     );
   }
 }
+
+
+
+
