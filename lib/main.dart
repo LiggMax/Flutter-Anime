@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(
-    MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text("hello flutter")),
-        body: const MaApp(),
-      ),
-    ),
-  );
+  runApp(MaterialApp(home: Tabs()));
 }
 
-class MaApp extends StatelessWidget {
-  const MaApp({super.key});
+class Tabs extends StatefulWidget {
+  const Tabs({super.key});
+
+  @override
+  State<Tabs> createState() => _TabsState();
+}
+
+class _TabsState extends State<Tabs> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          //横向布局
-          children: const [
-            Icon(Icons.account_circle,size: 100,color: Colors.amber),
-            Icon(Icons.apps_sharp),
-            Icon(Icons.add)
-          ],
-        ),
-        const Text("hello world")
-      ],
+    return Scaffold(
+      appBar: AppBar(title: const Text("hello world")),
+      body: const Text("Flutter"),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: '搜索'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
+        ],
+      ),
     );
   }
 }
