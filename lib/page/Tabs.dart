@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import './tabs/Home.dart';
 import './tabs/Profile.dart';
 import './tabs/Search.dart';
 import '../controllers/theme_controller.dart';
+import '../utils/theme_extensions.dart';
 
 class Tabs extends StatefulWidget {
   const Tabs({super.key});
@@ -22,6 +24,13 @@ class _TabsState extends State<Tabs> {
     const ProfilePage(),
   ];
 
+  // 页面标题列表
+  final List<String> _pageTitles = [
+    "首页",
+    "搜索",
+    "个人中心",
+  ];
+
   void _navigateTo(int index) {
     setState(() {
       _currentIndex = index;
@@ -31,19 +40,22 @@ class _TabsState extends State<Tabs> {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Flutter Anime"),
+        title: Text(_pageTitles[_currentIndex]),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent, // 状态栏透明
+          statusBarIconBrightness: context.isDarkMode ? Brightness.light : Brightness.dark,
+          statusBarBrightness: context.isDarkMode ? Brightness.dark : Brightness.light,
+        ),
         actions: [
           IconButton(
-            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            icon: Icon(context.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: () async {
               await themeController.toggleTheme();
             },
-            tooltip: isDarkMode ? '切换到浅色模式' : '切换到深色模式',
+            tooltip: context.isDarkMode ? '切换到浅色模式' : '切换到深色模式',
           ),
         ],
       ),
@@ -55,30 +67,28 @@ class _TabsState extends State<Tabs> {
         index: _currentIndex,
         onTap: _navigateTo,
         height: 70,
-        // 导航栏高度
-        color: isDarkMode ? Colors.grey[800]! : Colors.cyanAccent,
+        color: context.navigationBarColor,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 200),
         items: [
           Icon(
             Icons.home,
             size: 30,
-            color: isDarkMode ? Colors.white : Colors.black,
+            color: context.navigationIconColor,
           ),
           Icon(
             Icons.search,
             size: 30,
-            color: isDarkMode ? Colors.white : Colors.black,
+            color: context.navigationIconColor,
           ),
           Icon(
             Icons.person,
             size: 30,
-            color: isDarkMode ? Colors.white : Colors.black,
+            color: context.navigationIconColor,
           ),
         ],
-        buttonBackgroundColor: isDarkMode ? Colors.blue[400]! : Colors.amber,
-        // 选中按钮的背景颜色
-        animationCurve: Curves.easeInOut, // 动画曲线
+        buttonBackgroundColor: context.navigationSelectedColor,
+        animationCurve: Curves.easeInOut,
       ),
     );
   }
