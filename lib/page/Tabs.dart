@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:get/get.dart';
 import './tabs/Home.dart';
 import './tabs/Profile.dart';
 import './tabs/Search.dart';
+import '../controllers/theme_controller.dart';
 
 class Tabs extends StatefulWidget {
   const Tabs({super.key});
@@ -13,6 +15,7 @@ class Tabs extends StatefulWidget {
 
 class _TabsState extends State<Tabs> {
   int _currentIndex = 0;
+  final ThemeController themeController = Get.find<ThemeController>();
 
   final List<Widget> _pages = [
     const HomePage(),
@@ -28,8 +31,25 @@ class _TabsState extends State<Tabs> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("hello world")),
+    return Obx(() => Scaffold(
+      appBar: AppBar(
+        title: const Text("Flutter Anime"),
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeController.isDarkMode.value 
+                ? Icons.light_mode 
+                : Icons.dark_mode,
+            ),
+            onPressed: () {
+              themeController.toggleTheme();
+            },
+            tooltip: themeController.isDarkMode.value 
+              ? '切换到浅色模式' 
+              : '切换到深色模式',
+          ),
+        ],
+      ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _pages[_currentIndex],
@@ -38,17 +58,39 @@ class _TabsState extends State<Tabs> {
         index: _currentIndex,
         onTap: _navigateTo,
         height: 70, // 导航栏高度
-        color: Colors.cyanAccent,
+        color: themeController.isDarkMode.value 
+          ? Colors.grey[800]! 
+          : Colors.cyanAccent,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 200),
-        items: const [
-          Icon(Icons.home, size: 30, color: Colors.black),
-          Icon(Icons.search, size: 30, color: Colors.black),
-          Icon(Icons.person, size: 30, color: Colors.black),
+        items: [
+          Icon(
+            Icons.home, 
+            size: 30, 
+            color: themeController.isDarkMode.value 
+              ? Colors.white 
+              : Colors.black,
+          ),
+          Icon(
+            Icons.search, 
+            size: 30, 
+            color: themeController.isDarkMode.value 
+              ? Colors.white 
+              : Colors.black,
+          ),
+          Icon(
+            Icons.person, 
+            size: 30, 
+            color: themeController.isDarkMode.value 
+              ? Colors.white 
+              : Colors.black,
+          ),
         ],
-        buttonBackgroundColor: Colors.amber, // 选中按钮的背景颜色
+        buttonBackgroundColor: themeController.isDarkMode.value 
+          ? Colors.blue[400]! 
+          : Colors.amber, // 选中按钮的背景颜色
         animationCurve: Curves.easeInOut, // 动画曲线
       ),
-    );
+    ));
   }
 }
