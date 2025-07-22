@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'recommend.dart';
-import 'time.dart';
 import 'ranking.dart';
 
 class HomePage extends StatefulWidget {
@@ -31,7 +30,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               controller: _tabController,
               tabs: const [
                 Tab(text: '推荐'),
-                Tab(text: '时间表'),
                 Tab(text: '排行榜'),
               ],
               labelColor: Theme.of(context).primaryColor,
@@ -54,7 +52,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               controller: _tabController,
               children: const [
                 RecommendPage(),
-                TimePage(),
                 RankingPage(),
               ],
             ),

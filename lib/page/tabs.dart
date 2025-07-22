@@ -44,6 +44,7 @@ class _TabsState extends State<Tabs> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_pageTitles[_currentIndex]),
+        centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent, // 状态栏透明
           statusBarIconBrightness: context.isDarkMode ? Brightness.light : Brightness.dark,
