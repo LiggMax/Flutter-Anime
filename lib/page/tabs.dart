@@ -4,7 +4,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'tabs/home/home.dart';
 import './tabs/profile.dart';
-import './tabs/search.dart';
+import './tabs/time.dart';
 import '../controllers/theme_controller.dart';
 import '../utils/theme_extensions.dart';
 
@@ -20,14 +20,14 @@ class _TabsState extends State<Tabs> {
 
   final List<Widget> _pages = [
     const HomePage(),
-    const SearchPage(),
+    const TimePage(),
     const ProfilePage(),
   ];
 
   // 页面标题列表
   final List<String> _pageTitles = [
     "首页",
-    "搜索",
+    "时间表",
     "个人中心",
   ];
 
@@ -77,7 +77,7 @@ class _TabsState extends State<Tabs> {
             color: context.navigationIconColor,
           ),
           Icon(
-            Icons.search,
+            Icons.timeline_sharp,
             size: 30,
             color: context.navigationIconColor,
           ),
