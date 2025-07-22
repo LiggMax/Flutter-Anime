@@ -7,13 +7,48 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late ThemeController themeController;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    themeController = ThemeController();
+    _initializeTheme();
+  }
+
+  Future<void> _initializeTheme() async {
+    await themeController.initTheme();
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ThemeController(),
+    if (!_isInitialized) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        debugShowCheckedModeBanner: false,
+      );
+    }
+
+    return ChangeNotifierProvider.value(
+      value: themeController,
       child: Consumer<ThemeController>(
         builder: (context, themeController, child) {
           return AnimatedTheme(

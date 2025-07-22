@@ -39,17 +39,11 @@ class _TabsState extends State<Tabs> {
         title: const Text("Flutter Anime"),
         actions: [
           IconButton(
-            icon: Icon(
-              isDarkMode
-                ? Icons.light_mode
-                : Icons.dark_mode,
-            ),
-            onPressed: () {
-              themeController.toggleTheme();
+            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () async {
+              await themeController.toggleTheme();
             },
-            tooltip: isDarkMode
-              ? '切换到浅色模式'
-              : '切换到深色模式',
+            tooltip: isDarkMode ? '切换到浅色模式' : '切换到深色模式',
           ),
         ],
       ),
@@ -60,38 +54,30 @@ class _TabsState extends State<Tabs> {
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
         onTap: _navigateTo,
-        height: 70, // 导航栏高度
-        color: isDarkMode
-          ? Colors.grey[800]!
-          : Colors.cyanAccent,
+        height: 70,
+        // 导航栏高度
+        color: isDarkMode ? Colors.grey[800]! : Colors.cyanAccent,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 200),
         items: [
           Icon(
             Icons.home,
             size: 30,
-            color: isDarkMode
-              ? Colors.white
-              : Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
           Icon(
             Icons.search,
             size: 30,
-            color: isDarkMode
-              ? Colors.white
-              : Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
           Icon(
             Icons.person,
             size: 30,
-            color: isDarkMode
-              ? Colors.white
-              : Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ],
-        buttonBackgroundColor: isDarkMode
-          ? Colors.blue[400]!
-          : Colors.amber, // 选中按钮的背景颜色
+        buttonBackgroundColor: isDarkMode ? Colors.blue[400]! : Colors.amber,
+        // 选中按钮的背景颜色
         animationCurve: Curves.easeInOut, // 动画曲线
       ),
     );
