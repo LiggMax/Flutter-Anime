@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import './page/Tabs.dart';
 import './controllers/theme_controller.dart';
 
@@ -8,20 +8,27 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 初始化主题控制器
-    final ThemeController themeController = Get.put(ThemeController());
-    
-    return GetMaterialApp(
-      title: 'Flutter Anime',
-      theme: themeController.lightTheme,
-      darkTheme: themeController.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const Tabs(),
-      debugShowCheckedModeBanner: false,
+    return ChangeNotifierProvider(
+      create: (context) => ThemeController(),
+      child: Consumer<ThemeController>(
+        builder: (context, themeController, child) {
+          return AnimatedTheme(
+            duration: const Duration(milliseconds: 300),
+            data: themeController.currentTheme,
+            child: MaterialApp(
+              theme: ThemeController.lightTheme,
+              darkTheme: ThemeController.darkTheme,
+              themeMode: themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              home: const Tabs(),
+              debugShowCheckedModeBanner: false,
+            ),
+          );
+        },
+      ),
     );
   }
 }

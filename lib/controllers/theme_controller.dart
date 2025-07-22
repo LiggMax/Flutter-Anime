@@ -1,23 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-class ThemeController extends GetxController {
-  // 响应式主题模式变量
-  var isDarkMode = false.obs;
+class ThemeController extends ChangeNotifier {
+  bool _isDarkMode = false;
 
-  // 切换主题
+  bool get isDarkMode => _isDarkMode;
+
   void toggleTheme() {
-    isDarkMode.value = !isDarkMode.value;
-    Get.changeThemeMode(isDarkMode.value ? ThemeMode.dark : ThemeMode.light);
-  }
-
-  // 获取当前主题数据
-  ThemeData get currentTheme {
-    return isDarkMode.value ? _darkTheme : _lightTheme;
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
   }
 
   // 浅色主题
-  static final ThemeData _lightTheme = ThemeData(
+  static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primarySwatch: Colors.blue,
     appBarTheme: const AppBarTheme(
@@ -34,7 +28,7 @@ class ThemeController extends GetxController {
   );
 
   // 深色主题
-  static final ThemeData _darkTheme = ThemeData(
+  static final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     primarySwatch: Colors.blue,
     appBarTheme: const AppBarTheme(
@@ -50,9 +44,6 @@ class ThemeController extends GetxController {
     ),
   );
 
-  // 获取浅色主题
-  ThemeData get lightTheme => _lightTheme;
-
-  // 获取深色主题
-  ThemeData get darkTheme => _darkTheme;
+  // 获取当前主题
+  ThemeData get currentTheme => _isDarkMode ? darkTheme : lightTheme;
 }
