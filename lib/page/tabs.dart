@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
-import './tabs/Home.dart';
-import './tabs/Profile.dart';
-import './tabs/Search.dart';
+import './tabs/home.dart';
+import './tabs/profile.dart';
+import './tabs/search.dart';
 import '../controllers/theme_controller.dart';
 import '../utils/theme_extensions.dart';
 
