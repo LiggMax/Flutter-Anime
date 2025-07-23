@@ -87,52 +87,56 @@ class AnimeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subject = animeData['subject'];
-    final watchers = animeData['watchers'] ?? 0;
-
     final name = subject['nameCN']?.isNotEmpty == true
         ? subject['nameCN']
         : subject['name'];
     final imageUrl = subject['images']?['large'] ?? '';
-    final score = subject['rating']?['score']?.toString() ?? '无评分';
 
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias, // 确保内容不会超出圆角
+      child: Stack(
+        fit: StackFit.expand,
         children: [
           // 封面图片
-          Expanded(
-            flex: 3,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: _buildImage(imageUrl),
-            ),
-          ),
-          // 信息区域
-          Expanded(
-            flex: 2,
-            child: Padding(
+          _buildImage(imageUrl),
+          // 底部渐变蒙版和标题
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black26,
+                    Colors.black45,
+                  ],
+                ),
+              ),
               padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // 标题
-                  Text(
-                    name ?? '未知动漫',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+              child: Text(
+                name ?? '未知动漫',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(1, 1),
+                      blurRadius: 2,
+                      color: Colors.black,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  // 评分和关注数
-                  _buildInfoSection(score, watchers),
-                ],
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -159,32 +163,9 @@ class AnimeCard extends StatelessWidget {
       color: Colors.grey[300],
       child: const Icon(
         Icons.movie,
-        size: 40,
+        size: 30,
         color: Colors.grey,
       ),
-    );
-  }
-
-  Widget _buildInfoSection(String score, int watchers) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.star, size: 12, color: Colors.amber),
-            const SizedBox(width: 2),
-            Text(score, style: const TextStyle(fontSize: 10)),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Row(
-          children: [
-            const Icon(Icons.visibility, size: 12, color: Colors.blue),
-            const SizedBox(width: 2),
-            Text('$watchers人关注', style: const TextStyle(fontSize: 10)),
-          ],
-        ),
-      ],
     );
   }
 }
@@ -345,13 +326,13 @@ class AnimeGrid extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: _getCrossAxisCount(context),
-              childAspectRatio: 0.6,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              childAspectRatio: 0.75, 
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => AnimeCard(animeData: animes[index]),
@@ -365,10 +346,10 @@ class AnimeGrid extends StatelessWidget {
 
   int _getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < 600) return 2;
-    if (width < 900) return 3;
-    if (width < 1200) return 4;
-    return 5;
+    if (width < 400) return 3;
+    if (width < 600) return 4;
+    if (width < 900) return 5;
+    return 7; // 超大屏幕显示7列
   }
 }
 
@@ -387,7 +368,6 @@ class _TimePageState extends State<TimePage> with AutomaticKeepAliveClientMixin 
   void initState() {
     super.initState();
     _calendarProvider = CalendarProvider();
-    // loadCalendar 现在在 CalendarProvider 构造函数中自动调用
   }
 
   @override

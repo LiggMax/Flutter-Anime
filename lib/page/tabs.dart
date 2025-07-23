@@ -60,9 +60,9 @@ class _TabsState extends State<Tabs> {
           ),
         ],
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
