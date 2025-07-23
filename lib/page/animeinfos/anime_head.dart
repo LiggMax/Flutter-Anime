@@ -77,7 +77,7 @@ class AnimeDetailAppBar extends StatelessWidget {
   }
 }
 
-/// 详情页头部组件
+/// 头部组件
 class AnimeDetailHeader extends StatelessWidget {
   final BangumiDetailData bangumiItem;
   final bool isLoading;
