@@ -463,7 +463,7 @@ class AnimePlayButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 3,
-          shadowColor: const Color(0xFF8B5CF6).withOpacity(0.3),
+          shadowColor: const Color(0xFF8B5CF6).withAlpha(53),
         ),
         icon: const Icon(
           Icons.play_arrow_rounded,

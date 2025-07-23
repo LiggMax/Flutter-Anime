@@ -137,20 +137,6 @@ class _AnimeDataPageState extends State<AnimeDataPage>
       ),
     );
   }
-
-  /// 构建播放选项项目
-  Widget _buildPlayOption(String title, IconData icon) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF8B5CF6)),
-      title: Text(title),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        Navigator.pop(context);
-        // TODO: 实现对应的播放功能
-        print('选择了: $title');
-      },
-    );
-  }
 }
 
 /// 控制器模式
