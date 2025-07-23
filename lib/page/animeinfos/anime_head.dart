@@ -366,12 +366,12 @@ class BangumiInfoCard extends StatelessWidget {
                 final hasHalfStar = (score / 2) - fullStars >= 0.5;
 
                 if (index < fullStars) {
-                  return const Icon(Icons.star, color: Colors.amber, size: 16);
+                  return const Icon(Icons.star, color: Colors.amber, size: 20);
                 } else if (index == fullStars && hasHalfStar) {
                   return const Icon(
                     Icons.star_half,
                     color: Colors.amber,
-                    size: 16,
+                    size: 20,
                   );
                 } else {
                   return const Icon(
@@ -387,14 +387,7 @@ class BangumiInfoCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 2,
-                      color: Colors.black,
-                    ),
-                  ],
+                  color: Colors.black87,
                 ),
               ),
             ],
