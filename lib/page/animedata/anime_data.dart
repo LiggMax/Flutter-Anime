@@ -19,7 +19,8 @@ class AnimeDataPage extends StatefulWidget {
   State<AnimeDataPage> createState() => _AnimeDataPageState();
 }
 
-class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateMixin {
+class _AnimeDataPageState extends State<AnimeDataPage>
+    with TickerProviderStateMixin {
   /// 参考Kazumi的控制器模式
   final InfoController infoController = InfoController();
   late TabController infoTabController;
@@ -58,7 +59,8 @@ class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateM
       totalEpisodes: 0,
       eps: 0,
       volumes: 0,
-      type: 2, // 默认为TV动画
+      type: 2,
+      // 默认为TV动画
       series: false,
       locked: false,
       nsfw: false,
@@ -98,65 +100,98 @@ class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateM
         length: tabs.length,
         child: Scaffold(
           body: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: SliverAppBar.medium(
-                    title: Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        infoController.bangumiItem.displayName.isEmpty
-                            ? (widget.animeName ?? '动漫详情')
-                            : infoController.bangumiItem.displayName,
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+                  return <Widget>[
+                    SliverOverlapAbsorber(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
                       ),
-                    ),
-                    automaticallyImplyLeading: false,
-                    scrolledUnderElevation: 0.0,
-                    leading: IconButton(
-                      onPressed: () {
-                        Navigator.maybePop(context);
-                      },
-                      icon: const Icon(Icons.arrow_back),
-                    ),
-                    actions: [
-                      if (innerBoxIsScrolled)
-                        IconButton(
-                          onPressed: () {
-                            // TODO: 实现收藏功能
-                          },
-                          icon: const Icon(Icons.favorite_border),
+                      sliver: SliverAppBar.medium(
+                        title: Container(
+                          width: double.infinity,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            infoController.bangumiItem.displayName.isEmpty
+                                ? (widget.animeName ?? '动漫详情')
+                                : infoController.bangumiItem.displayName,
+                          ),
                         ),
-                      IconButton(
-                        onPressed: () {
-                          // TODO: 实现分享功能
-                        },
-                        icon: const Icon(Icons.share),
+                        automaticallyImplyLeading: false,
+                        scrolledUnderElevation: 0.0,
+                        // 添加滚动时的不透明背景
+                        backgroundColor: innerBoxIsScrolled
+                            ? Colors.white
+                            : Colors.transparent,
+                        foregroundColor: Colors.black,
+                        leading: IconButton(
+                          onPressed: () {
+                            Navigator.maybePop(context);
+                          },
+                          icon: const Icon(Icons.arrow_back),
+                        ),
+                        actions: [
+                          if (innerBoxIsScrolled)
+                            IconButton(
+                              onPressed: () {
+                                // TODO: 实现收藏功能
+                              },
+                              icon: const Icon(Icons.favorite_border),
+                            ),
+                          IconButton(
+                            onPressed: () {
+                              // TODO: 实现分享功能
+                            },
+                            icon: const Icon(Icons.share),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        stretch: true,
+                        centerTitle: false,
+                        // 参考Kazumi的高度设置
+                        expandedHeight:
+                            308 + kTextTabBarHeight + kToolbarHeight,
+                        collapsedHeight:
+                            kTextTabBarHeight +
+                            kToolbarHeight +
+                            MediaQuery.paddingOf(context).top,
+                        flexibleSpace: FlexibleSpaceBar(
+                          collapseMode: CollapseMode.pin,
+                          background: _buildFlexibleBackground(),
+                        ),
+                        forceElevated: innerBoxIsScrolled,
+                        bottom: PreferredSize(
+                          preferredSize: const Size.fromHeight(
+                            kTextTabBarHeight,
+                          ),
+                          child: Container(
+                            color: innerBoxIsScrolled
+                                ? Colors.white
+                                : Colors.transparent,
+                            child: TabBar(
+                              controller: infoTabController,
+                              isScrollable: false,
+                              tabAlignment: TabAlignment.fill,
+                              dividerHeight: 0,
+                              labelColor: innerBoxIsScrolled
+                                  ? Colors.black
+                                  : Colors.white,
+                              unselectedLabelColor: innerBoxIsScrolled
+                                  ? Colors.grey[600]
+                                  : Colors.white70,
+                              indicatorColor: innerBoxIsScrolled
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.white,
+                              tabs: tabs
+                                  .map((name) => Tab(text: name))
+                                  .toList(),
+                            ),
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                    ],
-                    stretch: true,
-                    centerTitle: false,
-                    // 参考Kazumi的高度设置
-                    expandedHeight: 308 + kTextTabBarHeight + kToolbarHeight,
-                    collapsedHeight: kTextTabBarHeight + kToolbarHeight + MediaQuery.paddingOf(context).top,
-                    flexibleSpace: FlexibleSpaceBar(
-                      collapseMode: CollapseMode.pin,
-                      background: _buildFlexibleBackground(),
                     ),
-                    forceElevated: innerBoxIsScrolled,
-                    bottom: TabBar(
-                      controller: infoTabController,
-                      isScrollable: false,
-                      tabAlignment: TabAlignment.fill,
-                      dividerHeight: 0,
-                      tabs: tabs.map((name) => Tab(text: name)).toList(),
-                    ),
-                  ),
-                ),
-              ];
-            },
+                  ];
+                },
             body: AnimeInfoTabView(
               tabController: infoTabController,
               bangumiItem: infoController.bangumiItem,
@@ -189,10 +224,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateM
                           return const LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white,
-                              Colors.transparent,
-                            ],
+                            colors: [Colors.white, Colors.transparent],
                             stops: [0.8, 1],
                           ).createShader(bounds);
                         },
@@ -214,7 +246,12 @@ class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateM
           child: Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 20, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                kToolbarHeight + 20,
+                16,
+                0,
+              ),
               child: BangumiInfoCard(
                 bangumiItem: infoController.bangumiItem,
                 isLoading: infoController.isLoading,
@@ -235,11 +272,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateM
         height: height,
         color: Colors.grey[800],
         child: const Center(
-          child: Icon(
-            Icons.movie,
-            size: 80,
-            color: Colors.white24,
-          ),
+          child: Icon(Icons.movie, size: 80, color: Colors.white24),
         ),
       );
     }
@@ -254,11 +287,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateM
         height: height,
         color: Colors.grey[800],
         child: const Center(
-          child: Icon(
-            Icons.movie,
-            size: 80,
-            color: Colors.white24,
-          ),
+          child: Icon(Icons.movie, size: 80, color: Colors.white24),
         ),
       ),
     );
@@ -357,7 +386,8 @@ class BangumiInfoCard extends StatelessWidget {
               ? Image.network(
                   bangumiItem.images.bestUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildPlaceholderIcon(),
                 )
               : _buildPlaceholderIcon(),
         ),
@@ -390,11 +420,7 @@ class BangumiInfoCard extends StatelessWidget {
             fontSize: 14,
             color: Colors.white70,
             shadows: [
-              Shadow(
-                offset: Offset(1, 1),
-                blurRadius: 2,
-                color: Colors.black,
-              ),
+              Shadow(offset: Offset(1, 1), blurRadius: 2, color: Colors.black),
             ],
           ),
         ),
@@ -414,9 +440,17 @@ class BangumiInfoCard extends StatelessWidget {
                 if (index < fullStars) {
                   return const Icon(Icons.star, color: Colors.amber, size: 16);
                 } else if (index == fullStars && hasHalfStar) {
-                  return const Icon(Icons.star_half, color: Colors.amber, size: 16);
+                  return const Icon(
+                    Icons.star_half,
+                    color: Colors.amber,
+                    size: 16,
+                  );
                 } else {
-                  return const Icon(Icons.star_border, color: Colors.white54, size: 16);
+                  return const Icon(
+                    Icons.star_border,
+                    color: Colors.white54,
+                    size: 16,
+                  );
                 }
               }),
               const SizedBox(width: 8),
@@ -483,28 +517,36 @@ class BangumiInfoCard extends StatelessWidget {
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: bangumiItem.mainTags.take(3).map((tag) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
-              ),
-              child: Text(
-                tag,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 2,
-                      color: Colors.black,
+            children: bangumiItem.mainTags
+                .take(3)
+                .map(
+                  (tag) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
                     ),
-                  ],
-                ),
-              ),
-            )).toList(),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      tag,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 2,
+                            color: Colors.black,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ],
@@ -516,16 +558,12 @@ class BangumiInfoCard extends StatelessWidget {
       width: double.infinity,
       height: double.infinity,
       color: Colors.grey[400],
-      child: const Icon(
-        Icons.movie,
-        size: 40,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.movie, size: 40, color: Colors.white),
     );
   }
 }
 
-/// 参考Kazumi的标签页视图组件
+/// 标签页视图组件
 class AnimeInfoTabView extends StatefulWidget {
   const AnimeInfoTabView({
     super.key,
@@ -544,17 +582,15 @@ class AnimeInfoTabView extends StatefulWidget {
   State<AnimeInfoTabView> createState() => _AnimeInfoTabViewState();
 }
 
-class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerProviderStateMixin {
+class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
+    with SingleTickerProviderStateMixin {
   bool fullIntro = false;
 
   @override
   Widget build(BuildContext context) {
     return TabBarView(
       controller: widget.tabController,
-      children: [
-        _buildDetailInfoTab(),
-        _buildSummaryTab(),
-      ],
+      children: [_buildDetailInfoTab(), _buildSummaryTab()],
     );
   }
 
@@ -629,7 +665,10 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
 
               _buildInfoSection('评分信息', [
                 _buildInfoRow('评分', widget.bangumiItem.scoreText),
-                _buildInfoRow('评价人数', '${widget.bangumiItem.totalRatingCount}人'),
+                _buildInfoRow(
+                  '评价人数',
+                  '${widget.bangumiItem.totalRatingCount}人',
+                ),
                 if (widget.bangumiItem.rating != null)
                   _buildInfoRow('排名', '第${widget.bangumiItem.rating!.rank}名'),
               ]),
@@ -638,12 +677,30 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
 
               if (widget.bangumiItem.collection != null) ...[
                 _buildInfoSection('收藏信息', [
-                  _buildInfoRow('总收藏', '${widget.bangumiItem.totalCollectionCount}人'),
-                  _buildInfoRow('想看', '${widget.bangumiItem.collection!.wish}人'),
-                  _buildInfoRow('在看', '${widget.bangumiItem.collection!.doing}人'),
-                  _buildInfoRow('看过', '${widget.bangumiItem.collection!.collect}人'),
-                  _buildInfoRow('搁置', '${widget.bangumiItem.collection!.onHold}人'),
-                  _buildInfoRow('抛弃', '${widget.bangumiItem.collection!.dropped}人'),
+                  _buildInfoRow(
+                    '总收藏',
+                    '${widget.bangumiItem.totalCollectionCount}人',
+                  ),
+                  _buildInfoRow(
+                    '想看',
+                    '${widget.bangumiItem.collection!.wish}人',
+                  ),
+                  _buildInfoRow(
+                    '在看',
+                    '${widget.bangumiItem.collection!.doing}人',
+                  ),
+                  _buildInfoRow(
+                    '看过',
+                    '${widget.bangumiItem.collection!.collect}人',
+                  ),
+                  _buildInfoRow(
+                    '搁置',
+                    '${widget.bangumiItem.collection!.onHold}人',
+                  ),
+                  _buildInfoRow(
+                    '抛弃',
+                    '${widget.bangumiItem.collection!.dropped}人',
+                  ),
                 ]),
 
                 const SizedBox(height: 20),
@@ -668,10 +725,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
   Widget _buildSummaryContent() {
     if (widget.bangumiItem.summary.isEmpty) {
       return const Center(
-        child: Text(
-          '暂无简介',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
+        child: Text('暂无简介', style: TextStyle(fontSize: 16, color: Colors.grey)),
       );
     }
 
@@ -697,7 +751,10 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
               LayoutBuilder(
                 builder: (context, constraints) {
                   final span = TextSpan(text: formattedSummary);
-                  final tp = TextPainter(text: span, textDirection: TextDirection.ltr);
+                  final tp = TextPainter(
+                    text: span,
+                    textDirection: TextDirection.ltr,
+                  );
                   tp.layout(maxWidth: constraints.maxWidth);
                   final numLines = tp.computeLineMetrics().length;
 
@@ -707,7 +764,8 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
                       children: [
                         SizedBox(
                           height: fullIntro ? null : 120,
-                          width: MediaQuery.sizeOf(context).width > widget.maxWidth
+                          width:
+                              MediaQuery.sizeOf(context).width > widget.maxWidth
                               ? widget.maxWidth
                               : MediaQuery.sizeOf(context).width - 32,
                           child: SelectableText(
@@ -774,9 +832,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey[300]!),
           ),
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );
@@ -802,10 +858,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
             ),
           ),
         ],
@@ -817,22 +870,26 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerPr
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: tags.map((tag) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.blue.withOpacity(0.3)),
-        ),
-        child: Text(
-          tag,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.blue[700],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      )).toList(),
+      children: tags
+          .map(
+            (tag) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blue[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
