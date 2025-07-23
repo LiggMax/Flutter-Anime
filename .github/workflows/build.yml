@@ -1,10 +1,23 @@
-name: Jekyll site CI
+name: Build Project
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        description: "Select platform to build"
+        options:
+          - android
+          - ios
+          - macos
+          - windows
+          - linux
+          - all
+        default: "all"
 
 jobs:
   build:
@@ -12,9 +25,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the site in the jekyll/builder container
-      run: |
-        docker run \
-        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
-        jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '3.7.12' # 可根据需要更改版本
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build for selected platform
+        if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' }}
+        run: |
+          flutter build android
+          echo "Android build completed"
+
+      - name: Build iOS
+        if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all' }}
+        run: |
+          flutter build ios --release --no-codesign
+          echo "iOS build completed"
+
+      - name: Build macOS
+        if: ${{ github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all' }}
+        run: |
+          flutter build macos
+          echo "macOS build completed"
+
+      - name: Build Windows
+        if: ${{ github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' }}
+        run: |
+          flutter build windows
+          echo "Windows build completed"
+
+      - name: Build Linux
+        if: ${{ github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all' }}
+        run: |
+          flutter build linux
+          echo "Linux build completed"
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: flutter-build-artifacts
+          path: |
+            build/app/outputs/flutter-apk/
+            build/ios/archive/
+            build/macos/
+            build/windows/
+            build/linux/
+          if-no-files-found: ignore
