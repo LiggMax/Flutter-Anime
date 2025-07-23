@@ -70,9 +70,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildBody(),
-    );
+    return _buildBody();
   }
 
   Widget _buildBody() {
@@ -118,45 +116,215 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
       );
     }
 
-    return NestedScrollView(
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return [
-          SliverAppBar(
-            expandedHeight: 300.0,
-            floating: false,
-            pinned: true,
-            backgroundColor: innerBoxIsScrolled ? Colors.white : Colors.transparent,
-            foregroundColor: innerBoxIsScrolled ? Colors.black : Colors.white,
-            elevation: innerBoxIsScrolled ? 4.0 : 0.0,
-            title: innerBoxIsScrolled 
-                ? Text(
-                    _animeDetailData?.displayName ?? widget.animeName ?? '动漫详情',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+    return DefaultTabController(
+      length: 2,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          // 根据滚动位置更新AppBar状态
+          final isScrolled = scrollInfo.metrics.pixels > 200;
+          if (_isAppBarScrolled != isScrolled) {
+            setState(() {
+              _isAppBarScrolled = isScrolled;
+            });
+          }
+          return false;
+        },
+        child: Scaffold(
+          body: Stack(
+            children: [
+              // 主要内容区域 - 统一滚动
+              CustomScrollView(
+                slivers: [
+                  // 背景头部区域（跟随滚动移动）
+                  SliverToBoxAdapter(
+                    child: _buildHeaderSection(),
+                  ),
+                  // 操作按钮区域
+                  SliverToBoxAdapter(
+                    child: _buildActionButtons(),
+                  ),
+                  // 固定标签栏
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverTabBarDelegate(
+                      Container(
+                        color: Colors.white,
+                        child: TabBar(
+                          labelColor: Colors.black,
+                          unselectedLabelColor: Colors.grey,
+                          indicatorColor: Colors.blue,
+                          indicatorWeight: 3,
+                          labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          unselectedLabelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                          tabs: const [
+                            Tab(text: '详情'),
+                            Tab(text: '简介'),
+                          ],
+                        ),
+                      ),
                     ),
-                  )
-                : null,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: innerBoxIsScrolled ? Colors.black : Colors.white,
+                  ),
+                  // 标签页内容区域
+                  SliverFillRemaining(
+                    child: Container(
+                      color: Colors.grey[50],
+                      child: TabBarView(
+                        children: [
+                          _buildDetailInfoForSliver(),
+                          _buildSummaryForSliver(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeaderSection(),
-            ),
+              // 悬浮的动态AppBar
+              _buildFloatingAppBar(),
+            ],
           ),
-        ];
-      },
-      body: Column(
+        ),
+      ),
+    );
+  }
+
+  bool _isAppBarScrolled = false;
+
+  Widget _buildDetailInfoForSliver() {
+    if (_animeDetailData == null) {
+      return Container(
+        height: 200,
+        child: const Center(
+          child: Text(
+            '暂无详细信息',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
+    final data = _animeDetailData!;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildActionButtons(),
-          Expanded(
-            child: _buildDetailTabs(),
-          ),
+          _buildInfoSection('基本信息', [
+            _buildInfoRow('原名', data.name),
+            _buildInfoRow('中文名', data.nameCn),
+            _buildInfoRow('类型', data.typeText),
+            _buildInfoRow('总集数', '${data.totalEpisodes}话'),
+            _buildInfoRow('放送日期', data.date),
+            _buildInfoRow('播放平台', data.platform),
+          ]),
+          
+          const SizedBox(height: 20),
+          
+          _buildInfoSection('评分信息', [
+            _buildInfoRow('评分', data.scoreText),
+            _buildInfoRow('评价人数', '${data.totalRatingCount}人'),
+            if (data.rating != null) _buildInfoRow('排名', '第${data.rating!.rank}名'),
+          ]),
+          
+          const SizedBox(height: 20),
+          
+          if (data.collection != null) ...[
+            _buildInfoSection('收藏信息', [
+              _buildInfoRow('总收藏', '${data.totalCollectionCount}人'),
+              _buildInfoRow('想看', '${data.collection!.wish}人'),
+              _buildInfoRow('在看', '${data.collection!.doing}人'),
+              _buildInfoRow('看过', '${data.collection!.collect}人'),
+              _buildInfoRow('搁置', '${data.collection!.onHold}人'),
+              _buildInfoRow('抛弃', '${data.collection!.dropped}人'),
+            ]),
+            
+            const SizedBox(height: 20),
+          ],
+          
+          if (data.mainTags.isNotEmpty) ...[
+            _buildInfoSection('标签', [
+              _buildTagsRow(data.mainTags),
+            ]),
+          ],
+          
+          // 底部间距
+          const SizedBox(height: 100),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryForSliver() {
+    if (_animeDetailData == null || _animeDetailData!.summary.isEmpty) {
+      return Container(
+        height: 200,
+        child: const Center(
+          child: Text(
+            '暂无简介',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
+    // 处理换行符和格式化文本
+    final formattedSummary = _animeDetailData!.summary
+        .replaceAll('\\r\\n', '\n')
+        .replaceAll('\\n', '\n')
+        .trim();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            formattedSummary,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.6,
+              color: Colors.black87,
+            ),
+          ),
+          // 底部间距
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
+  // SliverTabBarDelegate 类
+  Widget _buildFloatingAppBar() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: MediaQuery.of(context).padding.top + kToolbarHeight,
+        color: _isAppBarScrolled ? Colors.white : Colors.transparent,
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          foregroundColor: _isAppBarScrolled ? Colors.black : Colors.white,
+          elevation: _isAppBarScrolled ? 4.0 : 0.0,
+          title: _isAppBarScrolled 
+              ? Text(
+                  _animeDetailData?.displayName ?? widget.animeName ?? '动漫详情',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : null,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: _isAppBarScrolled ? Colors.black : Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
       ),
     );
   }
@@ -169,46 +337,54 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         ? data.images.bestUrl 
         : (widget.imageUrl ?? '');
 
-    return Stack(
-      children: [
-        // 背景模糊图片
-        Positioned.fill(
-          child: _buildBlurredBackground(imageUrl),
-        ),
-        // 渐变遮罩
-        Positioned.fill(
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black26,
-                  Colors.black54,
+    return Container(
+      height: 300,
+      child: Stack(
+        children: [
+          // 背景模糊图片
+          Positioned.fill(
+            child: _buildBlurredBackground(imageUrl),
+          ),
+          // 渐变遮罩
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black26,
+                    Colors.black54,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // 前景内容
+          Positioned.fill(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(
+                16.0, 
+                MediaQuery.of(context).padding.top + kToolbarHeight + 20.0, 
+                16.0, 
+                20.0
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // 左侧封面图片
+                  _buildCoverImage(),
+                  const SizedBox(width: 16),
+                  // 右侧信息
+                  Expanded(
+                    child: _buildAnimeInfo(),
+                  ),
                 ],
               ),
             ),
           ),
-        ),
-        // 前景内容
-        Positioned.fill(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16.0, 100.0, 16.0, 20.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // 左侧封面图片
-                _buildCoverImage(),
-                const SizedBox(width: 16),
-                // 右侧信息
-                Expanded(
-                  child: _buildAnimeInfo(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -492,146 +668,6 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
     );
   }
 
-  Widget _buildDetailTabs() {
-    if (_animeDetailData == null) return const SizedBox.shrink();
-
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          // 标签栏
-          Container(
-            color: Colors.white,
-            child: const TabBar(
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.blue,
-              indicatorWeight: 3,
-              labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              unselectedLabelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              tabs: [
-                Tab(text: '详情'),
-                Tab(text: '简介'),
-              ],
-            ),
-          ),
-          // 内容区域
-          Expanded(
-            child: Container(
-              color: Colors.grey[50],
-              child: TabBarView(
-                children: [
-                  _buildDetailInfo(),
-                  _buildSummary(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummary() {
-    if (_animeDetailData == null || _animeDetailData!.summary.isEmpty) {
-      return Container(
-        color: Colors.grey[50],
-        child: const Center(
-          child: Text(
-            '暂无简介',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
-    // 处理换行符和格式化文本
-    final formattedSummary = _animeDetailData!.summary
-        .replaceAll('\\r\\n', '\n')
-        .replaceAll('\\n', '\n')
-        .trim();
-
-    return Container(
-      color: Colors.grey[50],
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          formattedSummary,
-          style: const TextStyle(
-            fontSize: 14,
-            height: 1.6,
-            color: Colors.black87,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailInfo() {
-    if (_animeDetailData == null) {
-      return Container(
-        color: Colors.grey[50],
-        child: const Center(
-          child: Text(
-            '暂无详细信息',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
-    final data = _animeDetailData!;
-
-    return Container(
-      color: Colors.grey[50],
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoSection('基本信息', [
-              _buildInfoRow('原名', data.name),
-              _buildInfoRow('中文名', data.nameCn),
-              _buildInfoRow('类型', data.typeText),
-              _buildInfoRow('总集数', '${data.totalEpisodes}话'),
-              _buildInfoRow('放送日期', data.date),
-              _buildInfoRow('播放平台', data.platform),
-            ]),
-            
-            const SizedBox(height: 20),
-            
-            _buildInfoSection('评分信息', [
-              _buildInfoRow('评分', data.scoreText),
-              _buildInfoRow('评价人数', '${data.totalRatingCount}人'),
-              if (data.rating != null) _buildInfoRow('排名', '第${data.rating!.rank}名'),
-            ]),
-            
-            const SizedBox(height: 20),
-            
-            if (data.collection != null) ...[
-              _buildInfoSection('收藏信息', [
-                _buildInfoRow('总收藏', '${data.totalCollectionCount}人'),
-                _buildInfoRow('想看', '${data.collection!.wish}人'),
-                _buildInfoRow('在看', '${data.collection!.doing}人'),
-                _buildInfoRow('看过', '${data.collection!.collect}人'),
-                _buildInfoRow('搁置', '${data.collection!.onHold}人'),
-                _buildInfoRow('抛弃', '${data.collection!.dropped}人'),
-              ]),
-              
-              const SizedBox(height: 20),
-            ],
-            
-            if (data.mainTags.isNotEmpty) ...[
-              _buildInfoSection('标签', [
-                _buildTagsRow(data.mainTags),
-              ]),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildInfoSection(String title, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -726,6 +762,28 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         color: Colors.white,
       ),
     );
+  }
+}
+
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _SliverTabBarDelegate(this.child);
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => 48.0; // 标签栏的高度
+  
+  @override
+  double get minExtent => 48.0; // 标签栏的高度
+
+  @override
+  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
+    return oldDelegate.child != child;
   }
 }
 
