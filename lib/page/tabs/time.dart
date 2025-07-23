@@ -202,7 +202,13 @@ class WeeklyAnimeGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    //获取当前星期(1-7）并计算 Tab 的初始索引（0-6）
+    final todayWeekday = DateTime.now().weekday;
+    final initialIndex = todayWeekday -1;// weekday 1 对应 index 0
+
     return DefaultTabController(
+      initialIndex: initialIndex, // 设置初始索引
       length: 7,
       child: Column(
         children: [
