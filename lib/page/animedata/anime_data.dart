@@ -366,7 +366,7 @@ class BangumiInfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withAlpha(53),
             blurRadius: 12,
             offset: const Offset(0, 6),
             spreadRadius: 2,
@@ -526,9 +526,9 @@ class BangumiInfoCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withAlpha(51),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      border: Border.all(color: Colors.white.withAlpha(52)),
                     ),
                     child: Text(
                       tag,
@@ -875,9 +875,9 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
             (tag) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withAlpha(50),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                border: Border.all(color: Colors.blue.withAlpha(52)),
               ),
               child: Text(
                 tag,
