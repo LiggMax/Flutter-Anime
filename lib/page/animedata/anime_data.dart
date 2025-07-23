@@ -1,7 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/request/bangumi.dart';
 import '../../modules/bangumi_data.dart';
-import 'dart:ui';
 
 class AnimeDataPage extends StatefulWidget {
   final int animeId;
@@ -19,378 +19,220 @@ class AnimeDataPage extends StatefulWidget {
   State<AnimeDataPage> createState() => _AnimeDataPageState();
 }
 
-class _AnimeDataPageState extends State<AnimeDataPage> {
-  BangumiDetailData? _animeDetailData;
-  bool _isLoading = true;
-  String? _errorMessage;
+class _AnimeDataPageState extends State<AnimeDataPage> with TickerProviderStateMixin {
+  /// 参考Kazumi的控制器模式
+  final InfoController infoController = InfoController();
+  late TabController infoTabController;
+
+  bool commentsIsLoading = false;
+  bool charactersIsLoading = false;
+  bool commentsQueryTimeout = false;
+  bool charactersQueryTimeout = false;
+
+  // Kazumi风格的响应式布局常量
+  final double maxWidth = 950.0;
 
   @override
   void initState() {
     super.initState();
-    _loadAnimeDetail();
+    // 初始化数据 - 参考Kazumi的方式，创建空的BangumiDetailData实例
+    infoController.bangumiItem = BangumiDetailData(
+      id: widget.animeId,
+      name: '',
+      nameCn: widget.animeName ?? '动漫详情',
+      summary: '',
+      date: '',
+      platform: '',
+      images: BangumiImages(
+        small: widget.imageUrl ?? '',
+        grid: widget.imageUrl ?? '',
+        large: widget.imageUrl ?? '',
+        medium: widget.imageUrl ?? '',
+        common: widget.imageUrl ?? '',
+      ),
+      rating: null,
+      collection: null,
+      tags: [],
+      infobox: [],
+      metaTags: [],
+      totalEpisodes: 0,
+      eps: 0,
+      volumes: 0,
+      type: 2, // 默认为TV动画
+      series: false,
+      locked: false,
+      nsfw: false,
+    );
+
+    // 参考Kazumi的标签页设置
+    infoTabController = TabController(length: 2, vsync: this);
+
+    // 加载详情数据
+    queryBangumiInfoByID(widget.animeId);
   }
 
-  Future<void> _loadAnimeDetail() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  @override
+  void dispose() {
+    infoTabController.dispose();
+    super.dispose();
+  }
 
+  /// 参考Kazumi的查询方法
+  Future<void> queryBangumiInfoByID(int id, {String type = "init"}) async {
     try {
-      final data = await BangumiService.getInfoByID(widget.animeId);
-
-      if (data != null) {
-        // 使用数据解析器解析数据
-        final parsedData = BangumiDataParser.parseDetailData(data);
-
-        if (parsedData != null) {
-          setState(() {
-            _animeDetailData = parsedData;
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _errorMessage = '数据解析失败';
-            _isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          _errorMessage = '获取数据失败';
-          _isLoading = false;
-        });
-      }
+      await infoController.queryBangumiInfoByID(id, type: type);
+      setState(() {});
     } catch (e) {
-      setState(() {
-        _errorMessage = '网络错误: $e';
-        _isLoading = false;
-      });
+      print('Error loading anime data: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _buildBody();
+    // 参考Kazumi的标签页配置
+    final List<String> tabs = <String>['详情', '简介'];
+
+    return PopScope(
+      canPop: true,
+      child: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar.medium(
+                    title: Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        infoController.bangumiItem.displayName.isEmpty
+                            ? (widget.animeName ?? '动漫详情')
+                            : infoController.bangumiItem.displayName,
+                      ),
+                    ),
+                    automaticallyImplyLeading: false,
+                    scrolledUnderElevation: 0.0,
+                    leading: IconButton(
+                      onPressed: () {
+                        Navigator.maybePop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                    actions: [
+                      if (innerBoxIsScrolled)
+                        IconButton(
+                          onPressed: () {
+                            // TODO: 实现收藏功能
+                          },
+                          icon: const Icon(Icons.favorite_border),
+                        ),
+                      IconButton(
+                        onPressed: () {
+                          // TODO: 实现分享功能
+                        },
+                        icon: const Icon(Icons.share),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    stretch: true,
+                    centerTitle: false,
+                    // 参考Kazumi的高度设置
+                    expandedHeight: 308 + kTextTabBarHeight + kToolbarHeight,
+                    collapsedHeight: kTextTabBarHeight + kToolbarHeight + MediaQuery.paddingOf(context).top,
+                    flexibleSpace: FlexibleSpaceBar(
+                      collapseMode: CollapseMode.pin,
+                      background: _buildFlexibleBackground(),
+                    ),
+                    forceElevated: innerBoxIsScrolled,
+                    bottom: TabBar(
+                      controller: infoTabController,
+                      isScrollable: false,
+                      tabAlignment: TabAlignment.fill,
+                      dividerHeight: 0,
+                      tabs: tabs.map((name) => Tab(text: name)).toList(),
+                    ),
+                  ),
+                ),
+              ];
+            },
+            body: AnimeInfoTabView(
+              tabController: infoTabController,
+              bangumiItem: infoController.bangumiItem,
+              isLoading: infoController.isLoading,
+              maxWidth: maxWidth,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text(
-              '正在加载动漫详情...',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 80,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _loadAnimeDetail,
-              child: const Text('重试'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return DefaultTabController(
-      length: 2,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          // 根据滚动位置更新AppBar状态
-          final isScrolled = scrollInfo.metrics.pixels > 200;
-          if (_isAppBarScrolled != isScrolled) {
-            setState(() {
-              _isAppBarScrolled = isScrolled;
-            });
-          }
-          return false;
-        },
-        child: Scaffold(
-          body: Stack(
-            children: [
-              // 主要内容区域 - 统一滚动
-              CustomScrollView(
-                slivers: [
-                  // 背景头部区域（跟随滚动移动）
-                  SliverToBoxAdapter(
-                    child: _buildHeaderSection(),
-                  ),
-                  // 操作按钮区域
-                  SliverToBoxAdapter(
-                    child: _buildActionButtons(),
-                  ),
-                  // 固定标签栏
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _SliverTabBarDelegate(
-                      Container(
-                        color: Colors.white,
-                        child: TabBar(
-                          labelColor: Colors.black,
-                          unselectedLabelColor: Colors.grey,
-                          indicatorColor: Colors.blue,
-                          indicatorWeight: 3,
-                          labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          unselectedLabelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                          tabs: const [
-                            Tab(text: '详情'),
-                            Tab(text: '简介'),
-                          ],
+  /// 参考Kazumi的FlexibleBackground实现
+  Widget _buildFlexibleBackground() {
+    return Stack(
+      children: [
+        // 参考Kazumi的背景模糊图片实现
+        if (!infoController.isLoading)
+          Positioned.fill(
+            bottom: kTextTabBarHeight,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.4,
+                child: LayoutBuilder(
+                  builder: (context, boxConstraints) {
+                    return ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.white,
+                              Colors.transparent,
+                            ],
+                            stops: [0.8, 1],
+                          ).createShader(bounds);
+                        },
+                        child: _buildNetworkImage(
+                          infoController.bangumiItem.images.bestUrl,
+                          boxConstraints.maxWidth,
+                          boxConstraints.maxHeight,
                         ),
                       ),
-                    ),
-                  ),
-                  // 标签页内容区域
-                  SliverFillRemaining(
-                    child: Container(
-                      color: Colors.grey[50],
-                      child: TabBarView(
-                        children: [
-                          _buildDetailInfoForSliver(),
-                          _buildSummaryForSliver(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // 悬浮的动态AppBar
-              _buildFloatingAppBar(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool _isAppBarScrolled = false;
-
-  Widget _buildDetailInfoForSliver() {
-    if (_animeDetailData == null) {
-      return Container(
-        height: 200,
-        child: const Center(
-          child: Text(
-            '暂无详细信息',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
-    final data = _animeDetailData!;
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildInfoSection('基本信息', [
-            _buildInfoRow('原名', data.name),
-            _buildInfoRow('中文名', data.nameCn),
-            _buildInfoRow('类型', data.typeText),
-            _buildInfoRow('总集数', '${data.totalEpisodes}话'),
-            _buildInfoRow('放送日期', data.date),
-            _buildInfoRow('播放平台', data.platform),
-          ]),
-          
-          const SizedBox(height: 20),
-          
-          _buildInfoSection('评分信息', [
-            _buildInfoRow('评分', data.scoreText),
-            _buildInfoRow('评价人数', '${data.totalRatingCount}人'),
-            if (data.rating != null) _buildInfoRow('排名', '第${data.rating!.rank}名'),
-          ]),
-          
-          const SizedBox(height: 20),
-          
-          if (data.collection != null) ...[
-            _buildInfoSection('收藏信息', [
-              _buildInfoRow('总收藏', '${data.totalCollectionCount}人'),
-              _buildInfoRow('想看', '${data.collection!.wish}人'),
-              _buildInfoRow('在看', '${data.collection!.doing}人'),
-              _buildInfoRow('看过', '${data.collection!.collect}人'),
-              _buildInfoRow('搁置', '${data.collection!.onHold}人'),
-              _buildInfoRow('抛弃', '${data.collection!.dropped}人'),
-            ]),
-            
-            const SizedBox(height: 20),
-          ],
-          
-          if (data.mainTags.isNotEmpty) ...[
-            _buildInfoSection('标签', [
-              _buildTagsRow(data.mainTags),
-            ]),
-          ],
-          
-          // 底部间距
-          const SizedBox(height: 100),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryForSliver() {
-    if (_animeDetailData == null || _animeDetailData!.summary.isEmpty) {
-      return Container(
-        height: 200,
-        child: const Center(
-          child: Text(
-            '暂无简介',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
-    // 处理换行符和格式化文本
-    final formattedSummary = _animeDetailData!.summary
-        .replaceAll('\\r\\n', '\n')
-        .replaceAll('\\n', '\n')
-        .trim();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            formattedSummary,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Colors.black87,
-            ),
-          ),
-          // 底部间距
-          const SizedBox(height: 100),
-        ],
-      ),
-    );
-  }
-
-  // SliverTabBarDelegate 类
-  Widget _buildFloatingAppBar() {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: MediaQuery.of(context).padding.top + kToolbarHeight,
-        color: _isAppBarScrolled ? Colors.white : Colors.transparent,
-        child: AppBar(
-          backgroundColor: Colors.transparent,
-          foregroundColor: _isAppBarScrolled ? Colors.black : Colors.white,
-          elevation: _isAppBarScrolled ? 4.0 : 0.0,
-          title: _isAppBarScrolled 
-              ? Text(
-                  _animeDetailData?.displayName ?? widget.animeName ?? '动漫详情',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              : null,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: _isAppBarScrolled ? Colors.black : Colors.white,
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderSection() {
-    if (_animeDetailData == null) return const SizedBox.shrink();
-
-    final data = _animeDetailData!;
-    final imageUrl = data.images.bestUrl.isNotEmpty 
-        ? data.images.bestUrl 
-        : (widget.imageUrl ?? '');
-
-    return Container(
-      height: 300,
-      child: Stack(
-        children: [
-          // 背景模糊图片
-          Positioned.fill(
-            child: _buildBlurredBackground(imageUrl),
-          ),
-          // 渐变遮罩
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black26,
-                    Colors.black54,
-                  ],
+                    );
+                  },
                 ),
               ),
             ),
           ),
-          // 前景内容
-          Positioned.fill(
-            child: Container(
-              padding: EdgeInsets.fromLTRB(
-                16.0, 
-                MediaQuery.of(context).padding.top + kToolbarHeight + 20.0, 
-                16.0, 
-                20.0
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // 左侧封面图片
-                  _buildCoverImage(),
-                  const SizedBox(width: 16),
-                  // 右侧信息
-                  Expanded(
-                    child: _buildAnimeInfo(),
-                  ),
-                ],
+        // 参考Kazumi的前景内容布局
+        SafeArea(
+          bottom: false,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 20, 16, 0),
+              child: BangumiInfoCard(
+                bangumiItem: infoController.bangumiItem,
+                isLoading: infoController.isLoading,
+                maxWidth: maxWidth,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildBlurredBackground(String imageUrl) {
+  /// 参考Kazumi的网络图片实现
+  Widget _buildNetworkImage(String imageUrl, double width, double height) {
     if (imageUrl.isEmpty) {
       return Container(
+        width: width,
+        height: height,
         color: Colors.grey[800],
         child: const Center(
           child: Icon(
@@ -402,79 +244,138 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
       );
     }
 
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-      child: Image.network(
-        imageUrl,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey[800],
-          child: const Center(
-            child: Icon(
-              Icons.movie,
-              size: 80,
-              color: Colors.white24,
-            ),
+    return Image.network(
+      imageUrl,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        width: width,
+        height: height,
+        color: Colors.grey[800],
+        child: const Center(
+          child: Icon(
+            Icons.movie,
+            size: 80,
+            color: Colors.white24,
           ),
         ),
       ),
     );
   }
+}
+
+/// 参考Kazumi的控制器模式
+class InfoController {
+  late BangumiDetailData bangumiItem;
+  bool isLoading = false;
+
+  Future<void> queryBangumiInfoByID(int id, {String type = "init"}) async {
+    isLoading = true;
+    try {
+      final data = await BangumiService.getInfoByID(id);
+      if (data != null) {
+        final parsedData = BangumiDataParser.parseDetailData(data);
+        if (parsedData != null) {
+          // 直接替换整个对象，因为字段是final的
+          bangumiItem = parsedData;
+        }
+      }
+    } catch (e) {
+      print('Error in queryBangumiInfoByID: $e');
+    } finally {
+      isLoading = false;
+    }
+  }
+}
+
+/// 参考Kazumi的信息卡片组件
+class BangumiInfoCard extends StatelessWidget {
+  final BangumiDetailData bangumiItem;
+  final bool isLoading;
+  final double maxWidth;
+
+  const BangumiInfoCard({
+    super.key,
+    required this.bangumiItem,
+    required this.isLoading,
+    required this.maxWidth,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Container(
+      width: MediaQuery.sizeOf(context).width > maxWidth
+          ? maxWidth
+          : MediaQuery.sizeOf(context).width - 32,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 左侧封面图片
+          _buildCoverImage(),
+          const SizedBox(width: 20),
+          // 右侧信息
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0),
+              child: _buildAnimeInfo(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildCoverImage() {
-    final imageUrl = _animeDetailData?.images.bestUrl ?? widget.imageUrl ?? '';
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: 120,
-        height: 160,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 110,
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: bangumiItem.images.bestUrl.isNotEmpty
+              ? Image.network(
+                  bangumiItem.images.bestUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
+                )
+              : _buildPlaceholderIcon(),
         ),
-        child: imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
-              )
-            : _buildPlaceholderIcon(),
       ),
     );
   }
 
   Widget _buildAnimeInfo() {
-    if (_animeDetailData == null) return const SizedBox.shrink();
-
-    final data = _animeDetailData!;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 标题
         Text(
-          data.displayName,
+          bangumiItem.displayName,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                offset: Offset(1, 1),
-                blurRadius: 3,
-                color: Colors.black,
-              ),
-            ],
+            color: Colors.black,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -484,7 +385,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
         // 放送日期和话数
         Text(
-          '${data.date} · 全 ${data.totalEpisodes} 话',
+          '${bangumiItem.date} · 全 ${bangumiItem.totalEpisodes} 话',
           style: const TextStyle(
             fontSize: 14,
             color: Colors.white70,
@@ -501,12 +402,12 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         const SizedBox(height: 8),
 
         // 评分区域
-        if (data.rating != null) ...[
+        if (bangumiItem.rating != null) ...[
           Row(
             children: [
               // 评分星星
               ...List.generate(5, (index) {
-                final score = data.rating!.score;
+                final score = bangumiItem.rating!.score;
                 final fullStars = (score / 2).floor();
                 final hasHalfStar = (score / 2) - fullStars >= 0.5;
 
@@ -520,7 +421,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
               }),
               const SizedBox(width: 8),
               Text(
-                data.scoreText,
+                bangumiItem.scoreText,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -540,7 +441,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
           const SizedBox(height: 4),
 
           Text(
-            '${data.totalRatingCount} 人评分 / #${data.rating!.rank}',
+            '${bangumiItem.totalRatingCount} 人评分 / #${bangumiItem.rating!.rank}',
             style: const TextStyle(
               fontSize: 12,
               color: Colors.white60,
@@ -558,9 +459,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         const SizedBox(height: 12),
 
         // 收藏数据
-        if (data.collection != null) ...[
+        if (bangumiItem.collection != null) ...[
           Text(
-            '${data.totalCollectionCount} 收藏 / ${data.collection!.doing} 在看 / ${data.collection!.wish} 想看',
+            '${bangumiItem.totalCollectionCount} 收藏 / ${bangumiItem.collection!.doing} 在看 / ${bangumiItem.collection!.wish} 想看',
             style: const TextStyle(
               fontSize: 12,
               color: Colors.white70,
@@ -578,11 +479,11 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         const SizedBox(height: 12),
 
         // 标签
-        if (data.mainTags.isNotEmpty) ...[
+        if (bangumiItem.mainTags.isNotEmpty) ...[
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: data.mainTags.take(3).map((tag) => Container(
+            children: bangumiItem.mainTags.take(3).map((tag) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
@@ -610,57 +511,241 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
     );
   }
 
-  Widget _buildActionButtons() {
-    if (_animeDetailData == null) return const SizedBox.shrink();
-
+  Widget _buildPlaceholderIcon() {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildActionButton(Icons.play_arrow, '开始观看', () {
-            // TODO: 实现播放功能
-          }),
-          _buildActionButton(Icons.favorite_border, '关注', () {
-            // TODO: 实现收藏功能
-          }),
-          _buildActionButton(Icons.share, '分享', () {
-            // TODO: 实现分享功能
-          }),
-        ],
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey[400],
+      child: const Icon(
+        Icons.movie,
+        size: 40,
+        color: Colors.white,
+      ),
+    );
+  }
+}
+
+/// 参考Kazumi的标签页视图组件
+class AnimeInfoTabView extends StatefulWidget {
+  const AnimeInfoTabView({
+    super.key,
+    required this.tabController,
+    required this.bangumiItem,
+    required this.isLoading,
+    required this.maxWidth,
+  });
+
+  final TabController tabController;
+  final BangumiDetailData bangumiItem;
+  final bool isLoading;
+  final double maxWidth;
+
+  @override
+  State<AnimeInfoTabView> createState() => _AnimeInfoTabViewState();
+}
+
+class _AnimeInfoTabViewState extends State<AnimeInfoTabView> with SingleTickerProviderStateMixin {
+  bool fullIntro = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TabBarView(
+      controller: widget.tabController,
+      children: [
+        _buildDetailInfoTab(),
+        _buildSummaryTab(),
+      ],
+    );
+  }
+
+  /// 详情标签页 - 参考Kazumi的实现
+  Widget _buildDetailInfoTab() {
+    return Builder(
+      builder: (BuildContext context) {
+        return CustomScrollView(
+          key: const PageStorageKey<String>('详情'),
+          slivers: <Widget>[
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverToBoxAdapter(
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: _buildDetailInfoContent(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 简介标签页 - 参考Kazumi的实现
+  Widget _buildSummaryTab() {
+    return Builder(
+      builder: (BuildContext context) {
+        return CustomScrollView(
+          key: const PageStorageKey<String>('简介'),
+          slivers: <Widget>[
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverToBoxAdapter(
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: _buildSummaryContent(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 参考Kazumi的详情内容实现
+  Widget _buildDetailInfoContent() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: MediaQuery.sizeOf(context).width > widget.maxWidth
+              ? widget.maxWidth
+              : MediaQuery.sizeOf(context).width - 32,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoSection('基本信息', [
+                _buildInfoRow('原名', widget.bangumiItem.name),
+                _buildInfoRow('中文名', widget.bangumiItem.nameCn),
+                _buildInfoRow('类型', widget.bangumiItem.typeText),
+                _buildInfoRow('总集数', '${widget.bangumiItem.totalEpisodes}话'),
+                _buildInfoRow('放送日期', widget.bangumiItem.date),
+                _buildInfoRow('播放平台', widget.bangumiItem.platform),
+              ]),
+
+              const SizedBox(height: 20),
+
+              _buildInfoSection('评分信息', [
+                _buildInfoRow('评分', widget.bangumiItem.scoreText),
+                _buildInfoRow('评价人数', '${widget.bangumiItem.totalRatingCount}人'),
+                if (widget.bangumiItem.rating != null)
+                  _buildInfoRow('排名', '第${widget.bangumiItem.rating!.rank}名'),
+              ]),
+
+              const SizedBox(height: 20),
+
+              if (widget.bangumiItem.collection != null) ...[
+                _buildInfoSection('收藏信息', [
+                  _buildInfoRow('总收藏', '${widget.bangumiItem.totalCollectionCount}人'),
+                  _buildInfoRow('想看', '${widget.bangumiItem.collection!.wish}人'),
+                  _buildInfoRow('在看', '${widget.bangumiItem.collection!.doing}人'),
+                  _buildInfoRow('看过', '${widget.bangumiItem.collection!.collect}人'),
+                  _buildInfoRow('搁置', '${widget.bangumiItem.collection!.onHold}人'),
+                  _buildInfoRow('抛弃', '${widget.bangumiItem.collection!.dropped}人'),
+                ]),
+
+                const SizedBox(height: 20),
+              ],
+
+              if (widget.bangumiItem.mainTags.isNotEmpty) ...[
+                _buildInfoSection('标签', [
+                  _buildTagsRow(widget.bangumiItem.mainTags),
+                ]),
+              ],
+
+              // 底部间距
+              const SizedBox(height: 100),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, VoidCallback onPressed) {
-    return Expanded(
+  /// 参考Kazumi的简介内容实现，包含智能展开功能
+  Widget _buildSummaryContent() {
+    if (widget.bangumiItem.summary.isEmpty) {
+      return const Center(
+        child: Text(
+          '暂无简介',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
+
+    // 处理换行符和格式化文本
+    final formattedSummary = widget.bangumiItem.summary
+        .replaceAll('\\r\\n', '\n')
+        .replaceAll('\\n', '\n')
+        .trim();
+
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            backgroundColor: Colors.blue.withOpacity(0.1),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            side: BorderSide(color: Colors.blue.withOpacity(0.3), width: 1),
-          ),
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: MediaQuery.sizeOf(context).width > widget.maxWidth
+              ? widget.maxWidth
+              : MediaQuery.sizeOf(context).width - 32,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: Colors.blue, size: 20),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.blue,
-                  fontWeight: FontWeight.w500,
-                ),
+              const Text('简介', style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 8),
+              // 参考Kazumi的智能展开/收起功能
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final span = TextSpan(text: formattedSummary);
+                  final tp = TextPainter(text: span, textDirection: TextDirection.ltr);
+                  tp.layout(maxWidth: constraints.maxWidth);
+                  final numLines = tp.computeLineMetrics().length;
+
+                  if (numLines > 7) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          height: fullIntro ? null : 120,
+                          width: MediaQuery.sizeOf(context).width > widget.maxWidth
+                              ? widget.maxWidth
+                              : MediaQuery.sizeOf(context).width - 32,
+                          child: SelectableText(
+                            formattedSummary,
+                            textAlign: TextAlign.start,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              height: 1.6,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              fullIntro = !fullIntro;
+                            });
+                          },
+                          child: Text(fullIntro ? '加载更少' : '加载更多'),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return SelectableText(
+                      formattedSummary,
+                      textAlign: TextAlign.start,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: Colors.black87,
+                      ),
+                    );
+                  }
+                },
               ),
+
+              // 底部间距
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -750,40 +835,4 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
       )).toList(),
     );
   }
-
-  Widget _buildPlaceholderIcon() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.grey[400],
-      child: const Icon(
-        Icons.movie,
-        size: 40,
-        color: Colors.white,
-      ),
-    );
-  }
 }
-
-class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-
-  _SliverTabBarDelegate(this.child);
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  double get maxExtent => 48.0; // 标签栏的高度
-  
-  @override
-  double get minExtent => 48.0; // 标签栏的高度
-
-  @override
-  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
-    return oldDelegate.child != child;
-  }
-}
-
