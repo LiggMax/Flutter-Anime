@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_routes.dart';
 import 'route_arguments.dart';
 import '../page/tabs.dart';
-import '../page/animedata/anime_data.dart';
+import 'package:flutter_app/page/animeinfos/anime_info.dart';
 
 class RouteGenerator {
   // 路由生成器
@@ -16,7 +16,7 @@ class RouteGenerator {
 
       case AppRoutes.animeData:
         final args = settings.arguments;
-        
+
         // 支持两种参数格式：AnimeDataArguments 或直接传递 int
         if (args is AnimeDataArguments) {
           return MaterialPageRoute(
@@ -74,4 +74,4 @@ class RouteGenerator {
       ),
     );
   }
-} 
+}
