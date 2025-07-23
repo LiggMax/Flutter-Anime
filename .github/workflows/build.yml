@@ -40,7 +40,7 @@ jobs:
       - name: Build for selected platform
         if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' }}
         run: |
-          flutter build android
+          flutter build apk
           echo "Android build completed"
 
       - name: Build iOS
