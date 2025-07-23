@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/request/bangumi.dart';
 import 'package:flutter/widgets.dart';
+import '../../routes/route_helper.dart';
 
 // 数据状态类
 class CalendarState {
@@ -78,69 +79,75 @@ class CalendarProvider {
 // 动漫卡片组件
 class AnimeCard extends StatelessWidget {
   final dynamic animeData;
+  final Function(int id)? onTap; // 添加点击回调
 
   const AnimeCard({
     super.key,
     required this.animeData,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final subject = animeData['subject'];
+    final id = subject['id'] as int;
     final name = subject['nameCN']?.isNotEmpty == true
         ? subject['nameCN']
         : subject['name'];
     final imageUrl = subject['images']?['large'] ?? '';
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.antiAlias, // 确保内容不会超出圆角
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 封面图片
-          _buildImage(imageUrl),
-          // 底部渐变蒙版和标题
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black26,
-                    Colors.black45,
-                  ],
+    return GestureDetector(
+      onTap: () => onTap?.call(id), // 点击时传递 id
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias, // 确保内容不会超出圆角
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 封面图片
+            _buildImage(imageUrl),
+            // 底部渐变蒙版和标题
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black26,
+                      Colors.black45,
+                    ],
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                name ?? '未知动漫',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 2,
-                      color: Colors.black,
-                    ),
-                  ],
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  name ?? '未知动漫',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 2,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -333,7 +340,24 @@ class AnimeGrid extends StatelessWidget {
               childAspectRatio: 0.75,
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) => AnimeCard(animeData: animes[index]),
+              (context, index) => AnimeCard(
+                animeData: animes[index],
+                onTap: (id) {
+                  final animeData = animes[index];
+                  final subject = animeData['subject'];
+                  final animeName = subject['nameCN']?.isNotEmpty == true
+                      ? subject['nameCN']
+                      : subject['name'];
+                  final imageUrl = subject['images']?['large'];
+                  
+                  RouteHelper.goToAnimeData(
+                    context,
+                    animeId: id,
+                    animeName: animeName,
+                    imageUrl: imageUrl,
+                  );
+                },
+              ),
               childCount: animes.length,
             ),
           ),

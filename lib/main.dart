@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './page/tabs.dart';
 import './controllers/theme_controller.dart';
+import './routes/route_generator.dart';
+import './routes/app_routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -59,6 +61,8 @@ class _MyAppState extends State<MyApp> {
               darkTheme: ThemeController.darkTheme,
               themeMode: themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
               home: const Tabs(),
+              onGenerateRoute: RouteGenerator.generateRoute,
+              initialRoute: AppRoutes.tabs,
               debugShowCheckedModeBanner: false,
             ),
           );
