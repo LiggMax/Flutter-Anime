@@ -71,6 +71,7 @@ class _TabsState extends State<Tabs> {
       appBar: AppBar(
         title: Text(_pageTitles[_currentIndex]),
         centerTitle: false,
+        automaticallyImplyLeading: false, // 禁用自动返回按钮
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent, // 状态栏透明
           statusBarIconBrightness: context.isDarkMode ? Brightness.light : Brightness.dark,
