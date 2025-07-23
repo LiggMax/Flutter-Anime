@@ -46,6 +46,16 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
                 ],
               ),
 
+              /// 标签
+              if (widget.bangumiItem.mainTags.isNotEmpty) ...[
+                AnimeInfoSection(
+                  title: '标签',
+                  children: [
+                    AnimeTagsRow(tags: widget.bangumiItem.mainTags),
+                  ],
+                ),
+              ],
+
               AnimeInfoSection(
                 title: '基本信息',
                 children: [
@@ -114,18 +124,6 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
 
                 const SizedBox(height: 20),
               ],
-
-              if (widget.bangumiItem.mainTags.isNotEmpty) ...[
-                AnimeInfoSection(
-                  title: '标签',
-                  children: [
-                    AnimeTagsRow(tags: widget.bangumiItem.mainTags),
-                  ],
-                ),
-              ],
-
-              // 底部间距
-              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -278,39 +276,107 @@ class AnimeInfoRow extends StatelessWidget {
 }
 
 /// 标签行组件
-class AnimeTagsRow extends StatelessWidget {
-  final List<String> tags;
+class AnimeTagsRow extends StatefulWidget {
+  final List<BangumiTag> tags;
+  final int maxInitialTags; // 默认显示的标签数量
 
   const AnimeTagsRow({
     super.key,
     required this.tags,
+    this.maxInitialTags = 6, // 默认显示6个标签
   });
 
   @override
+  State<AnimeTagsRow> createState() => _AnimeTagsRowState();
+}
+
+class _AnimeTagsRowState extends State<AnimeTagsRow> {
+  bool isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: tags
-          .map(
-            (tag) => Container(
+    if (widget.tags.isEmpty) {
+      return const Text(
+        '暂无标签',
+        style: TextStyle(fontSize: 14, color: Colors.grey),
+      );
+    }
+
+    // 判断是否需要展开功能
+    final bool needsExpansion = widget.tags.length > widget.maxInitialTags;
+    final List<BangumiTag> tagsToShow = needsExpansion && !isExpanded
+        ? widget.tags.take(widget.maxInitialTags).toList()
+        : widget.tags;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.start,
+          children: tagsToShow
+              .map(
+                (tag) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withAlpha(50),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.blue.withAlpha(52)),
+                  ),
+                  child: Text(
+                    '${tag.name} (${tag.count})',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+        // 展开/收起按钮
+        if (needsExpansion) ...[
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.blue.withAlpha(50),
+                color: Colors.grey.withAlpha(30),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.withAlpha(52)),
+                border: Border.all(color: Colors.grey.withAlpha(80)),
               ),
-              child: Text(
-                tag,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue[700],
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isExpanded
+                        ? '收起 (${widget.tags.length - widget.maxInitialTags})'
+                        : '展开 (+${widget.tags.length - widget.maxInitialTags})',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    size: 16,
+                    color: Colors.grey,
+                  ),
+                ],
               ),
             ),
-          )
-          .toList(),
+          ),
+        ],
+      ],
     );
   }
 }

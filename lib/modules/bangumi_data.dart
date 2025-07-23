@@ -97,8 +97,8 @@ class BangumiDetailData {
     }
   }
 
-  // 获取主要标签
-  List<String> get mainTags => metaTags.take(5).toList();
+  // 获取主要标签（完整标签信息，包含count）
+  List<BangumiTag> get mainTags => tags;
 }
 
 // 图片信息模型
@@ -246,7 +246,7 @@ class BangumiDataParser {
   // 解析动漫详情数据
   static BangumiDetailData? parseDetailData(Map<String, dynamic>? jsonData) {
     if (jsonData == null) return null;
-    
+
     try {
       return BangumiDetailData.fromJson(jsonData);
     } catch (e) {
