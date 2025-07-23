@@ -38,11 +38,11 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
     try {
       final data = await BangumiService.getInfoByID(widget.animeId);
-      
+
       if (data != null) {
         // 使用数据解析器解析数据
         final parsedData = BangumiDataParser.parseDetailData(data);
-        
+
         if (parsedData != null) {
           setState(() {
             _animeDetailData = parsedData;
@@ -71,13 +71,6 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.animeName ?? '动漫详情'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: _buildBody(),
     );
   }
@@ -125,21 +118,46 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
       );
     }
 
-    return CustomScrollView(
-      slivers: [
-        // 顶部背景模糊区域
-        SliverToBoxAdapter(
-          child: _buildHeaderSection(),
-        ),
-        // 操作按钮区域
-        SliverToBoxAdapter(
-          child: _buildActionButtons(),
-        ),
-        // 详情标签页区域
-        SliverToBoxAdapter(
-          child: _buildDetailTabs(),
-        ),
-      ],
+    return NestedScrollView(
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return [
+          SliverAppBar(
+            expandedHeight: 300.0,
+            floating: false,
+            pinned: true,
+            backgroundColor: innerBoxIsScrolled ? Colors.white : Colors.transparent,
+            foregroundColor: innerBoxIsScrolled ? Colors.black : Colors.white,
+            elevation: innerBoxIsScrolled ? 4.0 : 0.0,
+            title: innerBoxIsScrolled 
+                ? Text(
+                    _animeDetailData?.displayName ?? widget.animeName ?? '动漫详情',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: innerBoxIsScrolled ? Colors.black : Colors.white,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildHeaderSection(),
+            ),
+          ),
+        ];
+      },
+      body: Column(
+        children: [
+          _buildActionButtons(),
+          Expanded(
+            child: _buildDetailTabs(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -151,51 +169,46 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         ? data.images.bestUrl 
         : (widget.imageUrl ?? '');
 
-    return Container(
-      height: 300,
-      child: Stack(
-        children: [
-          // 背景模糊图片
-          Positioned.fill(
-            child: _buildBlurredBackground(imageUrl),
-          ),
-          // 渐变遮罩
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black26,
-                    Colors.black54,
-                  ],
-                ),
+    return Stack(
+      children: [
+        // 背景模糊图片
+        Positioned.fill(
+          child: _buildBlurredBackground(imageUrl),
+        ),
+        // 渐变遮罩
+        Positioned.fill(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black26,
+                  Colors.black54,
+                ],
               ),
             ),
           ),
-          // 前景内容
-          Positioned.fill(
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 左侧封面图片
-                    _buildCoverImage(),
-                    const SizedBox(width: 16),
-                    // 右侧信息
-                    Expanded(
-                      child: _buildAnimeInfo(),
-                    ),
-                  ],
+        ),
+        // 前景内容
+        Positioned.fill(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16.0, 100.0, 16.0, 20.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // 左侧封面图片
+                _buildCoverImage(),
+                const SizedBox(width: 16),
+                // 右侧信息
+                Expanded(
+                  child: _buildAnimeInfo(),
                 ),
-              ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -236,7 +249,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
   Widget _buildCoverImage() {
     final imageUrl = _animeDetailData?.images.bestUrl ?? widget.imageUrl ?? '';
-    
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Container(
@@ -266,9 +279,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
   Widget _buildAnimeInfo() {
     if (_animeDetailData == null) return const SizedBox.shrink();
-    
+
     final data = _animeDetailData!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -290,9 +303,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // 放送日期和话数
         Text(
           '${data.date} · 全 ${data.totalEpisodes} 话',
@@ -308,9 +321,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // 评分区域
         if (data.rating != null) ...[
           Row(
@@ -320,7 +333,7 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
                 final score = data.rating!.score;
                 final fullStars = (score / 2).floor();
                 final hasHalfStar = (score / 2) - fullStars >= 0.5;
-                
+
                 if (index < fullStars) {
                   return const Icon(Icons.star, color: Colors.amber, size: 16);
                 } else if (index == fullStars && hasHalfStar) {
@@ -347,9 +360,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 4),
-          
+
           Text(
             '${data.totalRatingCount} 人评分 / #${data.rating!.rank}',
             style: const TextStyle(
@@ -365,9 +378,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
             ),
           ),
         ],
-        
+
         const SizedBox(height: 12),
-        
+
         // 收藏数据
         if (data.collection != null) ...[
           Text(
@@ -385,9 +398,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
             ),
           ),
         ],
-        
+
         const SizedBox(height: 12),
-        
+
         // 标签
         if (data.mainTags.isNotEmpty) ...[
           Wrap(
@@ -424,21 +437,20 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
   Widget _buildActionButtons() {
     if (_animeDetailData == null) return const SizedBox.shrink();
 
-    final data = _animeDetailData!;
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildActionButton(Icons.play_arrow, '播放', () {
-            // TODO: Implement play functionality
+          _buildActionButton(Icons.play_arrow, '开始观看', () {
+            // TODO: 实现播放功能
           }),
-          _buildActionButton(Icons.bookmark_border, '收藏', () {
-            // TODO: Implement collection functionality
+          _buildActionButton(Icons.favorite_border, '关注', () {
+            // TODO: 实现收藏功能
           }),
           _buildActionButton(Icons.share, '分享', () {
-            // TODO: Implement share functionality
+            // TODO: 实现分享功能
           }),
         ],
       ),
@@ -453,22 +465,24 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            backgroundColor: Colors.white.withOpacity(0.1),
+            backgroundColor: Colors.blue.withOpacity(0.1),
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
-            side: const BorderSide(color: Colors.white, width: 1),
+            side: BorderSide(color: Colors.blue.withOpacity(0.3), width: 1),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: Colors.white, size: 24),
+              Icon(icon, color: Colors.blue, size: 20),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
+                  fontSize: 11,
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -492,6 +506,9 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
               labelColor: Colors.black,
               unselectedLabelColor: Colors.grey,
               indicatorColor: Colors.blue,
+              indicatorWeight: 3,
+              labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              unselectedLabelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               tabs: [
                 Tab(text: '详情'),
                 Tab(text: '简介'),
@@ -499,13 +516,15 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
             ),
           ),
           // 内容区域
-          Container(
-            height: 400,
-            child: TabBarView(
-              children: [
-                _buildDetailInfo(),
-                _buildSummary(),
-              ],
+          Expanded(
+            child: Container(
+              color: Colors.grey[50],
+              child: TabBarView(
+                children: [
+                  _buildDetailInfo(),
+                  _buildSummary(),
+                ],
+              ),
             ),
           ),
         ],
@@ -515,10 +534,13 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
   Widget _buildSummary() {
     if (_animeDetailData == null || _animeDetailData!.summary.isEmpty) {
-      return const Center(
-        child: Text(
-          '暂无简介',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+      return Container(
+        color: Colors.grey[50],
+        child: const Center(
+          child: Text(
+            '暂无简介',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
         ),
       );
     }
@@ -529,14 +551,17 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
         .replaceAll('\\n', '\n')
         .trim();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(
-        formattedSummary,
-        style: const TextStyle(
-          fontSize: 14,
-          height: 1.6,
-          color: Colors.black87,
+    return Container(
+      color: Colors.grey[50],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          formattedSummary,
+          style: const TextStyle(
+            fontSize: 14,
+            height: 1.6,
+            color: Colors.black87,
+          ),
         ),
       ),
     );
@@ -544,59 +569,65 @@ class _AnimeDataPageState extends State<AnimeDataPage> {
 
   Widget _buildDetailInfo() {
     if (_animeDetailData == null) {
-      return const Center(
-        child: Text(
-          '暂无详细信息',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+      return Container(
+        color: Colors.grey[50],
+        child: const Center(
+          child: Text(
+            '暂无详细信息',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
         ),
       );
     }
 
     final data = _animeDetailData!;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildInfoSection('基本信息', [
-            _buildInfoRow('原名', data.name),
-            _buildInfoRow('中文名', data.nameCn),
-            _buildInfoRow('类型', data.typeText),
-            _buildInfoRow('总集数', '${data.totalEpisodes}话'),
-            _buildInfoRow('放送日期', data.date),
-            _buildInfoRow('播放平台', data.platform),
-          ]),
-          
-          const SizedBox(height: 20),
-          
-          _buildInfoSection('评分信息', [
-            _buildInfoRow('评分', data.scoreText),
-            _buildInfoRow('评价人数', '${data.totalRatingCount}人'),
-            if (data.rating != null) _buildInfoRow('排名', '第${data.rating!.rank}名'),
-          ]),
-          
-          const SizedBox(height: 20),
-          
-          if (data.collection != null) ...[
-            _buildInfoSection('收藏信息', [
-              _buildInfoRow('总收藏', '${data.totalCollectionCount}人'),
-              _buildInfoRow('想看', '${data.collection!.wish}人'),
-              _buildInfoRow('在看', '${data.collection!.doing}人'),
-              _buildInfoRow('看过', '${data.collection!.collect}人'),
-              _buildInfoRow('搁置', '${data.collection!.onHold}人'),
-              _buildInfoRow('抛弃', '${data.collection!.dropped}人'),
+    return Container(
+      color: Colors.grey[50],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoSection('基本信息', [
+              _buildInfoRow('原名', data.name),
+              _buildInfoRow('中文名', data.nameCn),
+              _buildInfoRow('类型', data.typeText),
+              _buildInfoRow('总集数', '${data.totalEpisodes}话'),
+              _buildInfoRow('放送日期', data.date),
+              _buildInfoRow('播放平台', data.platform),
             ]),
             
             const SizedBox(height: 20),
-          ],
-          
-          if (data.mainTags.isNotEmpty) ...[
-            _buildInfoSection('标签', [
-              _buildTagsRow(data.mainTags),
+            
+            _buildInfoSection('评分信息', [
+              _buildInfoRow('评分', data.scoreText),
+              _buildInfoRow('评价人数', '${data.totalRatingCount}人'),
+              if (data.rating != null) _buildInfoRow('排名', '第${data.rating!.rank}名'),
             ]),
+            
+            const SizedBox(height: 20),
+            
+            if (data.collection != null) ...[
+              _buildInfoSection('收藏信息', [
+                _buildInfoRow('总收藏', '${data.totalCollectionCount}人'),
+                _buildInfoRow('想看', '${data.collection!.wish}人'),
+                _buildInfoRow('在看', '${data.collection!.doing}人'),
+                _buildInfoRow('看过', '${data.collection!.collect}人'),
+                _buildInfoRow('搁置', '${data.collection!.onHold}人'),
+                _buildInfoRow('抛弃', '${data.collection!.dropped}人'),
+              ]),
+              
+              const SizedBox(height: 20),
+            ],
+            
+            if (data.mainTags.isNotEmpty) ...[
+              _buildInfoSection('标签', [
+                _buildTagsRow(data.mainTags),
+              ]),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
