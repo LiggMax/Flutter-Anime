@@ -18,11 +18,15 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomePage(),
-    const TimePage(),
-    const ProfilePage(),
-  ];
+  // 用于存储已创建的页面
+  final Map<int, Widget> _createdPages = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // 预创建首页，确保应用启动时能正常显示
+    _createdPages[0] = const HomePage();
+  }
 
   // 页面标题列表
   final List<String> _pageTitles = [
@@ -30,6 +34,28 @@ class _TabsState extends State<Tabs> {
     "时间表",
     "个人中心",
   ];
+
+  // 页面创建工厂方法
+  Widget _createPage(int index) {
+    switch (index) {
+      case 0:
+        return const HomePage();
+      case 1:
+        return const TimePage();
+      case 2:
+        return const ProfilePage();
+      default:
+        return const HomePage();
+    }
+  }
+
+  // 获取页面，如果没有创建则创建
+  Widget _getPage(int index) {
+    if (!_createdPages.containsKey(index)) {
+      _createdPages[index] = _createPage(index);
+    }
+    return _createdPages[index]!;
+  }
 
   void _navigateTo(int index) {
     setState(() {
@@ -62,7 +88,17 @@ class _TabsState extends State<Tabs> {
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: _pages,
+        children: List.generate(3, (index) {
+          // 如果是当前页面或者已经创建过的页面，返回真实页面
+          if (index == _currentIndex) {
+            return _getPage(index);
+          } else if (_createdPages.containsKey(index)) {
+            return _createdPages[index]!;
+          } else {
+            // 返回空占位符，避免不必要的页面创建
+            return const SizedBox.shrink();
+          }
+        }),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
