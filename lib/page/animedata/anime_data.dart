@@ -21,7 +21,7 @@ class AnimeDataPage extends StatefulWidget {
 
 class _AnimeDataPageState extends State<AnimeDataPage>
     with TickerProviderStateMixin {
-  /// 参考Kazumi的控制器模式
+  /// 控制器模式
   final InfoController infoController = InfoController();
   late TabController infoTabController;
 
@@ -30,13 +30,13 @@ class _AnimeDataPageState extends State<AnimeDataPage>
   bool commentsQueryTimeout = false;
   bool charactersQueryTimeout = false;
 
-  // Kazumi风格的响应式布局常量
+  // 响应式布局常量
   final double maxWidth = 950.0;
 
   @override
   void initState() {
     super.initState();
-    // 初始化数据 - 参考Kazumi的方式，创建空的BangumiDetailData实例
+    // 初始化数据 创建空的BangumiDetailData实例
     infoController.bangumiItem = BangumiDetailData(
       id: widget.animeId,
       name: '',
@@ -66,7 +66,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
       nsfw: false,
     );
 
-    // 参考Kazumi的标签页设置
+    // 标签页设置
     infoTabController = TabController(length: 2, vsync: this);
 
     // 加载详情数据
@@ -79,7 +79,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
     super.dispose();
   }
 
-  /// 参考Kazumi的查询方法
+  /// 查询方法
   Future<void> queryBangumiInfoByID(int id, {String type = "init"}) async {
     try {
       await infoController.queryBangumiInfoByID(id, type: type);
@@ -91,7 +91,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
 
   @override
   Widget build(BuildContext context) {
-    // 参考Kazumi的标签页配置
+    // 标签页配置
     final List<String> tabs = <String>['详情', '简介'];
 
     return PopScope(
@@ -148,7 +148,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
                         ],
                         stretch: true,
                         centerTitle: false,
-                        // 参考Kazumi的高度设置
+                        // 高度设置
                         expandedHeight:
                             308 + kTextTabBarHeight + kToolbarHeight,
                         collapsedHeight:
@@ -175,13 +175,13 @@ class _AnimeDataPageState extends State<AnimeDataPage>
                               dividerHeight: 0,
                               labelColor: innerBoxIsScrolled
                                   ? Colors.black
-                                  : Colors.white,
+                                  : Colors.black,
                               unselectedLabelColor: innerBoxIsScrolled
-                                  ? Colors.grey[600]
-                                  : Colors.white70,
+                                  ? Colors.black
+                                  : Colors.black,
                               indicatorColor: innerBoxIsScrolled
                                   ? Theme.of(context).primaryColor
-                                  : Colors.white,
+                                  : Colors.black26,
                               tabs: tabs
                                   .map((name) => Tab(text: name))
                                   .toList(),
@@ -204,11 +204,11 @@ class _AnimeDataPageState extends State<AnimeDataPage>
     );
   }
 
-  /// 参考Kazumi的FlexibleBackground实现
+  /// FlexibleBackground实现
   Widget _buildFlexibleBackground() {
     return Stack(
       children: [
-        // 参考Kazumi的背景模糊图片实现
+        // 背景模糊图片实现
         if (!infoController.isLoading)
           Positioned.fill(
             bottom: kTextTabBarHeight,
@@ -240,7 +240,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
               ),
             ),
           ),
-        // 参考Kazumi的前景内容布局
+        // 前景内容布局
         SafeArea(
           bottom: false,
           child: Align(
@@ -264,7 +264,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
     );
   }
 
-  /// 参考Kazumi的网络图片实现
+  /// 网络图片实现
   Widget _buildNetworkImage(String imageUrl, double width, double height) {
     if (imageUrl.isEmpty) {
       return Container(
@@ -294,7 +294,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
   }
 }
 
-/// 参考Kazumi的控制器模式
+/// 控制器模式
 class InfoController {
   late BangumiDetailData bangumiItem;
   bool isLoading = false;
@@ -318,7 +318,7 @@ class InfoController {
   }
 }
 
-/// 参考Kazumi的信息卡片组件
+/// 信息卡片组件
 class BangumiInfoCard extends StatelessWidget {
   final BangumiDetailData bangumiItem;
   final bool isLoading;
@@ -594,7 +594,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     );
   }
 
-  /// 详情标签页 - 参考Kazumi的实现
+  /// 详情标签页
   Widget _buildDetailInfoTab() {
     return Builder(
       builder: (BuildContext context) {
@@ -617,7 +617,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     );
   }
 
-  /// 简介标签页 - 参考Kazumi的实现
+  /// 简介标签页
   Widget _buildSummaryTab() {
     return Builder(
       builder: (BuildContext context) {
@@ -640,7 +640,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     );
   }
 
-  /// 参考Kazumi的详情内容实现
+  /// 详情内容实现
   Widget _buildDetailInfoContent() {
     return Center(
       child: Padding(
@@ -721,7 +721,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     );
   }
 
-  /// 参考Kazumi的简介内容实现，包含智能展开功能
+  /// 简介内容实现，包含智能展开功能
   Widget _buildSummaryContent() {
     if (widget.bangumiItem.summary.isEmpty) {
       return const Center(
