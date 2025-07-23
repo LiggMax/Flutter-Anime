@@ -313,8 +313,8 @@ class BangumiInfoCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 130,
-          height: 190,
+          width: 140,
+          height: 230,
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.circular(12),

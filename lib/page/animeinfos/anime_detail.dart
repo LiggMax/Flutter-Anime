@@ -46,7 +46,6 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
                 ],
               ),
 
-              /// 标签
               if (widget.bangumiItem.mainTags.isNotEmpty) ...[
                 AnimeInfoSection(
                   title: '标签',
@@ -70,60 +69,6 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
                   AnimeInfoRow(label: '播放平台', value: widget.bangumiItem.platform),
                 ],
               ),
-
-              const SizedBox(height: 20),
-
-              AnimeInfoSection(
-                title: '评分信息',
-                children: [
-                  AnimeInfoRow(label: '评分', value: widget.bangumiItem.scoreText),
-                  AnimeInfoRow(
-                    label: '评价人数',
-                    value: '${widget.bangumiItem.totalRatingCount}人',
-                  ),
-                  if (widget.bangumiItem.rating != null)
-                    AnimeInfoRow(
-                      label: '排名',
-                      value: '第${widget.bangumiItem.rating!.rank}名',
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              if (widget.bangumiItem.collection != null) ...[
-                AnimeInfoSection(
-                  title: '收藏信息',
-                  children: [
-                    AnimeInfoRow(
-                      label: '总收藏',
-                      value: '${widget.bangumiItem.totalCollectionCount}人',
-                    ),
-                    AnimeInfoRow(
-                      label: '想看',
-                      value: '${widget.bangumiItem.collection!.wish}人',
-                    ),
-                    AnimeInfoRow(
-                      label: '在看',
-                      value: '${widget.bangumiItem.collection!.doing}人',
-                    ),
-                    AnimeInfoRow(
-                      label: '看过',
-                      value: '${widget.bangumiItem.collection!.collect}人',
-                    ),
-                    AnimeInfoRow(
-                      label: '搁置',
-                      value: '${widget.bangumiItem.collection!.onHold}人',
-                    ),
-                    AnimeInfoRow(
-                      label: '抛弃',
-                      value: '${widget.bangumiItem.collection!.dropped}人',
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-              ],
             ],
           ),
         ),
