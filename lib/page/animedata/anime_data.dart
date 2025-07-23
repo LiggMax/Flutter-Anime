@@ -318,7 +318,7 @@ class BangumiInfoCard extends StatelessWidget {
         children: [
           // 左侧封面图片
           _buildCoverImage(),
-          const SizedBox(width: 20),
+          const SizedBox(width: 12),
           // 右侧信息
           Expanded(
             child: Padding(
@@ -347,8 +347,8 @@ class BangumiInfoCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 110,
-          height: 150,
+          width: 150,
+          height: 220,
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.circular(12),
