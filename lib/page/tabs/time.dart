@@ -16,19 +16,58 @@ class CalendarProvider {
   final _stateController = StreamController<CalendarState>();
   Stream<CalendarState> get stateStream => _stateController.stream;
 
+  // 静态缓存
+  static Map<String, dynamic>? _cachedData;
+  static DateTime? _cacheTime;
+  static const Duration _cacheExpiration = Duration(minutes: 30); // 缓存30分钟
+
   CalendarProvider() {
-    _stateController.add(CalendarState(isLoading: true));
+    // 检查是否有有效缓存
+    if (_hasValidCache()) {
+      _stateController.add(CalendarState(data: _cachedData, isLoading: false));
+    } else {
+      _stateController.add(CalendarState(isLoading: true));
+      loadCalendar();
+    }
   }
 
-  Future<void> loadCalendar() async {
+  // 检查缓存是否有效
+  bool _hasValidCache() {
+    return _cachedData != null &&
+           _cacheTime != null &&
+           DateTime.now().difference(_cacheTime!) < _cacheExpiration;
+  }
+
+  Future<void> loadCalendar({bool forceRefresh = false}) async {
+    // 如果不是强制刷新且有有效缓存，直接返回缓存数据
+    if (!forceRefresh && _hasValidCache()) {
+      _stateController.add(CalendarState(data: _cachedData, isLoading: false));
+      return;
+    }
+
     _stateController.add(CalendarState(isLoading: true));
 
     try {
       final data = await BangumiService.getCalendar();
+      // 更新缓存
+      _cachedData = data;
+      _cacheTime = DateTime.now();
+
       _stateController.add(CalendarState(data: data, isLoading: false));
     } catch (e) {
       _stateController.add(CalendarState(isLoading: false));
     }
+  }
+
+  // 强制刷新数据
+  Future<void> refreshCalendar() async {
+    await loadCalendar(forceRefresh: true);
+  }
+
+  // 清除缓存
+  static void clearCache() {
+    _cachedData = null;
+    _cacheTime = null;
   }
 
   void dispose() {
@@ -153,10 +192,12 @@ class AnimeCard extends StatelessWidget {
 // 星期动漫网格组件
 class WeeklyAnimeGrid extends StatelessWidget {
   final Map<String, dynamic> calendarData;
+  final VoidCallback? onRefresh;
 
   const WeeklyAnimeGrid({
     super.key,
     required this.calendarData,
+    this.onRefresh,
   });
 
   @override
@@ -203,7 +244,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
       final dayIndex = entry.key + 1; // 1-7
       final dayName = entry.value;
       final animeCount = calendarData[dayIndex.toString()]?.length ?? 0;
-      
+
       return Tab(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -234,31 +275,51 @@ class WeeklyAnimeGrid extends StatelessWidget {
     return List.generate(7, (index) {
       final dayIndex = index + 1; // 1-7
       final dayAnimes = calendarData[dayIndex.toString()] as List<dynamic>? ?? [];
-      
+
       if (dayAnimes.isEmpty) {
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.tv_off,
-                size: 80,
-                color: Colors.grey,
-              ),
-              SizedBox(height: 16),
-              Text(
-                '今天没有新番',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+        return RefreshIndicator(
+          onRefresh: () async => onRefresh != null ? onRefresh!() : Future.value(),
+          child: const SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: 400,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.tv_off,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      '今天没有新番',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '下拉刷新试试',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         );
       }
 
-      return AnimeGrid(animes: dayAnimes);
+      return RefreshIndicator(
+        onRefresh: () async => onRefresh != null ? onRefresh!() : Future.value(),
+        child: AnimeGrid(animes: dayAnimes),
+      );
     });
   }
 }
@@ -275,6 +336,7 @@ class AnimeGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(16.0),
@@ -319,7 +381,7 @@ class _TimePageState extends State<TimePage> with AutomaticKeepAliveClientMixin 
   void initState() {
     super.initState();
     _calendarProvider = CalendarProvider();
-    _calendarProvider.loadCalendar();
+    // loadCalendar 现在在 CalendarProvider 构造函数中自动调用
   }
 
   @override
@@ -344,9 +406,21 @@ class _TimePageState extends State<TimePage> with AutomaticKeepAliveClientMixin 
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     } else if (state.data != null) {
-      return WeeklyAnimeGrid(calendarData: state.data!);
+      return WeeklyAnimeGrid(
+        calendarData: state.data!,
+        onRefresh: () => _calendarProvider.refreshCalendar(),
+      );
     } else {
-      return const Center(child: Text("加载数据失败"));
+      return RefreshIndicator(
+        onRefresh: () => _calendarProvider.refreshCalendar(),
+        child: const SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: 400,
+            child: Center(child: Text("加载数据失败，下拉重试")),
+          ),
+        ),
+      );
     }
   }
 
