@@ -59,7 +59,7 @@ class AnimeDetailAppBar extends StatelessWidget {
       stretch: true,
       centerTitle: false,
       // 高度设置
-      expandedHeight: 280 + kTextTabBarHeight + kToolbarHeight, // 220 → 280 增加60px容纳播放按钮
+      expandedHeight: 300 + kTextTabBarHeight + kToolbarHeight, // 280 → 320 增加40px适应新间距
       collapsedHeight: kTextTabBarHeight +
           kToolbarHeight +
           MediaQuery.paddingOf(context).top,
@@ -123,6 +123,8 @@ class AnimeDetailHeader extends StatelessWidget {
                   // 播放按钮区域
                   AnimePlayButton(
                     onPressed: onPlayPressed ?? () {
+                      // 默认实现
+                      print('开始观看');
                     },
                   ),
                 ],
@@ -236,7 +238,7 @@ class AnimeDetailTabBar extends StatelessWidget implements PreferredSizeWidget {
         child: TabBar(
           controller: tabController,
           isScrollable: false,
-          tabAlignment: TabAlignment.fill,
+          tabAlignment: TabAlignment.center,
           dividerHeight: 0,
           labelColor: innerBoxIsScrolled ? Colors.black : Colors.black,
           unselectedLabelColor: innerBoxIsScrolled ? Colors.black : Colors.black,
