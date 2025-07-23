@@ -330,9 +330,7 @@ class AnimeGrid extends StatelessWidget {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: _getCrossAxisCount(context),
-              childAspectRatio: 0.75, 
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              childAspectRatio: 0.75,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => AnimeCard(animeData: animes[index]),
