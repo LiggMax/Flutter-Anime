@@ -250,7 +250,6 @@ class BangumiDataParser {
     try {
       return BangumiDetailData.fromJson(jsonData);
     } catch (e) {
-      print('解析Bangumi数据失败: $e');
       return null;
     }
   }
