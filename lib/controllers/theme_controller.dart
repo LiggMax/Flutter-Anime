@@ -25,10 +25,11 @@ class ThemeController extends ChangeNotifier {
 
   // 浅色主题
   static final ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.light,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      brightness: Brightness.light,
+    colorScheme: const ColorScheme.light(
+      surface: Colors.white, // 设置surface背景色
+      primary: Colors.blue, // 主色调
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -38,6 +39,9 @@ class ThemeController extends ChangeNotifier {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
+        // 关键：systemNavigationBarColor必须与surface保持一致
+        systemNavigationBarColor: Colors.white, // 与surface一致
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
       titleTextStyle: TextStyle(
         color: Colors.black,
@@ -55,10 +59,11 @@ class ThemeController extends ChangeNotifier {
 
   // 深色主题
   static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      brightness: Brightness.dark,
+    colorScheme: const ColorScheme.dark(
+      surface: Color(0xFF121012), // 深色主题的surface背景色
+      primary: Colors.blue, // 主色调
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -68,6 +73,9 @@ class ThemeController extends ChangeNotifier {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
+        // 关键：systemNavigationBarColor必须与surface保持一致
+        systemNavigationBarColor: Color(0xFF121012), // 与surface一致
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
       titleTextStyle: TextStyle(
         color: Colors.white,
@@ -75,9 +83,9 @@ class ThemeController extends ChangeNotifier {
         fontWeight: FontWeight.w500,
       ),
     ),
-    scaffoldBackgroundColor: Colors.black,
+    scaffoldBackgroundColor: const Color(0xFF121012), // 与surface保持一致
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.grey,
+      backgroundColor: Color(0xFF121012), // 与surface保持一致
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.white70,
     ),
