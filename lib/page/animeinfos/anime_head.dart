@@ -439,7 +439,7 @@ class BangumiInfoCard extends StatelessWidget {
   }
 }
 
-/// 播放按钮组件
+/// 钮组件
 class AnimePlayButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -450,34 +450,72 @@ class AnimePlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF8B5CF6), // 紫色背景
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 9),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: Row(
+        children: [
+          // 新增的左侧按钮
+          Expanded(
+            flex: 1,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // TODO: 处理左侧按钮点击事件
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey, // 左侧按钮颜色
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 3,
+                shadowColor: Colors.grey.withAlpha(53),
+              ),
+              icon: const Icon(Icons.add_chart_rounded, size: 20), // 左侧图标
+              label: const Text(
+                '追番',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
-          elevation: 3,
-          shadowColor: const Color(0xFF8B5CF6).withAlpha(53),
-        ),
-        icon: const Icon(
-          Icons.play_arrow_rounded,
-          size: 24,
-        ),
-        label: const Text(
-          '开始观看',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+
+          const SizedBox(width: 10), // 按钮之间的间距
+
+          // 开始观看按钮
+          Expanded(
+            flex: 2,
+            child: ElevatedButton.icon(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B5CF6), // 紫色背景
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 3,
+                shadowColor: const Color(0xFF8B5CF6).withAlpha(53),
+              ),
+              icon: const Icon(
+                Icons.play_arrow_rounded,
+                size: 24,
+              ),
+              label: const Text(
+                '开始观看',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
+
 
