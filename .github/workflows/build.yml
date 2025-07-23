@@ -31,7 +31,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.7.12' # 可根据需要更改版本
+          flutter-version: '3.32.7'
           channel: stable
 
       - name: Install dependencies
