@@ -3,3 +3,4 @@
 /.idea/
 .flutter-plugins-dependencies
 *.log
+*.iml
