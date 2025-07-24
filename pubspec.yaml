@@ -33,7 +33,6 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   curved_navigation_bar: ^1.0.6
-  get: ^4.7.2
   provider: ^6.1.2
   shared_preferences: ^2.3.4
   dio: ^5.4.0
