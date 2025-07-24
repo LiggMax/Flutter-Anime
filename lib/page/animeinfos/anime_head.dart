@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/modules/bangumi_data.dart';
+import 'package:flutter_app/page/video/video_info.dart';
 
 /// 自定义AppBar组件
 class AnimeDetailAppBar extends StatelessWidget {
@@ -434,7 +435,7 @@ class BangumiInfoCard extends StatelessWidget {
   }
 }
 
-/// 钮组件
+/// 按钮组件
 class AnimePlayButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -483,7 +484,17 @@ class AnimePlayButton extends StatelessWidget {
           Expanded(
             flex: 2,
             child: ElevatedButton.icon(
-              onPressed: onPressed,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const VideoInfoPage(
+                      videoUrl: 'https://lf-cdn.trae.com.cn/obj/trae-com-cn/trae_website_prod_cn/static/media/solo-introduce.189b5726.mp4',
+                      videoTitle: '默认视频',
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF8B5CF6), // 紫色背景
                 foregroundColor: Colors.white,
