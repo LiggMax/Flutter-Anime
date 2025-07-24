@@ -42,26 +42,14 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.videoTitle ?? '视频标题'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.play_arrow),
-            onPressed: () => player.play(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.pause),
-            onPressed: () => player.pause(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 视频播放器 - 移动到页面顶部并设置高度为16:9比例
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Video(controller: controller),
-          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 视频播放器 - 设置16:9比例，确保不覆盖状态栏
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Video(controller: controller),
+            ),
 
           // 控件区域 - 放置在视频播放器下方
           Expanded(
@@ -153,6 +141,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
