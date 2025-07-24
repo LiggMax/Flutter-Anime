@@ -489,8 +489,9 @@ class AnimePlayButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const VideoInfoPage(
-                      videoUrl: 'https://lf-cdn.trae.com.cn/obj/trae-com-cn/trae_website_prod_cn/static/media/solo-introduce.189b5726.mp4',
-                      videoTitle: '默认视频',
+                      // 使用更兼容的测试视频URL
+                      videoUrl: 'https://h6uzb5wdvs.senhewenhua.com:8080/cache/6IOG5aSn5YWaIOesrOS6jOWtoy1FUDQubXA0.mp4?verify=1753373198-l%2BCTHgbtzuQMvqXImHf%2FdagKqcqCRDJQeVROu4sU10s%3D',
+                      videoTitle: '测试视频 - Big Buck Bunny',
                     ),
                   ),
                 );
