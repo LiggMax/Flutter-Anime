@@ -76,7 +76,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Color.fromRGBO(0, 0, 0, 0.7),
+                            Color.fromRGBO(0, 0, 0, 0.3),
                             Colors.transparent,
                           ],
                         ),
@@ -127,14 +127,13 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
-                        vertical: 12.0,
                       ),
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                            Color.fromRGBO(0, 0, 0, 0.8),
+                            Color.fromRGBO(0, 0, 0, 0.3),
                             Colors.transparent,
                           ],
                         ),
@@ -164,9 +163,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                               : position,
                                         ),
                                         style: TextStyle(
-                                          color: _isDragging
-                                              ? Colors.yellow
-                                              : Colors.white,
+                                          color: Colors.white,
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -197,37 +194,24 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                         builder: (context, snapshot) {
                                           final isPlaying =
                                               snapshot.data ?? false;
-                                          return Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(
-                                                0.2,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
+                                          return IconButton(
+                                            iconSize: 35,
+                                            icon: Icon(
+                                              isPlaying
+                                                  ? Icons.pause
+                                                  : Icons.play_arrow,
+                                              color: Colors.white,
                                             ),
-                                            child: IconButton(
-                                              iconSize: 20,
-                                              icon: Icon(
-                                                isPlaying
-                                                    ? Icons.pause
-                                                    : Icons.play_arrow,
-                                                color: Colors.white,
-                                              ),
-                                              onPressed: () {
-                                                if (isPlaying) {
-                                                  player.pause();
-                                                } else {
-                                                  player.play();
-                                                }
-                                              },
-                                            ),
+                                            onPressed: () {
+                                              if (isPlaying) {
+                                                player.pause();
+                                              } else {
+                                                player.play();
+                                              }
+                                            },
                                           );
                                         },
                                       ),
-
-                                      const SizedBox(width: 12),
 
                                       // 进度条区域
                                       Expanded(
@@ -413,33 +397,20 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                         ),
                                       ),
 
-                                      const SizedBox(width: 12),
-
                                       // 全屏按钮
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
+                                      IconButton(
+                                        iconSize: 35,
+                                        icon: const Icon(
+                                          Icons.fullscreen,
+                                          color: Colors.white,
                                         ),
-                                        child: IconButton(
-                                          iconSize: 18,
-                                          icon: const Icon(
-                                            Icons.fullscreen,
-                                            color: Colors.white,
-                                          ),
-                                          onPressed: () {
-                                            // TODO: 实现全屏功能
-                                          },
-                                        ),
+                                        onPressed: () {
+                                          // TODO: 实现全屏功能
+                                        },
                                       ),
                                     ],
                                   ),
 
-                                  const SizedBox(height: 8),
                                 ],
                               );
                             },
