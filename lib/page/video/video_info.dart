@@ -111,7 +111,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                       left: 0,
                       right: 0,
                       child: Container(
-                        height: 60,
+                        height: 40,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
