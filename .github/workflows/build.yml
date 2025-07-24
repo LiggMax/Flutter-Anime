@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build for selected platform
+      - name: Build android
         if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' }}
         run: |
           flutter build apk
