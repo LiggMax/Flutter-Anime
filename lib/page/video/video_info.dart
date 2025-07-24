@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -41,9 +42,15 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
           children: [
             // 视频播放器 - 设置16:9比例，确保不覆盖状态栏
             AspectRatio(
@@ -141,6 +148,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
             ),
           ),
         ],
+        ),
         ),
       ),
     );
