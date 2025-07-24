@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 允许HTTPS连接（默认） -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Bangumi API endpoints -->
+        <domain includeSubdomains="true">api.bgm.tv</domain>
+        <domain includeSubdomains="true">next.bgm.tv</domain>
+        <domain includeSubdomains="true">bgm.tv</domain>
+    </domain-config>
+    
+    <!-- 如果需要支持HTTP连接的域名，可以在这里添加 -->
+    <!-- 
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">example.com</domain>
+    </domain-config>
+    -->
+</network-security-config> 
