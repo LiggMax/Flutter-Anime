@@ -27,7 +27,7 @@ class CalendarProvider {
     if (_hasValidCache()) {
       _stateController.add(CalendarState(data: _cachedData, isLoading: false));
     } else {
-      _stateController.add(CalendarState(isLoading: true));
+    _stateController.add(CalendarState(isLoading: true));
       loadCalendar();
     }
   }
@@ -99,15 +99,15 @@ class AnimeCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap?.call(id), // 点击时传递 id
       child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
         clipBehavior: Clip.antiAlias, // 确保内容不会超出圆角
         child: Stack(
           fit: StackFit.expand,
-          children: [
-            // 封面图片
+        children: [
+          // 封面图片
             _buildImage(imageUrl),
             // 底部渐变蒙版和标题
             Positioned(
@@ -126,12 +126,12 @@ class AnimeCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  name ?? '未知动漫',
-                  style: const TextStyle(
+                    name ?? '未知动漫',
+                    style: const TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
                       Shadow(
@@ -140,14 +140,14 @@ class AnimeCard extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ),
             ),
           ],
-        ),
+          ),
       ),
     );
   }
@@ -238,7 +238,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
       final dayIndex = entry.key + 1; // 1-7
       final dayName = entry.value;
       final animeCount = calendarData[dayIndex.toString()]?.length ?? 0;
-
+      
       return Tab(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -269,7 +269,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
     return List.generate(7, (index) {
       final dayIndex = index + 1; // 1-7
       final dayAnimes = calendarData[dayIndex.toString()] as List<dynamic>? ?? [];
-
+      
       if (dayAnimes.isEmpty) {
         return RefreshIndicator(
           onRefresh: () async => onRefresh != null ? onRefresh!() : Future.value(),
@@ -278,22 +278,22 @@ class WeeklyAnimeGrid extends StatelessWidget {
             child: SizedBox(
               height: 400,
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.tv_off,
-                      size: 80,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      '今天没有新番',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.tv_off,
+                size: 80,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                '今天没有新番',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
                     SizedBox(height: 8),
                     Text(
                       '下拉刷新试试',
