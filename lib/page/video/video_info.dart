@@ -23,6 +23,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   bool _showControls = true;
   Timer? _hideControlsTimer;
   bool _isFullscreen = false;
+  bool _isTransitioning = false; // 防止连续快速切换
 
   @override
   void initState() {
@@ -96,38 +97,56 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   }
 
   void _toggleFullscreen() async {
+    // 防止连续快速切换
+    if (_isTransitioning) return;
+    
     setState(() {
-      _isFullscreen = !_isFullscreen;
+      _isTransitioning = true;
+      _showControls = false;
     });
+    _hideControlsTimer?.cancel();
 
-    if (_isFullscreen) {
-      // 进入全屏
-      await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.immersiveSticky,
-      );
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    } else {
-      // 退出全屏
-      await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      );
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
+    try {
+      if (!_isFullscreen) {
+        // 进入全屏
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.immersiveSticky,
+        );
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+        // 等待屏幕旋转完成
+        await Future.delayed(const Duration(milliseconds: 300));
+      } else {
+        // 退出全屏
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values,
+        );
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+        // 等待屏幕旋转和布局重建完成
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+      
+      // 更新全屏状态
+      setState(() {
+        _isFullscreen = !_isFullscreen;
+      });
+      
+      // 再次等待确保布局稳定
+      await Future.delayed(const Duration(milliseconds: 200));
+      
+    } finally {
+      // 显示控件并重新开始计时
+      setState(() {
+        _showControls = true;
+        _isTransitioning = false;
+      });
+      _startHideControlsTimer();
     }
-    
-    // 短暂延迟确保状态同步
-    await Future.delayed(const Duration(milliseconds: 100));
-    
-    // 强制显示控件并重新开始计时
-    setState(() {
-      _showControls = true;
-    });
-    _startHideControlsTimer();
   }
 
   @override
@@ -163,13 +182,18 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                               child: Column(
                                 children: [
                                   // 视频播放器 - 保持16:9比例
-                                  _buildVideoPlayer(isPlaying, position, duration, buffer),
+                                  Flexible(
+                                    flex: 0,
+                                    child: _buildVideoPlayer(isPlaying, position, duration, buffer),
+                                  ),
 
                                   // 视频下方的内容区域
                                   Expanded(
                                     child: Container(
                                       color: Theme.of(context).scaffoldBackgroundColor,
-                                      child: const Center(child: Text('视频信息和评论区域')),
+                                      child: const SingleChildScrollView(
+                                        child: Center(child: Text('视频信息和评论区域')),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -188,41 +212,48 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   }
 
     Widget _buildVideoPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
-    return Stack(
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Container(
-            color: Colors.black,
-            child: StreamBuilder<bool>(
-              stream: player.stream.buffering,
-              builder: (context, bufferingSnapshot) {
-                final isBuffering = bufferingSnapshot.data ?? true;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                width: constraints.maxWidth,
+                color: Colors.black,
+                child: StreamBuilder<bool>(
+                  stream: player.stream.buffering,
+                  builder: (context, bufferingSnapshot) {
+                    final isBuffering = bufferingSnapshot.data ?? true;
 
-                return Stack(
-                  children: [
-                    Video(
-                      controller: controller,
-                      controls: null, // 禁用默认控件
-                      aspectRatio: 16 / 9,
-                      fill: Colors.black,
-                    ),
-                    // 加载指示器
-                    if (isBuffering)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
+                    return Stack(
+                      children: [
+                        Video(
+                          controller: controller,
+                          controls: null, // 禁用默认控件
+                          aspectRatio: 16 / 9,
+                          fill: Colors.black,
+                          width: constraints.maxWidth,
+                          height: constraints.maxWidth * 9 / 16,
                         ),
-                      ),
-                  ],
-                );
-              },
+                        // 加载指示器
+                        if (isBuffering)
+                          const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
-        
-        _buildVideoControls(isPlaying, position, duration, buffer),
-      ],
+            
+            _buildVideoControls(isPlaying, position, duration, buffer),
+          ],
+        );
+      },
     );
   }
 
@@ -292,7 +323,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
           }
           _showControlsTemporarily();
         },
-        onFullscreen: _toggleFullscreen,
+        onFullscreen: _isTransitioning ? null : _toggleFullscreen,
         onSeekStart: (value) {
           _hideControlsTimer?.cancel();
           setState(() {
