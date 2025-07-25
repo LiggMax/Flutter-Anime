@@ -29,7 +29,6 @@
         <key>NSPrincipalClass</key>
         <string>NSApplication</string>
 
-        <!-- App Transport Security 配置 -->
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSExceptionDomains</key>
