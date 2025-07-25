@@ -9,9 +9,9 @@ class VideoTopControls extends StatelessWidget {
   final bool isFullscreen;
 
   const VideoTopControls({
-    super.key, 
-    this.title, 
-    this.onBack, 
+    super.key,
+    this.title,
+    this.onBack,
     this.onSettings,
     this.isFullscreen = false,
   });
@@ -31,10 +31,7 @@ class VideoTopControls extends StatelessWidget {
         children: [
           // 返回按钮
           IconButton(
-            icon: Icon(
-              isFullscreen ? Icons.fullscreen_exit : Icons.arrow_back_ios,
-              color: Colors.white,
-            ),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: onBack,
           ),
           // 标题
