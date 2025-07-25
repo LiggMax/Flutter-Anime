@@ -663,4 +663,4 @@ packages:
     version: "6.5.0"
 sdks:
   dart: ">=3.8.1 <4.0.0"
-  flutter: ">=3.32.7"
+  flutter: ">=3.32.5"
