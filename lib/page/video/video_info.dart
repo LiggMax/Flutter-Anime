@@ -133,51 +133,73 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                       ),
                     ),
                   ),
-                  Positioned.fill(
-                    child: VideoPlayerControls(
-                      player: player,
-                      showControls: _showControls,
-                      isDragging: _isDragging,
-                      dragPosition: _dragPosition,
-                      title: widget.videoTitle,
-                      onTap: _toggleControls,
-                      onBack: () => Navigator.of(context).pop(),
-                      onSettings: () {
-                        // TODO: 打开设置菜单
-                      },
-                      onPlayPause: () {
-                        if (player.state.playing) {
-                          player.pause();
-                        } else {
-                          player.play();
-                        }
-                        _showControlsTemporarily();
-                      },
-                      onFullscreen: () {
-                        // TODO: 实现全屏功能
-                      },
-                      onSeekStart: (value) {
-                        _hideControlsTimer?.cancel();
-                        setState(() {
-                          _isDragging = true;
-                          _showControls = true;
-                          _dragPosition = Duration(milliseconds: value.toInt());
-                        });
-                      },
-                      onSeekChanged: (value) {
-                        setState(() {
-                          _dragPosition = Duration(milliseconds: value.toInt());
-                        });
-                      },
-                      onSeekEnd: (value) {
-                        player.seek(Duration(milliseconds: value.toInt()));
-                        setState(() {
-                          _isDragging = false;
-                        });
-                        _startHideControlsTimer();
-                      },
-                    ),
-                  ),
+                   StreamBuilder<bool>(
+                     stream: player.stream.playing,
+                     builder: (context, playingSnapshot) {
+                       return StreamBuilder<Duration>(
+                         stream: player.stream.position,
+                         builder: (context, positionSnapshot) {
+                           return StreamBuilder<Duration>(
+                             stream: player.stream.duration,
+                             builder: (context, durationSnapshot) {
+                               final isPlaying = playingSnapshot.data ?? false;
+                               final position = positionSnapshot.data ?? Duration.zero;
+                               final duration = durationSnapshot.data ?? Duration.zero;
+
+                               return Positioned.fill(
+                                 child: VideoPlayerControls(
+                                   player: player,
+                                   showControls: _showControls,
+                                   isDragging: _isDragging,
+                                   dragPosition: _dragPosition,
+                                   title: widget.videoTitle,
+                                   isPlaying: isPlaying,
+                                   position: position,
+                                   duration: duration,
+                                   onTap: _toggleControls,
+                                   onBack: () => Navigator.of(context).pop(),
+                                   onSettings: () {
+                                     // TODO: 打开设置菜单
+                                   },
+                                   onPlayPause: () {
+                                     if (isPlaying) {
+                                       player.pause();
+                                     } else {
+                                       player.play();
+                                     }
+                                     _showControlsTemporarily();
+                                   },
+                                   onFullscreen: () {
+                                     // TODO: 实现全屏功能
+                                   },
+                                   onSeekStart: (value) {
+                                     _hideControlsTimer?.cancel();
+                                     setState(() {
+                                       _isDragging = true;
+                                       _showControls = true;
+                                       _dragPosition = Duration(milliseconds: value.toInt());
+                                     });
+                                   },
+                                   onSeekChanged: (value) {
+                                     setState(() {
+                                       _dragPosition = Duration(milliseconds: value.toInt());
+                                     });
+                                   },
+                                   onSeekEnd: (value) {
+                                     player.seek(Duration(milliseconds: value.toInt()));
+                                     setState(() {
+                                       _isDragging = false;
+                                     });
+                                     _startHideControlsTimer();
+                                   },
+                                 ),
+                               );
+                             },
+                           );
+                         },
+                       );
+                     },
+                   ),
                 ],
               ),
 

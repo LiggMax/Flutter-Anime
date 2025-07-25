@@ -70,6 +70,9 @@ class VideoBottomControls extends StatelessWidget {
   final Player player;
   final bool isDragging;
   final Duration dragPosition;
+  final bool isPlaying;
+  final Duration position;
+  final Duration duration;
   final VoidCallback? onPlayPause;
   final VoidCallback? onFullscreen;
   final Function(double)? onSeekStart;
@@ -82,6 +85,9 @@ class VideoBottomControls extends StatelessWidget {
     required this.player,
     required this.isDragging,
     required this.dragPosition,
+    required this.isPlaying,
+    required this.position,
+    required this.duration,
     this.onPlayPause,
     this.onFullscreen,
     this.onSeekStart,
@@ -99,194 +105,147 @@ class VideoBottomControls extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
           colors: [
-            Color.fromRGBO(0, 0, 0, 0.3),
+            Color.fromRGBO(0, 0, 0, 0.4),
             Colors.transparent,
           ],
         ),
       ),
-      child: StreamBuilder<Duration>(
-        stream: player.stream.position,
-        builder: (context, positionSnapshot) {
-          return StreamBuilder<Duration>(
-            stream: player.stream.duration,
-            builder: (context, durationSnapshot) {
-              final position = positionSnapshot.data ?? Duration.zero;
-              final duration = durationSnapshot.data ?? Duration.zero;
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 时间显示
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                formatDuration(
+                  isDragging ? dragPosition : position,
+                ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Text(
+                ' / ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                formatDuration(duration),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              // 播放/暂停按钮
+              IconButton(
+                iconSize: 35,
+                icon: Icon(
+                  isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  onPlayPause?.call();
+                  onInteraction?.call(); // 触发交互时显示控件
+                },
+              ),
 
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 时间显示
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        formatDuration(
-                          isDragging ? dragPosition : position,
-                        ),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Text(
-                        ' / ',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        formatDuration(duration),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      // 播放/暂停按钮
-                      StreamBuilder<bool>(
-                        stream: player.stream.playing, // 确保正确监听播放状态
-                        builder: (context, snapshot) {
-                          final isPlaying = snapshot.data ?? false;
-                          return IconButton(
-                            iconSize: 35,
-                            icon: Icon(
-                              isPlaying ? Icons.pause : Icons.play_arrow,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              onPlayPause?.call();
-                              onInteraction?.call(); // 触发交互时显示控件
-                            },
-                          );
-                        },
-                      ),
+              // 进度条区域
+              Expanded(
+                child: Stack(
+                  children: [
+                    // 缓冲进度条
+                    StreamBuilder<Duration>(
+                      stream: player.stream.buffer,
+                      builder: (context, bufferSnapshot) {
+                        final buffer = bufferSnapshot.data ?? Duration.zero;
+                        final bufferProgress = duration.inMilliseconds > 0
+                            ? (buffer.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+                            : 0.0;
 
-                      // 进度条区域
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            // 缓冲进度条
-                            StreamBuilder<Duration>(
-                              stream: player.stream.buffer,
-                              builder: (context, bufferSnapshot) {
-                                final buffer = bufferSnapshot.data ?? Duration.zero;
-                                final bufferProgress = duration.inMilliseconds > 0
-                                    ? (buffer.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
-                                    : 0.0;
-
-                                return Container(
-                                  height: 4.0,
-                                  margin: const EdgeInsets.symmetric(
-                                    horizontal: 24.0,
-                                    vertical: 22.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(2.0),
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                  ),
-                                  child: FractionallySizedBox(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: bufferProgress,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(2.0),
-                                        color: Colors.white.withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-
-                            // 主进度条
-                            SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                activeTrackColor: Colors.white,
-                                inactiveTrackColor: Colors.transparent,
-                                thumbColor: Colors.white,
-                                overlayColor: Colors.white.withAlpha(76),
-                                trackHeight: 4.0,
-                                thumbShape: RoundSliderThumbShape(
-                                  enabledThumbRadius: isDragging ? 10.0 : 8.0,
-                                ),
-                              ),
-                              child: Slider(
-                                value: duration.inMilliseconds > 0
-                                    ? (isDragging
-                                        ? dragPosition.inMilliseconds.toDouble().clamp(
-                                            0.0,
-                                            duration.inMilliseconds.toDouble(),
-                                          )
-                                        : position.inMilliseconds.toDouble().clamp(
-                                            0.0,
-                                            duration.inMilliseconds.toDouble(),
-                                          ))
-                                    : 0.0,
-                                min: 0.0,
-                                max: duration.inMilliseconds > 0
-                                    ? duration.inMilliseconds.toDouble()
-                                    : 1.0,
-                                onChangeStart: duration.inMilliseconds > 0 ? onSeekStart : null,
-                                onChanged: duration.inMilliseconds > 0 ? onSeekChanged : null,
-                                onChangeEnd: duration.inMilliseconds > 0 ? onSeekEnd : null,
+                        return Container(
+                          height: 4.0,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 24.0,
+                            vertical: 22.0,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2.0),
+                            color: Colors.white.withAlpha(53),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: bufferProgress,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(2.0),
+                                color: Colors.white.withAlpha(53),
                               ),
                             ),
+                          ),
+                        );
+                      },
+                    ),
 
-                            // 拖拽时显示时间预览
-                            if (isDragging)
-                              Positioned(
-                                top: -35,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0,
-                                      vertical: 4.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.8),
-                                      borderRadius: BorderRadius.circular(4.0),
-                                    ),
-                                    child: Text(
-                                      formatDuration(dragPosition),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
+                    // 主进度条
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        activeTrackColor: Colors.white,
+                        inactiveTrackColor: Colors.transparent,
+                        thumbColor: Colors.white,
+                        overlayColor: Colors.white.withAlpha(53),
+                        trackHeight: 4.0,
+                        thumbShape: RoundSliderThumbShape(
+                          enabledThumbRadius: isDragging ? 10.0 : 8.0,
                         ),
                       ),
-
-                      // 全屏按钮
-                      IconButton(
-                        iconSize: 35,
-                        icon: const Icon(
-                          Icons.fullscreen,
-                          color: Colors.white,
-                        ),
-                        onPressed: onFullscreen,
+                      child: Slider(
+                        value: duration.inMilliseconds > 0
+                            ? (isDragging
+                                ? dragPosition.inMilliseconds.toDouble().clamp(
+                                    0.0,
+                                    duration.inMilliseconds.toDouble(),
+                                  )
+                                : position.inMilliseconds.toDouble().clamp(
+                                    0.0,
+                                    duration.inMilliseconds.toDouble(),
+                                  ))
+                            : 0.0,
+                        min: 0.0,
+                        max: duration.inMilliseconds > 0
+                            ? duration.inMilliseconds.toDouble()
+                            : 1.0,
+                        onChangeStart: duration.inMilliseconds > 0 ? onSeekStart : null,
+                        onChanged: duration.inMilliseconds > 0 ? onSeekChanged : null,
+                        onChangeEnd: duration.inMilliseconds > 0 ? onSeekEnd : null,
                       ),
-                    ],
-                  ),
-                ],
-              );
-            },
-          );
-        },
+                    ),
+                  ],
+                ),
+              ),
+
+              // 全屏按钮
+              IconButton(
+                iconSize: 35,
+                icon: const Icon(
+                  Icons.fullscreen,
+                  color: Colors.white,
+                ),
+                onPressed: onFullscreen,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -312,6 +271,9 @@ class VideoPlayerControls extends StatelessWidget {
   final bool isDragging;
   final Duration dragPosition;
   final String? title;
+  final bool isPlaying;
+  final Duration position;
+  final Duration duration;
   final VoidCallback? onTap;
   final VoidCallback? onBack;
   final VoidCallback? onSettings;
@@ -327,6 +289,9 @@ class VideoPlayerControls extends StatelessWidget {
     required this.showControls,
     required this.isDragging,
     required this.dragPosition,
+    required this.isPlaying,
+    required this.position,
+    required this.duration,
     this.title,
     this.onTap,
     this.onBack,
@@ -381,6 +346,9 @@ class VideoPlayerControls extends StatelessWidget {
                 player: player,
                 isDragging: isDragging,
                 dragPosition: dragPosition,
+                isPlaying: isPlaying,
+                position: position,
+                duration: duration,
                 onPlayPause: onPlayPause,
                 onFullscreen: onFullscreen,
                 onSeekStart: onSeekStart,
