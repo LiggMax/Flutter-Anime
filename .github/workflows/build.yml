@@ -188,9 +188,15 @@ jobs:
           flutter build ios --release --no-codesign
           echo "iOS build completed"
 
+      - name: Create IPA
+        run: |
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -q -r ${{ env.APP_NAME }}.ipa Payload
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-ios
-          path: build/ios/archive/
+          path: ${{ env.APP_NAME }}.ipa
           if-no-files-found: ignore
