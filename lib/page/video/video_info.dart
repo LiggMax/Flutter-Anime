@@ -95,32 +95,39 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     _startHideControlsTimer();
   }
 
-  void _toggleFullscreen() {
+  void _toggleFullscreen() async {
     setState(() {
       _isFullscreen = !_isFullscreen;
     });
 
     if (_isFullscreen) {
       // 进入全屏
-      SystemChrome.setEnabledSystemUIMode(
+      await SystemChrome.setEnabledSystemUIMode(
         SystemUiMode.immersiveSticky,
       );
-      SystemChrome.setPreferredOrientations([
+      await SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
     } else {
       // 退出全屏
-      SystemChrome.setEnabledSystemUIMode(
+      await SystemChrome.setEnabledSystemUIMode(
         SystemUiMode.manual,
         overlays: SystemUiOverlay.values,
       );
-      SystemChrome.setPreferredOrientations([
+      await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
     }
     
-    _showControlsTemporarily();
+    // 短暂延迟确保状态同步
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    // 强制显示控件并重新开始计时
+    setState(() {
+      _showControls = true;
+    });
+    _startHideControlsTimer();
   }
 
   @override
@@ -133,97 +140,93 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       ),
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: _isFullscreen 
-          ? _buildFullscreenPlayer()
-          : SafeArea(
-              child: Column(
-                children: [
-                  // 视频播放器 - 保持16:9比例
-                  _buildVideoPlayer(),
+        body: StreamBuilder<bool>(
+          stream: player.stream.playing,
+          builder: (context, playingSnapshot) {
+            return StreamBuilder<Duration>(
+              stream: player.stream.position,
+              builder: (context, positionSnapshot) {
+                return StreamBuilder<Duration>(
+                  stream: player.stream.duration,
+                  builder: (context, durationSnapshot) {
+                    return StreamBuilder<Duration>(
+                      stream: player.stream.buffer,
+                      builder: (context, bufferSnapshot) {
+                        final isPlaying = playingSnapshot.data ?? false;
+                        final position = positionSnapshot.data ?? Duration.zero;
+                        final duration = durationSnapshot.data ?? Duration.zero;
+                        final buffer = bufferSnapshot.data ?? Duration.zero;
 
-                  // 视频下方的内容区域
-                  Expanded(
-                    child: Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: const Center(child: Text('视频信息和评论区域')),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                        return _isFullscreen 
+                          ? _buildFullscreenPlayer(isPlaying, position, duration, buffer)
+                          : SafeArea(
+                              child: Column(
+                                children: [
+                                  // 视频播放器 - 保持16:9比例
+                                  _buildVideoPlayer(isPlaying, position, duration, buffer),
+
+                                  // 视频下方的内容区域
+                                  Expanded(
+                                    child: Container(
+                                      color: Theme.of(context).scaffoldBackgroundColor,
+                                      child: const Center(child: Text('视频信息和评论区域')),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildVideoPlayer() {
+    Widget _buildVideoPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
     return Stack(
       children: [
-        _isFullscreen 
-          ? Positioned.fill(
-              child: Container(
-                color: Colors.black,
-                child: StreamBuilder<bool>(
-                  stream: player.stream.buffering,
-                  builder: (context, bufferingSnapshot) {
-                    final isBuffering = bufferingSnapshot.data ?? true;
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Container(
+            color: Colors.black,
+            child: StreamBuilder<bool>(
+              stream: player.stream.buffering,
+              builder: (context, bufferingSnapshot) {
+                final isBuffering = bufferingSnapshot.data ?? true;
 
-                    return Stack(
-                      children: [
-                        Video(
-                          controller: controller,
-                          controls: null, // 禁用默认控件
-                          fill: Colors.black,
-                        ),
-                        // 加载指示器
-                        if (isBuffering)
-                          const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            )
-          : AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Container(
-                color: Colors.black,
-                child: StreamBuilder<bool>(
-                  stream: player.stream.buffering,
-                  builder: (context, bufferingSnapshot) {
-                    final isBuffering = bufferingSnapshot.data ?? true;
-
-                    return Stack(
-                      children: [
-                        Video(
-                          controller: controller,
-                          controls: null, // 禁用默认控件
-                          aspectRatio: 16 / 9,
-                          fill: Colors.black,
-                        ),
-                        // 加载指示器
-                        if (isBuffering)
-                          const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                                                        ),
-                            ],
-                          );
-                        },
-                      ),
+                return Stack(
+                  children: [
+                    Video(
+                      controller: controller,
+                      controls: null, // 禁用默认控件
+                      aspectRatio: 16 / 9,
+                      fill: Colors.black,
                     ),
-                  ),
+                    // 加载指示器
+                    if (isBuffering)
+                      const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
         
-        _buildVideoControls(),
+        _buildVideoControls(isPlaying, position, duration, buffer),
       ],
     );
   }
 
-  Widget _buildFullscreenPlayer() {
+  Widget _buildFullscreenPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
     return Stack(
       children: [
         Positioned.fill(
@@ -255,86 +258,62 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
           ),
         ),
         
-        _buildVideoControls(),
+        _buildVideoControls(isPlaying, position, duration, buffer),
       ],
     );
   }
 
-  Widget _buildVideoControls() {
-    return StreamBuilder<bool>(
-      stream: player.stream.playing,
-      builder: (context, playingSnapshot) {
-        return StreamBuilder<Duration>(
-          stream: player.stream.position,
-          builder: (context, positionSnapshot) {
-            return StreamBuilder<Duration>(
-              stream: player.stream.duration,
-              builder: (context, durationSnapshot) {
-                return StreamBuilder<Duration>(
-                  stream: player.stream.buffer,
-                  builder: (context, bufferSnapshot) {
-                    final isPlaying = playingSnapshot.data ?? false;
-                    final position = positionSnapshot.data ?? Duration.zero;
-                    final duration = durationSnapshot.data ?? Duration.zero;
-                    final buffer = bufferSnapshot.data ?? Duration.zero;
-
-                    return Positioned.fill(
-                      child: VideoPlayerControls(
-                        player: player,
-                        showControls: _showControls,
-                        isDragging: _isDragging,
-                        dragPosition: _dragPosition,
-                        title: widget.videoTitle,
-                        isPlaying: isPlaying,
-                        position: position,
-                        duration: duration,
-                        buffer: buffer,
-                        isFullscreen: _isFullscreen,
-                        onTap: _toggleControls,
-                        onBack: _isFullscreen 
-                          ? _toggleFullscreen 
-                          : () => Navigator.of(context).pop(),
-                        onSettings: () {
-                          // TODO: 打开设置菜单
-                        },
-                        onPlayPause: () {
-                          if (isPlaying) {
-                            player.pause();
-                          } else {
-                            player.play();
-                          }
-                          _showControlsTemporarily();
-                        },
-                        onFullscreen: _toggleFullscreen,
-                        onSeekStart: (value) {
-                          _hideControlsTimer?.cancel();
-                          setState(() {
-                            _isDragging = true;
-                            _showControls = true;
-                            _dragPosition = Duration(milliseconds: value.toInt());
-                          });
-                        },
-                        onSeekChanged: (value) {
-                          setState(() {
-                            _dragPosition = Duration(milliseconds: value.toInt());
-                          });
-                        },
-                        onSeekEnd: (value) {
-                          player.seek(Duration(milliseconds: value.toInt()));
-                          setState(() {
-                            _isDragging = false;
-                          });
-                          _startHideControlsTimer();
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
+  Widget _buildVideoControls(bool isPlaying, Duration position, Duration duration, Duration buffer) {
+    return Positioned.fill(
+      child: VideoPlayerControls(
+        key: ValueKey('controls_${_isFullscreen}'), // 确保全屏切换时重建
+        player: player,
+        showControls: _showControls,
+        isDragging: _isDragging,
+        dragPosition: _dragPosition,
+        title: widget.videoTitle,
+        isPlaying: isPlaying,
+        position: position,
+        duration: duration,
+        buffer: buffer,
+        isFullscreen: _isFullscreen,
+        onTap: _toggleControls,
+        onBack: _isFullscreen 
+          ? _toggleFullscreen 
+          : () => Navigator.of(context).pop(),
+        onSettings: () {
+          // TODO: 打开设置菜单
+        },
+        onPlayPause: () {
+          if (isPlaying) {
+            player.pause();
+          } else {
+            player.play();
+          }
+          _showControlsTemporarily();
+        },
+        onFullscreen: _toggleFullscreen,
+        onSeekStart: (value) {
+          _hideControlsTimer?.cancel();
+          setState(() {
+            _isDragging = true;
+            _showControls = true;
+            _dragPosition = Duration(milliseconds: value.toInt());
+          });
+        },
+        onSeekChanged: (value) {
+          setState(() {
+            _dragPosition = Duration(milliseconds: value.toInt());
+          });
+        },
+        onSeekEnd: (value) {
+          player.seek(Duration(milliseconds: value.toInt()));
+          setState(() {
+            _isDragging = false;
+          });
+          _startHideControlsTimer();
+        },
+      ),
     );
   }
 }
