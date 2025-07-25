@@ -33,6 +33,12 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -44,8 +50,8 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-android-artifacts
-          path: build/app/outputs/flutter-apk/
+          name: ${{ env.APP_NAME }}-android
+          path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: ignore
 
   build-linux:
@@ -66,6 +72,12 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -77,7 +89,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-linux-artifacts
+          name: ${{ env.APP_NAME }}-linux
           path: build/linux/
           if-no-files-found: ignore
 
@@ -94,6 +106,12 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+      - name: Get app name
+        id: app_name
+        run: |
+          $APP_NAME = Select-String -Path pubspec.yaml -Pattern "^name:" | ForEach-Object { ($_ -split ":")[1].Trim() }
+          echo "APP_NAME=$APP_NAME" >> $env:GITHUB_ENV
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -105,8 +123,8 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-windows-artifacts
-          path: build/windows/
+          name: ${{ env.APP_NAME }}-windows
+          path: build/windows/x64/runner/Release/
           if-no-files-found: ignore
 
   build-macos:
@@ -122,6 +140,12 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -133,7 +157,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-macos-artifacts
+          name: ${{ env.APP_NAME }}-macos
           path: build/macos/
           if-no-files-found: ignore
 
@@ -150,6 +174,12 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -161,6 +191,6 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-ios-artifacts
+          name: ${{ env.APP_NAME }}-ios
           path: build/ios/archive/
           if-no-files-found: ignore
