@@ -152,7 +152,7 @@ class VideoBottomControls extends StatelessWidget {
                     children: [
                       // 播放/暂停按钮
                       StreamBuilder<bool>(
-                        stream: player.stream.playing,
+                        stream: player.stream.playing, // 确保正确监听播放状态
                         builder: (context, snapshot) {
                           final isPlaying = snapshot.data ?? false;
                           return IconButton(
@@ -322,7 +322,7 @@ class VideoPlayerControls extends StatelessWidget {
   final Function(double)? onSeekEnd;
 
   const VideoPlayerControls({
-    Key? key,
+    super.key,
     required this.player,
     required this.showControls,
     required this.isDragging,
@@ -336,7 +336,7 @@ class VideoPlayerControls extends StatelessWidget {
     this.onSeekStart,
     this.onSeekChanged,
     this.onSeekEnd,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
