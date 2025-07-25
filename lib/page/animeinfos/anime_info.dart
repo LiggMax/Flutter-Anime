@@ -81,7 +81,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
       await infoController.queryBangumiInfoByID(id, type: type);
       setState(() {});
     } catch (e) {
-      print('Error loading anime data: $e');
+      print('加载动漫数据错误: $e');
     }
   }
 
@@ -104,6 +104,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
                     context,
                   ),
                   sliver: AnimeDetailAppBar(
+                    id: widget.animeId,
                     title: infoController.bangumiItem.displayName.isEmpty
                         ? (widget.animeName ?? '动漫详情')
                         : infoController.bangumiItem.displayName,

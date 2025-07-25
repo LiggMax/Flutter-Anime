@@ -1,10 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/bangumi_data.dart';
-import 'package:AnimeFlow/page/video/video_info.dart';
+
+import '../play/video_info.dart';
 
 /// 自定义AppBar组件
 class AnimeDetailAppBar extends StatelessWidget {
+  final int id;
   final String title;
   final bool innerBoxIsScrolled;
   final TabController tabController;
@@ -13,6 +15,7 @@ class AnimeDetailAppBar extends StatelessWidget {
 
   const AnimeDetailAppBar({
     super.key,
+    required this.id,
     required this.title,
     required this.innerBoxIsScrolled,
     required this.tabController,
@@ -124,8 +127,6 @@ class AnimeDetailHeader extends StatelessWidget {
                   // 播放按钮区域
                   AnimePlayButton(
                     onPressed: onPlayPressed ?? () {
-                      // 默认实现
-                      print('开始观看');
                     },
                   ),
                 ],

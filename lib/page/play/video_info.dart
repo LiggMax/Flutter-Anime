@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'dart:async';
+import 'comments.dart';
 import 'controls.dart';
+import 'detail.dart';
 
 class VideoInfoPage extends StatefulWidget {
   final String? videoUrl;
@@ -99,7 +101,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   void _toggleFullscreen() async {
     // 防止连续快速切换
     if (_isTransitioning) return;
-    
+
     setState(() {
       _isTransitioning = true;
       _showControls = false;
@@ -130,15 +132,15 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         // 等待屏幕旋转和布局重建完成
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      
+
       // 更新全屏状态
       setState(() {
         _isFullscreen = !_isFullscreen;
       });
-      
+
       // 再次等待确保布局稳定
       await Future.delayed(const Duration(milliseconds: 200));
-      
+
     } finally {
       // 显示控件并重新开始计时
       setState(() {
@@ -176,7 +178,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                         final duration = durationSnapshot.data ?? Duration.zero;
                         final buffer = bufferSnapshot.data ?? Duration.zero;
 
-                        return _isFullscreen 
+                        return _isFullscreen
                           ? _buildFullscreenPlayer(isPlaying, position, duration, buffer)
                           : SafeArea(
                               child: Column(
@@ -191,8 +193,26 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                   Expanded(
                                     child: Container(
                                       color: Theme.of(context).scaffoldBackgroundColor,
-                                      child: const SingleChildScrollView(
-                                        child: Center(child: Text('视频信息和评论区域')),
+                                      child: DefaultTabController(
+                                        length: 2, // 两个标签页
+                                        child: Column(
+                                          children: [
+                                            TabBar(
+                                              tabs: [
+                                                Tab(text: '详情'),
+                                                Tab(text: '评论'),
+                                              ],
+                                            ),
+                                            Expanded(
+                                              child: TabBarView(
+                                                children: [
+                                                  DetailPage(), // 详情页面
+                                                  CommentsPage(), // 评论页面
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -210,8 +230,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       ),
     );
   }
-
-    Widget _buildVideoPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
+  Widget _buildVideoPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
@@ -249,7 +268,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                 ),
               ),
             ),
-            
+
             _buildVideoControls(isPlaying, position, duration, buffer),
           ],
         );
@@ -288,7 +307,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
             ),
           ),
         ),
-        
+
         _buildVideoControls(isPlaying, position, duration, buffer),
       ],
     );
@@ -309,8 +328,8 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         buffer: buffer,
         isFullscreen: _isFullscreen,
         onTap: _toggleControls,
-        onBack: _isFullscreen 
-          ? _toggleFullscreen 
+        onBack: _isFullscreen
+          ? _toggleFullscreen
           : () => Navigator.of(context).pop(),
         onSettings: () {
           // TODO: 打开设置菜单
