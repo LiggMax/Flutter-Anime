@@ -7,12 +7,7 @@ class VideoTopControls extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSettings;
 
-  const VideoTopControls({
-    super.key,
-    this.title,
-    this.onBack,
-    this.onSettings,
-  });
+  const VideoTopControls({super.key, this.title, this.onBack, this.onSettings});
 
   @override
   Widget build(BuildContext context) {
@@ -22,20 +17,14 @@ class VideoTopControls extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color.fromRGBO(0, 0, 0, 0.3),
-            Colors.transparent,
-          ],
+          colors: [Color.fromRGBO(0, 0, 0, 0.3), Colors.transparent],
         ),
       ),
       child: Row(
         children: [
           // 返回按钮
           IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: onBack,
           ),
           // 标题
@@ -53,10 +42,7 @@ class VideoTopControls extends StatelessWidget {
           ),
           // 设置按钮
           IconButton(
-            icon: const Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: onSettings,
           ),
         ],
@@ -73,6 +59,7 @@ class VideoBottomControls extends StatelessWidget {
   final bool isPlaying;
   final Duration position;
   final Duration duration;
+  final Duration buffer;
   final VoidCallback? onPlayPause;
   final VoidCallback? onFullscreen;
   final Function(double)? onSeekStart;
@@ -88,6 +75,7 @@ class VideoBottomControls extends StatelessWidget {
     required this.isPlaying,
     required this.position,
     required this.duration,
+    required this.buffer,
     this.onPlayPause,
     this.onFullscreen,
     this.onSeekStart,
@@ -99,15 +87,12 @@ class VideoBottomControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [
-            Color.fromRGBO(0, 0, 0, 0.4),
-            Colors.transparent,
-          ],
+          colors: [Color.fromRGBO(0, 0, 0, 0.4), Colors.transparent],
         ),
       ),
       child: Column(
@@ -118,9 +103,7 @@ class VideoBottomControls extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                formatDuration(
-                  isDragging ? dragPosition : position,
-                ),
+                formatDuration(isDragging ? dragPosition : position),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -162,85 +145,91 @@ class VideoBottomControls extends StatelessWidget {
 
               // 进度条区域
               Expanded(
-                child: Stack(
-                  children: [
-                    // 缓冲进度条
-                    StreamBuilder<Duration>(
-                      stream: player.stream.buffer,
-                      builder: (context, bufferSnapshot) {
-                        final buffer = bufferSnapshot.data ?? Duration.zero;
-                        final bufferProgress = duration.inMilliseconds > 0
-                            ? (buffer.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
-                            : 0.0;
-
-                        return Container(
-                          height: 4.0,
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 24.0,
-                            vertical: 22.0,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2.0),
-                            color: Colors.white.withAlpha(53),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: bufferProgress,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(2.0),
-                                color: Colors.white.withAlpha(53),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // 主进度条
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Colors.white,
-                        inactiveTrackColor: Colors.transparent,
-                        thumbColor: Colors.white,
-                        overlayColor: Colors.white.withAlpha(53),
-                        trackHeight: 4.0,
-                        thumbShape: RoundSliderThumbShape(
-                          enabledThumbRadius: isDragging ? 10.0 : 8.0,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(),
+                  child: Stack(
+                    children: [
+                      // 缓冲进度条背景
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Colors.white.withAlpha(10),
+                          // 缓冲进度颜色
+                          inactiveTrackColor: Colors.white.withAlpha(10),
+                          // 背景颜色
+                          thumbColor: Colors.white,
+                          // 隐藏滑块
+                          overlayColor: Colors.transparent,
+                          // 隐藏覆盖层
+                          trackHeight: 4.0,
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 0,
+                          ), // 隐藏滑块
+                        ),
+                        child: Slider(
+                          value: duration.inMilliseconds > 0
+                              ? buffer.inMilliseconds.toDouble().clamp(
+                                  0.0,
+                                  duration.inMilliseconds.toDouble(),
+                                )
+                              : 0.0,
+                          min: 0.0,
+                          max: duration.inMilliseconds > 0
+                              ? duration.inMilliseconds.toDouble()
+                              : 1.0,
+                          onChanged: null, // 禁用交互
                         ),
                       ),
-                      child: Slider(
-                        value: duration.inMilliseconds > 0
-                            ? (isDragging
-                                ? dragPosition.inMilliseconds.toDouble().clamp(
-                                    0.0,
-                                    duration.inMilliseconds.toDouble(),
-                                  )
-                                : position.inMilliseconds.toDouble().clamp(
-                                    0.0,
-                                    duration.inMilliseconds.toDouble(),
-                                  ))
-                            : 0.0,
-                        min: 0.0,
-                        max: duration.inMilliseconds > 0
-                            ? duration.inMilliseconds.toDouble()
-                            : 1.0,
-                        onChangeStart: duration.inMilliseconds > 0 ? onSeekStart : null,
-                        onChanged: duration.inMilliseconds > 0 ? onSeekChanged : null,
-                        onChangeEnd: duration.inMilliseconds > 0 ? onSeekEnd : null,
+
+                      // 主进度条
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Colors.white,
+                          inactiveTrackColor: Colors.transparent,
+                          thumbColor: Colors.white,
+                          overlayColor: Colors.white.withAlpha(53),
+                          trackHeight: 4.0,
+                          thumbShape: RoundSliderThumbShape(
+                            enabledThumbRadius: isDragging ? 10.0 : 8.0,
+                          ),
+                        ),
+                        child: Slider(
+                          value: duration.inMilliseconds > 0
+                              ? (isDragging
+                                    ? dragPosition.inMilliseconds
+                                          .toDouble()
+                                          .clamp(
+                                            0.0,
+                                            duration.inMilliseconds.toDouble(),
+                                          )
+                                    : position.inMilliseconds.toDouble().clamp(
+                                        0.0,
+                                        duration.inMilliseconds.toDouble(),
+                                      ))
+                              : 0.0,
+                          min: 0.0,
+                          max: duration.inMilliseconds > 0
+                              ? duration.inMilliseconds.toDouble()
+                              : 1.0,
+                          onChangeStart: duration.inMilliseconds > 0
+                              ? onSeekStart
+                              : null,
+                          onChanged: duration.inMilliseconds > 0
+                              ? onSeekChanged
+                              : null,
+                          onChangeEnd: duration.inMilliseconds > 0
+                              ? onSeekEnd
+                              : null,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
               // 全屏按钮
               IconButton(
                 iconSize: 35,
-                icon: const Icon(
-                  Icons.fullscreen,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.fullscreen, color: Colors.white),
                 onPressed: onFullscreen,
               ),
             ],
@@ -274,6 +263,7 @@ class VideoPlayerControls extends StatelessWidget {
   final bool isPlaying;
   final Duration position;
   final Duration duration;
+  final Duration buffer;
   final VoidCallback? onTap;
   final VoidCallback? onBack;
   final VoidCallback? onSettings;
@@ -292,6 +282,7 @@ class VideoPlayerControls extends StatelessWidget {
     required this.isPlaying,
     required this.position,
     required this.duration,
+    required this.buffer,
     this.title,
     this.onTap,
     this.onBack,
@@ -312,9 +303,7 @@ class VideoPlayerControls extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             behavior: HitTestBehavior.translucent,
-            child: Container(
-              color: Colors.transparent,
-            ),
+            child: Container(color: Colors.transparent),
           ),
         ),
 
@@ -349,6 +338,7 @@ class VideoPlayerControls extends StatelessWidget {
                 isPlaying: isPlaying,
                 position: position,
                 duration: duration,
+                buffer: buffer,
                 onPlayPause: onPlayPause,
                 onFullscreen: onFullscreen,
                 onSeekStart: onSeekStart,

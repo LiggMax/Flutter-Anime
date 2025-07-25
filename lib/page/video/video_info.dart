@@ -70,7 +70,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
 
   void _startHideControlsTimer() {
     _hideControlsTimer?.cancel();
-    _hideControlsTimer = Timer(const Duration(seconds: 5), () {
+    _hideControlsTimer = Timer(const Duration(seconds: 100), () {
       if (mounted) {
         setState(() {
           _showControls = false;
@@ -142,57 +142,64 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                            return StreamBuilder<Duration>(
                              stream: player.stream.duration,
                              builder: (context, durationSnapshot) {
-                               final isPlaying = playingSnapshot.data ?? false;
-                               final position = positionSnapshot.data ?? Duration.zero;
-                               final duration = durationSnapshot.data ?? Duration.zero;
+                               return StreamBuilder<Duration>(
+                                 stream: player.stream.buffer,
+                                 builder: (context, bufferSnapshot) {
+                                   final isPlaying = playingSnapshot.data ?? false;
+                                   final position = positionSnapshot.data ?? Duration.zero;
+                                   final duration = durationSnapshot.data ?? Duration.zero;
+                                   final buffer = bufferSnapshot.data ?? Duration.zero;
 
-                               return Positioned.fill(
-                                 child: VideoPlayerControls(
-                                   player: player,
-                                   showControls: _showControls,
-                                   isDragging: _isDragging,
-                                   dragPosition: _dragPosition,
-                                   title: widget.videoTitle,
-                                   isPlaying: isPlaying,
-                                   position: position,
-                                   duration: duration,
-                                   onTap: _toggleControls,
-                                   onBack: () => Navigator.of(context).pop(),
-                                   onSettings: () {
-                                     // TODO: 打开设置菜单
-                                   },
-                                   onPlayPause: () {
-                                     if (isPlaying) {
-                                       player.pause();
-                                     } else {
-                                       player.play();
-                                     }
-                                     _showControlsTemporarily();
-                                   },
-                                   onFullscreen: () {
-                                     // TODO: 实现全屏功能
-                                   },
-                                   onSeekStart: (value) {
-                                     _hideControlsTimer?.cancel();
-                                     setState(() {
-                                       _isDragging = true;
-                                       _showControls = true;
-                                       _dragPosition = Duration(milliseconds: value.toInt());
-                                     });
-                                   },
-                                   onSeekChanged: (value) {
-                                     setState(() {
-                                       _dragPosition = Duration(milliseconds: value.toInt());
-                                     });
-                                   },
-                                   onSeekEnd: (value) {
-                                     player.seek(Duration(milliseconds: value.toInt()));
-                                     setState(() {
-                                       _isDragging = false;
-                                     });
-                                     _startHideControlsTimer();
-                                   },
-                                 ),
+                                   return Positioned.fill(
+                                     child: VideoPlayerControls(
+                                       player: player,
+                                       showControls: _showControls,
+                                       isDragging: _isDragging,
+                                       dragPosition: _dragPosition,
+                                       title: widget.videoTitle,
+                                       isPlaying: isPlaying,
+                                       position: position,
+                                       duration: duration,
+                                       buffer: buffer,
+                                       onTap: _toggleControls,
+                                       onBack: () => Navigator.of(context).pop(),
+                                       onSettings: () {
+                                         // TODO: 打开设置菜单
+                                       },
+                                       onPlayPause: () {
+                                         if (isPlaying) {
+                                           player.pause();
+                                         } else {
+                                           player.play();
+                                         }
+                                         _showControlsTemporarily();
+                                       },
+                                       onFullscreen: () {
+                                         // TODO: 实现全屏功能
+                                       },
+                                       onSeekStart: (value) {
+                                         _hideControlsTimer?.cancel();
+                                         setState(() {
+                                           _isDragging = true;
+                                           _showControls = true;
+                                           _dragPosition = Duration(milliseconds: value.toInt());
+                                         });
+                                       },
+                                       onSeekChanged: (value) {
+                                         setState(() {
+                                           _dragPosition = Duration(milliseconds: value.toInt());
+                                         });
+                                       },
+                                       onSeekEnd: (value) {
+                                         player.seek(Duration(milliseconds: value.toInt()));
+                                         setState(() {
+                                           _isDragging = false;
+                                         });
+                                         _startHideControlsTimer();
+                                       },
+                                     ),
+                                   );
+                                 },
                                );
                              },
                            );
