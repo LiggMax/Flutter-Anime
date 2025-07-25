@@ -39,7 +39,7 @@ class AnimeDetailAppBar extends StatelessWidget {
         onPressed: () {
           Navigator.maybePop(context);
         },
-        icon: const Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back_ios),
       ),
       actions: [
         if (innerBoxIsScrolled)

@@ -6,8 +6,15 @@ class VideoTopControls extends StatelessWidget {
   final String? title;
   final VoidCallback? onBack;
   final VoidCallback? onSettings;
+  final bool isFullscreen;
 
-  const VideoTopControls({super.key, this.title, this.onBack, this.onSettings});
+  const VideoTopControls({
+    super.key, 
+    this.title, 
+    this.onBack, 
+    this.onSettings,
+    this.isFullscreen = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,10 @@ class VideoTopControls extends StatelessWidget {
         children: [
           // 返回按钮
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            icon: Icon(
+              isFullscreen ? Icons.fullscreen_exit : Icons.arrow_back_ios,
+              color: Colors.white,
+            ),
             onPressed: onBack,
           ),
           // 标题
@@ -60,6 +70,7 @@ class VideoBottomControls extends StatelessWidget {
   final Duration position;
   final Duration duration;
   final Duration buffer;
+  final bool isFullscreen;
   final VoidCallback? onPlayPause;
   final VoidCallback? onFullscreen;
   final Function(double)? onSeekStart;
@@ -76,6 +87,7 @@ class VideoBottomControls extends StatelessWidget {
     required this.position,
     required this.duration,
     required this.buffer,
+    required this.isFullscreen,
     this.onPlayPause,
     this.onFullscreen,
     this.onSeekStart,
@@ -229,7 +241,10 @@ class VideoBottomControls extends StatelessWidget {
               // 全屏按钮
               IconButton(
                 iconSize: 35,
-                icon: const Icon(Icons.fullscreen, color: Colors.white),
+                icon: Icon(
+                  isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                  color: Colors.white,
+                ),
                 onPressed: onFullscreen,
               ),
             ],
@@ -264,6 +279,7 @@ class VideoPlayerControls extends StatelessWidget {
   final Duration position;
   final Duration duration;
   final Duration buffer;
+  final bool isFullscreen;
   final VoidCallback? onTap;
   final VoidCallback? onBack;
   final VoidCallback? onSettings;
@@ -283,6 +299,7 @@ class VideoPlayerControls extends StatelessWidget {
     required this.position,
     required this.duration,
     required this.buffer,
+    required this.isFullscreen,
     this.title,
     this.onTap,
     this.onBack,
@@ -319,6 +336,7 @@ class VideoPlayerControls extends StatelessWidget {
                 title: title,
                 onBack: onBack,
                 onSettings: onSettings,
+                isFullscreen: isFullscreen,
               ),
             ),
           ),
@@ -339,6 +357,7 @@ class VideoPlayerControls extends StatelessWidget {
                 position: position,
                 duration: duration,
                 buffer: buffer,
+                isFullscreen: isFullscreen,
                 onPlayPause: onPlayPause,
                 onFullscreen: onFullscreen,
                 onSeekStart: onSeekStart,
