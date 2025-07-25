@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:AnimeFlow/request/bangumi.dart';
 
 class DetailPage extends StatelessWidget {
   final int? animeId;
@@ -30,5 +31,15 @@ class DetailPage extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+///获取剧集信息
+
+class GetEpisodes {
+
+  Future<Map<String, dynamic>?> getEpisodesByID(int id) async {
+      final response = await BangumiService.getEpisodesByID(id);
+      return response;
   }
 }

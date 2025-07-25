@@ -56,7 +56,8 @@ class _AnimeDataPageState extends State<AnimeDataPage>
       totalEpisodes: 0,
       eps: 0,
       volumes: 0,
-      type: 2, // 默认为TV动画
+      type: 2,
+      // 默认为TV动画
       series: false,
       locked: false,
       nsfw: false,
@@ -98,28 +99,28 @@ class _AnimeDataPageState extends State<AnimeDataPage>
           body: NestedScrollView(
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                    context,
-                  ),
-                  sliver: AnimeDetailAppBar(
-                    id: widget.animeId,
-                    title: infoController.bangumiItem.displayName.isEmpty
-                        ? (widget.animeName ?? '动漫详情')
-                        : infoController.bangumiItem.displayName,
-                    innerBoxIsScrolled: innerBoxIsScrolled,
-                    tabController: infoTabController,
-                    tabs: tabs,
-                    background: AnimeDetailHeader(
-                      bangumiItem: infoController.bangumiItem,
-                      isLoading: infoController.isLoading,
-                      maxWidth: maxWidth,
+                  return <Widget>[
+                    SliverOverlapAbsorber(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
+                      sliver: AnimeDetailAppBar(
+                        id: widget.animeId,
+                        title: infoController.bangumiItem.displayName.isEmpty
+                            ? (widget.animeName ?? '动漫详情')
+                            : infoController.bangumiItem.displayName,
+                        innerBoxIsScrolled: innerBoxIsScrolled,
+                        tabController: infoTabController,
+                        tabs: tabs,
+                        background: AnimeDetailHeader(
+                          bangumiItem: infoController.bangumiItem,
+                          isLoading: infoController.isLoading,
+                          maxWidth: maxWidth,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ];
-            },
+                  ];
+                },
             body: AnimeInfoTabView(
               tabController: infoTabController,
               bangumiItem: infoController.bangumiItem,
@@ -149,8 +150,6 @@ class InfoController {
           bangumiItem = parsedData;
         }
       }
-    } catch (e) {
-      print('Error in queryBangumiInfoByID: $e');
     } finally {
       isLoading = false;
     }
@@ -178,7 +177,6 @@ class AnimeInfoTabView extends StatefulWidget {
 
 class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     with SingleTickerProviderStateMixin {
-
   @override
   Widget build(BuildContext context) {
     return TabBarView(
