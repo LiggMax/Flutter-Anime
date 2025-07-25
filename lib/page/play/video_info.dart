@@ -10,13 +10,13 @@ import 'detail.dart';
 class VideoInfoPage extends StatefulWidget {
   final String? videoUrl;
   final int? animeId;
-  final String? animeTitle;
+  final String? animeName;
 
   const VideoInfoPage({
     super.key,
     this.videoUrl,
     this.animeId,
-    this.animeTitle,
+    this.animeName,
   });
 
   @override
@@ -53,7 +53,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     });
 
     print('接收到的id${widget.animeId}');
-    print('接收到的标题${widget.animeTitle}');
+    print('接收到的标题${widget.animeName}');
     // 如果提供了视频URL，则开始播放
     if (widget.videoUrl != null) {
       player.open(Media(widget.videoUrl!));
@@ -215,7 +215,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                                 children: [
                                                   DetailPage(
                                                     animeId: widget.animeId,
-                                                    animeTitle: widget.animeTitle,
+                                                    animeName: widget.animeName,
                                                   ), // 详情页面
                                                   CommentsPage(), // 评论页面
                                                 ],
@@ -331,7 +331,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         showControls: _showControls,
         isDragging: _isDragging,
         dragPosition: _dragPosition,
-        title: widget.animeTitle,
+        title: widget.animeName,
         isPlaying: isPlaying,
         position: position,
         duration: duration,

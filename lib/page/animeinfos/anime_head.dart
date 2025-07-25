@@ -499,7 +499,7 @@ class AnimePlayButton extends StatelessWidget {
                       // 使用更兼容的测试视频URL
                       videoUrl: 'https://lf-cdn.trae.com.cn/obj/trae-com-cn/trae_website_prod_cn/static/media/solo-introduce.189b5726.mp4',
                       animeId: animeId,
-                      animeTitle: animeName,
+                      animeName: animeName,
                     ),
                   ),
                 );
