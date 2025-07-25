@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_routes.dart';
 import 'route_arguments.dart';
 import '../page/tabs.dart';
-import 'package:flutter_app/page/animeinfos/anime_info.dart';
+import 'package:AnimeFlow/page/animeinfos/anime_info.dart';
 
 class RouteGenerator {
   // 路由生成器

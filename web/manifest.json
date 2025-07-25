@@ -1,6 +1,6 @@
 {
-    "name": "flutter_app",
-    "short_name": "flutter_app",
+    "name": "AnimeFlow",
+    "short_name": "AnimeFlow",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

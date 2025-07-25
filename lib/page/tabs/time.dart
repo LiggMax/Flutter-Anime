@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/request/bangumi.dart';
+import 'package:AnimeFlow/request/bangumi.dart';
 import 'package:flutter/widgets.dart';
 import '../../routes/route_helper.dart';
 
@@ -238,7 +238,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
       final dayIndex = entry.key + 1; // 1-7
       final dayName = entry.value;
       final animeCount = calendarData[dayIndex.toString()]?.length ?? 0;
-      
+
       return Tab(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -269,7 +269,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
     return List.generate(7, (index) {
       final dayIndex = index + 1; // 1-7
       final dayAnimes = calendarData[dayIndex.toString()] as List<dynamic>? ?? [];
-      
+
       if (dayAnimes.isEmpty) {
         return RefreshIndicator(
           onRefresh: () async => onRefresh != null ? onRefresh!() : Future.value(),
@@ -349,7 +349,7 @@ class AnimeGrid extends StatelessWidget {
                       ? subject['nameCN']
                       : subject['name'];
                   final imageUrl = subject['images']?['large'];
-                  
+
                   RouteHelper.goToAnimeData(
                     context,
                     animeId: id,

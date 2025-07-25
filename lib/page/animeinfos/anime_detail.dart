@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/modules/bangumi_data.dart';
+import 'package:AnimeFlow/modules/bangumi_data.dart';
 
 /// 详情内容主组件
 class AnimeDetailContent extends StatefulWidget {
