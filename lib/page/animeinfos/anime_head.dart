@@ -128,6 +128,8 @@ class AnimeDetailHeader extends StatelessWidget {
                   AnimePlayButton(
                     onPressed: onPlayPressed ?? () {
                     },
+                    animeId: bangumiItem.id,
+                    animeName: bangumiItem.displayName,
                   ),
                 ],
               ),
@@ -439,10 +441,14 @@ class BangumiInfoCard extends StatelessWidget {
 /// 按钮组件
 class AnimePlayButton extends StatelessWidget {
   final VoidCallback onPressed;
+  final int? animeId;
+  final String? animeName;
 
   const AnimePlayButton({
     super.key,
     required this.onPressed,
+    this.animeId,
+    this.animeName,
   });
 
   @override
@@ -489,10 +495,11 @@ class AnimePlayButton extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const VideoInfoPage(
+                    builder: (context) => VideoInfoPage(
                       // 使用更兼容的测试视频URL
                       videoUrl: 'https://lf-cdn.trae.com.cn/obj/trae-com-cn/trae_website_prod_cn/static/media/solo-introduce.189b5726.mp4',
-                      videoTitle: '测试视频 - Big Buck Bunny',
+                      animeId: animeId,
+                      animeTitle: animeName,
                     ),
                   ),
                 );

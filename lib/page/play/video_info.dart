@@ -9,9 +9,15 @@ import 'detail.dart';
 
 class VideoInfoPage extends StatefulWidget {
   final String? videoUrl;
-  final String? videoTitle;
+  final int? animeId;
+  final String? animeTitle;
 
-  const VideoInfoPage({super.key, this.videoUrl, this.videoTitle});
+  const VideoInfoPage({
+    super.key,
+    this.videoUrl,
+    this.animeId,
+    this.animeTitle,
+  });
 
   @override
   State<VideoInfoPage> createState() => _VideoInfoPageState();
@@ -46,6 +52,8 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       print('播放器日志: $log');
     });
 
+    print('接收到的id${widget.animeId}');
+    print('接收到的标题${widget.animeTitle}');
     // 如果提供了视频URL，则开始播放
     if (widget.videoUrl != null) {
       player.open(Media(widget.videoUrl!));
@@ -137,7 +145,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       setState(() {
         _isFullscreen = !_isFullscreen;
       });
-
       // 再次等待确保布局稳定
       await Future.delayed(const Duration(milliseconds: 200));
 
@@ -206,7 +213,10 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                             Expanded(
                                               child: TabBarView(
                                                 children: [
-                                                  DetailPage(), // 详情页面
+                                                  DetailPage(
+                                                    animeId: widget.animeId,
+                                                    animeTitle: widget.animeTitle,
+                                                  ), // 详情页面
                                                   CommentsPage(), // 评论页面
                                                 ],
                                               ),
@@ -321,7 +331,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         showControls: _showControls,
         isDragging: _isDragging,
         dragPosition: _dragPosition,
-        title: widget.videoTitle,
+        title: widget.animeTitle,
         isPlaying: isPlaying,
         position: position,
         duration: duration,
