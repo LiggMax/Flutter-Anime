@@ -9,8 +9,7 @@ class VideoInfoPage extends StatefulWidget {
   final String? videoUrl;
   final String? videoTitle;
 
-  const VideoInfoPage({Key? key, this.videoUrl, this.videoTitle})
-    : super(key: key);
+  const VideoInfoPage({super.key, this.videoUrl, this.videoTitle});
 
   @override
   State<VideoInfoPage> createState() => _VideoInfoPageState();
@@ -30,6 +29,9 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
 
     // 创建播放器实例
     player = Player();
+
+    // 初始化VideoController
+    controller = VideoController(player);
 
     // 添加播放器状态监听，用于调试
     player.stream.error.listen((error) {
@@ -125,32 +127,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                     color: Colors.white,
                                   ),
                                 ),
-                              // 调试信息（开发时使用）
-                              if (widget.videoUrl != null)
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.7),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: StreamBuilder<bool>(
-                                      stream: player.stream.playing,
-                                      builder: (context, playingSnapshot) {
-                                        final isPlaying = playingSnapshot.data ?? false;
-                                        return Text(
-                                          isPlaying ? '播放中' : '已暂停',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
                             ],
                           );
                         },
@@ -218,6 +194,4 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       ),
     );
   }
-
-
 }
