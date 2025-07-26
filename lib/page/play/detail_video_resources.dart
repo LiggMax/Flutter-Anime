@@ -196,7 +196,8 @@ class VideoSourceDrawer extends StatelessWidget {
     int total = 0;
     for (final episodeData in videoSourceData) {
       final routes = episodeData['routes'] as List<Map<String, String>>? ?? [];
-      final episodes = episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
+      final episodes =
+          episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
 
       for (int i = 0; i < routes.length && i < episodes.length; i++) {
         total += episodes[i].length; // 每个剧集一张卡片
@@ -209,20 +210,39 @@ class VideoSourceDrawer extends StatelessWidget {
   Widget _buildEpisodeCard(BuildContext context, int index) {
     int currentIndex = 0;
 
-    for (int sourceIndex = 0; sourceIndex < videoSourceData.length; sourceIndex++) {
+    for (
+      int sourceIndex = 0;
+      sourceIndex < videoSourceData.length;
+      sourceIndex++
+    ) {
       final episodeData = videoSourceData[sourceIndex];
       final title = episodeData['title'] ?? '未知标题';
       final routes = episodeData['routes'] as List<Map<String, String>>? ?? [];
-      final episodes = episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
+      final episodes =
+          episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
 
-      for (int routeIndex = 0; routeIndex < routes.length && routeIndex < episodes.length; routeIndex++) {
+      for (
+        int routeIndex = 0;
+        routeIndex < routes.length && routeIndex < episodes.length;
+        routeIndex++
+      ) {
         final route = routes[routeIndex];
         final routeEpisodes = episodes[routeIndex];
 
-        for (int episodeIndex = 0; episodeIndex < routeEpisodes.length; episodeIndex++) {
+        for (
+          int episodeIndex = 0;
+          episodeIndex < routeEpisodes.length;
+          episodeIndex++
+        ) {
           if (currentIndex == index) {
             final episode = routeEpisodes[episodeIndex];
-            return _buildSingleEpisodeCard(context, title, route, episode, episodeIndex);
+            return _buildSingleEpisodeCard(
+              context,
+              title,
+              route,
+              episode,
+              episodeIndex,
+            );
           }
           currentIndex++;
         }
@@ -269,33 +289,41 @@ class VideoSourceDrawer extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 剧集标题
-                      Text(
-                        episodeTitle,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      // 剧集标题和episodeTitle
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              sourceTitle,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            episodeTitle,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
 
-                      // 条目和线路信息
-                      Text(
-                        sourceTitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-
                       // 线路标签
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
                           borderRadius: BorderRadius.circular(8),
@@ -312,13 +340,6 @@ class VideoSourceDrawer extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // 播放图标
-                Icon(
-                  Icons.play_circle_outline,
-                  color: Colors.blue[600],
-                  size: 28,
-                ),
               ],
             ),
           ),
@@ -326,8 +347,6 @@ class VideoSourceDrawer extends StatelessWidget {
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -365,8 +384,11 @@ class VideoSourceDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      animeName,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      '选择视频资源',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(

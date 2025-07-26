@@ -11,7 +11,7 @@ class VideoAnalysis {
   static const String selectNames = 'body > .box-width .search-box .thumb-content > .thumb-txt';
   static const String selectLinks =  'body > .box-width .search-box .thumb-menu > a';
   static const String selectChannelNames = '.anthology-tab > .swiper-wrapper a';//线路名称
-  static const String matchChannelName = r'^()?(?<ch>.+?)(\d+)?$';//线路名称正则
+  static const String matchChannelName = r'^(?:[^\w\u4e00-\u9fa5]*)?(?<ch>[\w\u4e00-\u9fa5\s]+?)(?:-(?<num>\d+))?(?:\s*<.*)?$';//线路名称正则
   static const String selectEpisodeLists = '.anthology-list-box';//剧集列表
   static const String matchEpisodeSortFromName = r'第\s*(?<ep>.+)\s*[话集]';//剧集序号正则
   static const String selectEpisodesFromList = 'a';
