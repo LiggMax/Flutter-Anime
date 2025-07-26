@@ -151,14 +151,20 @@ jobs:
 
       - name: Build macOS
         run: |
-          flutter build macos
+          flutter build macos 
           echo "macOS build completed"
+
+      - name : Create DMG
+        run: |
+          mkdir -p build/dist
+          cd  -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          hdiutil create -fs HFS+ -volname ${{ env.APP_NAME }} -srcfolder build/dist ${{ env.APP_NAME }}.dmg
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-macos
-          path: build/macos/Build//Build/Products/Release/AnimeFlow.app
+          path: AnimeFlow.dmg
           if-no-files-found: ignore
 
   build-ios:
