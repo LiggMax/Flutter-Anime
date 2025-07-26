@@ -13,9 +13,12 @@ class DetailPage extends StatefulWidget {
   State<DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> {
+class _DetailPageState extends State<DetailPage> with AutomaticKeepAliveClientMixin {
   List<Episode> _episodes = [];
   bool _loading = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -40,6 +43,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -55,15 +59,11 @@ class _DetailPageState extends State<DetailPage> {
           if (_loading) ...[
             const Center(child: CircularProgressIndicator()),
           ] else ...[
-            // 使用新创建的EpisodeCountRow组件
             EpisodeCountRow(
               episodeCount: _episodes.length,
               onRefresh: _fetchEpisodes,
-              episodes: _episodes, // 传递剧集列表
+              episodes: _episodes,
             ),
-            const SizedBox(height: 10),
-            // Display episode list
-            EpisodeList(episodes: _episodes),
           ],
         ],
       ),
