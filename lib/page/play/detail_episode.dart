@@ -1,3 +1,7 @@
+/*
+  @Author Ligg
+  @Time 2025/7/26
+ */
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/episodes_data.dart';
 
@@ -5,33 +9,26 @@ class EpisodeItem extends StatelessWidget {
   final Episode episode;
   final VoidCallback? onTap;
 
-  const EpisodeItem({
-    super.key,
-    required this.episode,
-    this.onTap,
-  });
+  const EpisodeItem({super.key, required this.episode, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         title: Text(
           episode.nameCn.isNotEmpty
               ? episode.nameCn
               : episode.name.isNotEmpty
-                  ? episode.name
-                  : '待播出',
+              ? episode.name
+              : '待播出',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('第${episode.ep}集'),
-            if (episode.airdate.isNotEmpty)
-              Text('播出日期: ${episode.airdate}'),
-            if (episode.duration.isNotEmpty)
-              Text('时长: ${episode.duration}'),
+            if (episode.airdate.isNotEmpty) Text('播出日期: ${episode.airdate}'),
+            if (episode.duration.isNotEmpty) Text('时长: ${episode.duration}'),
           ],
         ),
         trailing: Column(
@@ -55,22 +52,42 @@ class EpisodeItem extends StatelessWidget {
 
 class EpisodeList extends StatelessWidget {
   final List<Episode> episodes;
+  final ScrollController? scrollController;
+  final bool closeOnTap;
 
-  const EpisodeList({super.key, required this.episodes});
+  const EpisodeList({
+    super.key,
+    required this.episodes,
+    this.scrollController,
+    this.closeOnTap = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      controller: scrollController,
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: scrollController != null
+          ? null
+          : const NeverScrollableScrollPhysics(),
       itemCount: episodes.length,
       itemBuilder: (context, index) {
         final episode = episodes[index];
-        return EpisodeItem(
-          episode: episode,
-          onTap: () {
-            print('剧集ID: ${episode.id}');
-          },
+        return Container(
+          margin: const EdgeInsets.symmetric(
+            vertical: 4,
+            horizontal: 16,
+          ),
+          child: EpisodeItem(
+            episode: episode,
+            onTap: () {
+              print('剧集ID: ${episode.id}');
+              print('剧集ep ${episode.ep}');
+              if (closeOnTap) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
         );
       },
     );
@@ -93,10 +110,7 @@ class EpisodeCountRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          '剧集数量: $episodeCount',
-          style: TextStyle(fontSize : 16),
-        ),
+        Text('剧集数量: $episodeCount', style: TextStyle(fontSize: 16)),
         const Spacer(),
         IconButton(
           icon: const Icon(Icons.format_align_right_rounded),
@@ -154,26 +168,10 @@ class EpisodeDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  shrinkWrap: true,
-                  itemCount: episodes.length,
-                  itemBuilder: (context, index) {
-                    final episode = episodes[index];
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 16,
-                      ),
-                      child: EpisodeItem(
-                        episode: episode,
-                        onTap: () {
-                          print('剧集ID: ${episode.id}');
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    );
-                  },
+                child: EpisodeList(
+                  episodes: episodes,
+                  scrollController: scrollController,
+                  closeOnTap: true,
                 ),
               ),
             ],

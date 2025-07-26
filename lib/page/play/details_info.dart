@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
 import 'package:AnimeFlow/modules/episodes_data.dart';
-import 'package:AnimeFlow/page/play/episode.dart';
+import 'package:AnimeFlow/page/play/detail_episode.dart';
+import 'package:AnimeFlow/page/play/detail_video_resources.dart';
 
 class DetailPage extends StatefulWidget {
   final int? animeId;
@@ -13,7 +14,8 @@ class DetailPage extends StatefulWidget {
   State<DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> with AutomaticKeepAliveClientMixin {
+class _DetailPageState extends State<DetailPage>
+    with AutomaticKeepAliveClientMixin {
   List<Episode> _episodes = [];
   bool _loading = true;
 
@@ -58,11 +60,16 @@ class _DetailPageState extends State<DetailPage> with AutomaticKeepAliveClientMi
           if (_loading) ...[
             const Center(child: CircularProgressIndicator()),
           ] else ...[
+
+            // 剧集列表
             EpisodeCountRow(
               episodeCount: _episodes.length,
               onRefresh: _fetchEpisodes,
               episodes: _episodes,
             ),
+
+            // 视频源
+            const PlayData(),
           ],
         ],
       ),
