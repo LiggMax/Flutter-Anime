@@ -1,6 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/episodes_data.dart';
 
+class EpisodeItem extends StatelessWidget {
+  final Episode episode;
+  final VoidCallback? onTap;
+
+  const EpisodeItem({
+    super.key,
+    required this.episode,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        title: Text(
+          episode.nameCn.isNotEmpty
+              ? episode.nameCn
+              : episode.name.isNotEmpty
+                  ? episode.name
+                  : '待播出',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('第${episode.ep}集'),
+            if (episode.airdate.isNotEmpty)
+              Text('播出日期: ${episode.airdate}'),
+            if (episode.duration.isNotEmpty)
+              Text('时长: ${episode.duration}'),
+          ],
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.comment, size: 25),
+                const SizedBox(width: 5),
+                Text('${episode.comment}'),
+              ],
+            ),
+          ],
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
 class EpisodeList extends StatelessWidget {
   final List<Episode> episodes;
 
@@ -14,28 +66,11 @@ class EpisodeList extends StatelessWidget {
       itemCount: episodes.length,
       itemBuilder: (context, index) {
         final episode = episodes[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: ListTile(
-            title: Text(
-              episode.nameCn.isNotEmpty
-                  ? episode.nameCn
-                  : episode.name.isNotEmpty
-                  ? episode.name
-                  : '待播出',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('第${episode.ep}集'),
-                if (episode.airdate.isNotEmpty)
-                  Text('播出日期: ${episode.airdate}'),
-                if (episode.duration.isNotEmpty)
-                  Text('时长: ${episode.duration}'),
-              ],
-            ),
-          ),
+        return EpisodeItem(
+          episode: episode,
+          onTap: () {
+            print('剧集ID: ${episode.id}');
+          },
         );
       },
     );
@@ -45,7 +80,7 @@ class EpisodeList extends StatelessWidget {
 class EpisodeCountRow extends StatelessWidget {
   final int episodeCount;
   final VoidCallback onRefresh;
-  final List<Episode> episodes; 
+  final List<Episode> episodes;
 
   const EpisodeCountRow({
     super.key,
@@ -58,7 +93,10 @@ class EpisodeCountRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text('剧集数量: $episodeCount'),
+        Text(
+          '剧集数量: $episodeCount',
+          style: TextStyle(fontSize : 16),
+        ),
         const Spacer(),
         IconButton(
           icon: const Icon(Icons.format_align_right_rounded),
@@ -78,7 +116,7 @@ class EpisodeCountRow extends StatelessWidget {
 }
 
 class EpisodeDrawer extends StatelessWidget {
-  final List<Episode> episodes; // 添加剧集列表参数
+  final List<Episode> episodes;
 
   const EpisodeDrawer({super.key, required this.episodes});
 
@@ -122,30 +160,17 @@ class EpisodeDrawer extends StatelessWidget {
                   itemCount: episodes.length,
                   itemBuilder: (context, index) {
                     final episode = episodes[index];
-                    return Card(
+                    return Container(
                       margin: const EdgeInsets.symmetric(
                         vertical: 4,
                         horizontal: 16,
                       ),
-                      child: ListTile(
-                        title: Text(
-                          episode.nameCn.isNotEmpty
-                              ? episode.nameCn
-                              : episode.name.isNotEmpty
-                              ? episode.name
-                              : '待播出',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('第${episode.ep}集'),
-                            if (episode.airdate.isNotEmpty)
-                              Text('播出日期: ${episode.airdate}'),
-                            if (episode.duration.isNotEmpty)
-                              Text('时长: ${episode.duration}'),
-                          ],
-                        ),
+                      child: EpisodeItem(
+                        episode: episode,
+                        onTap: () {
+                          print('剧集ID: ${episode.id}');
+                          Navigator.of(context).pop();
+                        },
                       ),
                     );
                   },

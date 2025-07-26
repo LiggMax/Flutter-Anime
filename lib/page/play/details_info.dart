@@ -43,7 +43,7 @@ class _DetailPageState extends State<DetailPage> with AutomaticKeepAliveClientMi
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); 
+    super.build(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -54,7 +54,6 @@ class _DetailPageState extends State<DetailPage> with AutomaticKeepAliveClientMi
               widget.animeName!,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 20),
           ],
           if (_loading) ...[
             const Center(child: CircularProgressIndicator()),

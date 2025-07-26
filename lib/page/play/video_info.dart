@@ -326,7 +326,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   Widget _buildVideoControls(bool isPlaying, Duration position, Duration duration, Duration buffer) {
     return Positioned.fill(
       child: VideoPlayerControls(
-        key: ValueKey('controls_${_isFullscreen}'), // 确保全屏切换时重建
+        key: ValueKey('controls_$_isFullscreen'), // 确保全屏切换时重建
         player: player,
         showControls: _showControls,
         isDragging: _isDragging,
