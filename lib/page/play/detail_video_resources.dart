@@ -170,12 +170,6 @@ class _PlayDataState extends State<PlayData> {
                   ),
                 ],
               ),
-            ] else if (_videoSourceData != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                '解析到 ${_videoSourceData!.length} 个条目',
-                style: const TextStyle(fontSize: 12, color: Colors.green),
-              ),
             ],
           ] else ...[
             const Text('请选择剧集', style: TextStyle(color: Colors.grey)),
@@ -432,28 +426,13 @@ class VideoSourceDrawer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '剧集条目列表',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
                     Text(
                       animeName,
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '共找到 $itemCount 个条目 · ${_getTotalEpisodeCount()} 集剧集',
-                      style: const TextStyle(fontSize: 12, color: Colors.blue),
-                    ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 10),
 
               // 视频源列表
               Expanded(
