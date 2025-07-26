@@ -54,12 +54,14 @@ class EpisodeList extends StatelessWidget {
   final List<Episode> episodes;
   final ScrollController? scrollController;
   final bool closeOnTap;
+  final Function(Episode)? onEpisodeSelected;
 
   const EpisodeList({
     super.key,
     required this.episodes,
     this.scrollController,
     this.closeOnTap = false,
+    this.onEpisodeSelected,
   });
 
   @override
@@ -81,8 +83,9 @@ class EpisodeList extends StatelessWidget {
           child: EpisodeItem(
             episode: episode,
             onTap: () {
-              print('剧集ID: ${episode.id}');
-              print('剧集ep ${episode.ep}');
+              // 调用回调函数
+              onEpisodeSelected?.call(episode);
+              //关闭弹窗
               if (closeOnTap) {
                 Navigator.of(context).pop();
               }
@@ -98,12 +101,14 @@ class EpisodeCountRow extends StatelessWidget {
   final int episodeCount;
   final VoidCallback onRefresh;
   final List<Episode> episodes;
+  final Function(Episode)? onEpisodeSelected;
 
   const EpisodeCountRow({
     super.key,
     required this.episodeCount,
     required this.onRefresh,
     required this.episodes,
+    this.onEpisodeSelected,
   });
 
   @override
@@ -119,7 +124,10 @@ class EpisodeCountRow extends StatelessWidget {
               context: context,
               isScrollControlled: true,
               builder: (BuildContext context) {
-                return EpisodeDrawer(episodes: episodes);
+                return EpisodeDrawer(
+                  episodes: episodes,
+                  onEpisodeSelected: onEpisodeSelected,
+                );
               },
             );
           },
@@ -131,8 +139,13 @@ class EpisodeCountRow extends StatelessWidget {
 
 class EpisodeDrawer extends StatelessWidget {
   final List<Episode> episodes;
+  final Function(Episode)? onEpisodeSelected;
 
-  const EpisodeDrawer({super.key, required this.episodes});
+  const EpisodeDrawer({
+    super.key,
+    required this.episodes,
+    this.onEpisodeSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +185,7 @@ class EpisodeDrawer extends StatelessWidget {
                   episodes: episodes,
                   scrollController: scrollController,
                   closeOnTap: true,
+                  onEpisodeSelected: onEpisodeSelected,
                 ),
               ),
             ],

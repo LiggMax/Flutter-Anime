@@ -18,6 +18,7 @@ class _DetailPageState extends State<DetailPage>
     with AutomaticKeepAliveClientMixin {
   List<Episode> _episodes = [];
   bool _loading = true;
+  Episode? _selectedEpisode;
 
   @override
   bool get wantKeepAlive => true;
@@ -43,6 +44,12 @@ class _DetailPageState extends State<DetailPage>
     }
   }
 
+  void _onEpisodeSelected(Episode episode) {
+    setState(() {
+      _selectedEpisode = episode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -66,10 +73,16 @@ class _DetailPageState extends State<DetailPage>
               episodeCount: _episodes.length,
               onRefresh: _fetchEpisodes,
               episodes: _episodes,
+              onEpisodeSelected: _onEpisodeSelected,
             ),
 
+            const SizedBox(height: 20),
+
             // 视频源
-            const PlayData(),
+            PlayData(
+              selectedEpisode: _selectedEpisode,
+              animeName: widget.animeName,
+            ),
           ],
         ],
       ),
