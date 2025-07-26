@@ -38,10 +38,12 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
-      // 添加默认User-Agent到headers中
+      // 添加默认User-Agent到headers中（仅当未设置时）
       final opts = options ?? Options();
       opts.headers ??= {};
-      opts.headers!['User-Agent'] = Api.userAgent;
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.userAgent;
+      }
       
       return await _dio.get<T>(
         path,
@@ -63,10 +65,12 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
-      // 添加默认User-Agent到headers中
+      // 添加默认User-Agent到headers中（仅当未设置时）
       final opts = options ?? Options();
       opts.headers ??= {};
-      opts.headers!['User-Agent'] = Api.userAgent;
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.userAgent;
+      }
       
       return await _dio.post<T>(
         path,
@@ -89,10 +93,12 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
-      // 添加默认User-Agent到headers中
+      // 添加默认User-Agent到headers中（仅当未设置时）
       final opts = options ?? Options();
       opts.headers ??= {};
-      opts.headers!['User-Agent'] = Api.userAgent;
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.userAgent;
+      }
       
       return await _dio.put<T>(
         path,
@@ -115,10 +121,12 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
-      // 添加默认User-Agent到headers中
+      // 添加默认User-Agent到headers中（仅当未设置时）
       final opts = options ?? Options();
       opts.headers ??= {};
-      opts.headers!['User-Agent'] = Api.userAgent;
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.userAgent;
+      }
       
       return await _dio.delete<T>(
         path,
@@ -141,10 +149,12 @@ class HttpRequest {
     Options? options,
   }) async {
     try {
-      // 添加默认User-Agent到headers中
+      // 添加默认User-Agent到headers中（仅当未设置时）
       final opts = options ?? Options();
       opts.headers ??= {};
-      opts.headers!['User-Agent'] = Api.userAgent;
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.userAgent;
+      }
       
       return await _dio.download(
         urlPath,
