@@ -155,6 +155,13 @@ jobs:
           flutter build macos
           echo "macOS build completed"
 
+      - name : Create DMG
+        run: |
+          mkdir -p build/dist
+          cp -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          ln -s /Applications build/dist/Applications
+          hdiutil create -fs HFS+ -volname ${{ env.APP_NAME }} -srcfolder build/dist ${{ env.APP_NAME }}.dmg
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:

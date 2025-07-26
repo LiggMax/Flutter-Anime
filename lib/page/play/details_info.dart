@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
+import 'package:AnimeFlow/modules/episodes_data.dart';
+import 'package:AnimeFlow/page/play/detail_episode.dart';
+import 'package:AnimeFlow/page/play/detail_video_resources.dart';
 
 class DetailPage extends StatefulWidget {
   final int? animeId;
@@ -11,9 +14,14 @@ class DetailPage extends StatefulWidget {
   State<DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> {
-  List<dynamic> _episodes = [];
+class _DetailPageState extends State<DetailPage>
+    with AutomaticKeepAliveClientMixin {
+  List<Episode> _episodes = [];
   bool _loading = true;
+  Episode? _selectedEpisode;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -23,12 +31,11 @@ class _DetailPageState extends State<DetailPage> {
 
   Future<void> _fetchEpisodes() async {
     try {
+      ///获取剧集信息
       final response = await BangumiService.getEpisodesByID(widget.animeId!);
       if (response != null) {
-        setState(() {
-          _episodes = response['episodes'];
-          _loading = false;
-        });
+        final episodesData = EpisodesData.fromJson(response);
+        _episodes = episodesData.episodes;
       }
     } finally {
       setState(() {
@@ -37,8 +44,15 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
+  void _onEpisodeSelected(Episode episode) {
+    setState(() {
+      _selectedEpisode = episode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -49,25 +63,29 @@ class _DetailPageState extends State<DetailPage> {
               widget.animeName!,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 20),
           ],
           if (_loading) ...[
             const Center(child: CircularProgressIndicator()),
           ] else ...[
-            Text('剧集数量: ${_episodes.length}'),
-            // 这里可以添加更多剧集信息的展示
+
+            // 剧集列表
+            EpisodeCountRow(
+              episodeCount: _episodes.length,
+              onRefresh: _fetchEpisodes,
+              episodes: _episodes,
+              onEpisodeSelected: _onEpisodeSelected,
+            ),
+
+            const SizedBox(height: 20),
+
+            // 视频源
+            PlayData(
+              selectedEpisode: _selectedEpisode,
+              animeName: widget.animeName,
+            ),
           ],
         ],
       ),
     );
-  }
-}
-
-///获取剧集信息
-
-class GetEpisodes {
-  Future<Map<String, dynamic>?> getEpisodesByID(int id) async {
-    final response = await BangumiService.getEpisodesByID(id);
-    return response;
   }
 }

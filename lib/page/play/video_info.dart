@@ -5,7 +5,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'dart:async';
 import 'comments.dart';
 import 'controls.dart';
-import 'detail.dart';
+import 'details_info.dart';
 
 class VideoInfoPage extends StatefulWidget {
   final String? videoUrl;
@@ -326,7 +326,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   Widget _buildVideoControls(bool isPlaying, Duration position, Duration duration, Duration buffer) {
     return Positioned.fill(
       child: VideoPlayerControls(
-        key: ValueKey('controls_${_isFullscreen}'), // 确保全屏切换时重建
+        key: ValueKey('controls_$_isFullscreen'), // 确保全屏切换时重建
         player: player,
         showControls: _showControls,
         isDragging: _isDragging,

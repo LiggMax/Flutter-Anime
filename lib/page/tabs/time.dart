@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
-import 'package:flutter/widgets.dart';
 import '../../routes/route_helper.dart';
 
 // 数据状态类

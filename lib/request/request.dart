@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'api.dart';
 
 class HttpRequest {
   static final HttpRequest _instance = HttpRequest._internal();
@@ -11,9 +12,6 @@ class HttpRequest {
     _dio = Dio(BaseOptions(
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
-      headers: {
-        'User-Agent': 'Flutter-Anime/1.0.0 (https://github.com/LiggMax/Flutter-Anime.git)',
-      },
     ));
 
     // 添加日志拦截器
@@ -40,10 +38,17 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
+      // 添加默认User-Agent到headers中（仅当未设置时）
+      final opts = options ?? Options();
+      opts.headers ??= {};
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+      }
+
       return await _dio.get<T>(
         path,
         queryParameters: queryParameters,
-        options: options,
+        options: opts,
         cancelToken: cancelToken,
       );
     } catch (e) {
@@ -60,11 +65,18 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
+      // 添加默认User-Agent到headers中（仅当未设置时）
+      final opts = options ?? Options();
+      opts.headers ??= {};
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+      }
+
       return await _dio.post<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: opts,
         cancelToken: cancelToken,
       );
     } catch (e) {
@@ -81,11 +93,18 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
+      // 添加默认User-Agent到headers中（仅当未设置时）
+      final opts = options ?? Options();
+      opts.headers ??= {};
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+      }
+
       return await _dio.put<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: opts,
         cancelToken: cancelToken,
       );
     } catch (e) {
@@ -102,11 +121,18 @@ class HttpRequest {
     CancelToken? cancelToken,
   }) async {
     try {
+      // 添加默认User-Agent到headers中（仅当未设置时）
+      final opts = options ?? Options();
+      opts.headers ??= {};
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+      }
+
       return await _dio.delete<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: opts,
         cancelToken: cancelToken,
       );
     } catch (e) {
@@ -120,13 +146,22 @@ class HttpRequest {
     String savePath, {
     ProgressCallback? onReceiveProgress,
     CancelToken? cancelToken,
+    Options? options,
   }) async {
     try {
+      // 添加默认User-Agent到headers中（仅当未设置时）
+      final opts = options ?? Options();
+      opts.headers ??= {};
+      if (!opts.headers!.containsKey('User-Agent')) {
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+      }
+
       return await _dio.download(
         urlPath,
         savePath,
         onReceiveProgress: onReceiveProgress,
         cancelToken: cancelToken,
+        options: opts,
       );
     } catch (e) {
       rethrow;
