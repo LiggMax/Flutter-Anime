@@ -17,7 +17,7 @@ class VideoService {
   static const int requestInterval = 1;
 
 
-  static Future<Map<String, List<String>>?> getVideoSource(
+  static Future<List<Map<String, dynamic>>?> getVideoSource(
     String keyword,
     int ep,
   ) async {
@@ -36,10 +36,15 @@ class VideoService {
           response.data.toString(),
         );
 
-        // 根据links数量进行循环发送请求
+        // 收集所有的剧集数据
+        final episodeDataList = <Map<String, dynamic>>[];
+        final titles = parseResult['titles'] ?? [];
         final links = parseResult['links'] ?? [];
+
+        // 根据links数量进行循环发送请求
         for (int i = 0; i < links.length; i++) {
           final link = links[i];
+          final title = i < titles.length ? titles[i] : '未知标题';
 
           ///搜索剧集
           final linkResponse = await httpRequest.get(
@@ -53,6 +58,12 @@ class VideoService {
               linkResponse.data.toString(),
             );
 
+            // 添加条目信息到剧集数据中
+            episodeData['title'] = title;
+            episodeData['link'] = link;
+            
+            episodeDataList.add(episodeData);
+
             _log.info('链接 [$i] 解析结果: ${episodeData['routes']?.length ?? 0} 个线路, ${episodeData['episodes']?.length ?? 0} 个剧集面板');
           }
 
@@ -62,7 +73,7 @@ class VideoService {
           }
         }
 
-        return parseResult;
+        return episodeDataList;
       }
 
       return null;
