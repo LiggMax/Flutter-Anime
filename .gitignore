@@ -4,3 +4,4 @@
 .flutter-plugins-dependencies
 *.log
 *.iml
+/pubspec.lock

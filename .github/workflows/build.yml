@@ -111,6 +111,7 @@ jobs:
         run: |
           $APP_NAME = Select-String -Path pubspec.yaml -Pattern "^name:" | ForEach-Object { ($_ -split ":")[1].Trim() }
           echo "APP_NAME=$APP_NAME" >> $env:GITHUB_ENV
+          echo "::set-output name=app_name::$APP_NAME"
 
       - name: Install dependencies
         run: flutter pub get
@@ -158,7 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-macos
-          path: build/macos/Build//Build/Products/Release/AnimeFlow.app
+          path: build/macos/Build/Products/Release/AnimeFlow.app
           if-no-files-found: ignore
 
   build-ios:
