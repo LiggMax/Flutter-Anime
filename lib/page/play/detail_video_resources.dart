@@ -191,84 +191,38 @@ class VideoSourceDrawer extends StatelessWidget {
     required this.animeName,
   });
 
-  // 计算展开后的总项目数
+  // 计算剧集卡片总数量
   int _calculateTotalItems() {
     int total = 0;
     for (final episodeData in videoSourceData) {
-      total += 1; // 条目标题
       final routes = episodeData['routes'] as List<Map<String, String>>? ?? [];
-      final episodes =
-          episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
+      final episodes = episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
 
       for (int i = 0; i < routes.length && i < episodes.length; i++) {
-        total += 1; // 线路标题
-        total += episodes[i].length; // 该线路的剧集数量
+        total += episodes[i].length; // 每个剧集一张卡片
       }
     }
     return total;
   }
 
-  // 计算总剧集数
-  int _getTotalEpisodeCount() {
-    int total = 0;
-    for (final episodeData in videoSourceData) {
-      final episodes =
-          episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
-      for (final episodeList in episodes) {
-        total += episodeList.length;
-      }
-    }
-    return total;
-  }
-
-  // 构建列表项
-  Widget _buildListItem(BuildContext context, int index) {
+  // 构建剧集卡片
+  Widget _buildEpisodeCard(BuildContext context, int index) {
     int currentIndex = 0;
 
-    for (
-      int sourceIndex = 0;
-      sourceIndex < videoSourceData.length;
-      sourceIndex++
-    ) {
+    for (int sourceIndex = 0; sourceIndex < videoSourceData.length; sourceIndex++) {
       final episodeData = videoSourceData[sourceIndex];
       final title = episodeData['title'] ?? '未知标题';
       final routes = episodeData['routes'] as List<Map<String, String>>? ?? [];
-      final episodes =
-          episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
+      final episodes = episodeData['episodes'] as List<List<Map<String, String>>>? ?? [];
 
-      // 条目标题
-      if (currentIndex == index) {
-        return _buildSourceTitle(title, sourceIndex);
-      }
-      currentIndex++;
-
-      // 遍历线路和剧集
-      for (
-        int routeIndex = 0;
-        routeIndex < routes.length && routeIndex < episodes.length;
-        routeIndex++
-      ) {
+      for (int routeIndex = 0; routeIndex < routes.length && routeIndex < episodes.length; routeIndex++) {
         final route = routes[routeIndex];
         final routeEpisodes = episodes[routeIndex];
 
-        // 线路标题
-        if (currentIndex == index) {
-          return _buildRouteTitle(route, routeIndex);
-        }
-        currentIndex++;
-
-        // 该线路的剧集
-        for (
-          int episodeIndex = 0;
-          episodeIndex < routeEpisodes.length;
-          episodeIndex++
-        ) {
+        for (int episodeIndex = 0; episodeIndex < routeEpisodes.length; episodeIndex++) {
           if (currentIndex == index) {
-            return _buildEpisodeItem(
-              context,
-              routeEpisodes[episodeIndex],
-              episodeIndex,
-            );
+            final episode = routeEpisodes[episodeIndex];
+            return _buildSingleEpisodeCard(context, title, route, episode, episodeIndex);
           }
           currentIndex++;
         }
@@ -278,118 +232,102 @@ class VideoSourceDrawer extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  // 构建条目标题
-  Widget _buildSourceTitle(String title, int sourceIndex) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Card(
-        color: const Color(0xFF8B5CF6),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Text(
-                  '${sourceIndex + 1}',
-                  style: const TextStyle(
-                    color: Color(0xFF8B5CF6),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 构建线路标题
-  Widget _buildRouteTitle(Map<String, String> route, int routeIndex) {
-    final routeName = route['name'] ?? route['original'] ?? '未知线路';
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-      child: Card(
-        color: Colors.grey[100],
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Icon(Icons.video_library, color: Colors.grey[600], size: 20),
-              const SizedBox(width: 8),
-              Text(
-                routeName,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 构建剧集项
-  Widget _buildEpisodeItem(
+  // 构建单个剧集卡片
+  Widget _buildSingleEpisodeCard(
     BuildContext context,
+    String sourceTitle,
+    Map<String, String> route,
     Map<String, String> episode,
     int episodeIndex,
   ) {
+    final routeName = route['name'] ?? route['original'] ?? '未知线路';
     final episodeTitle = episode['title'] ?? '未知剧集';
+    final episodeNumber = episode['episode'] ?? '${episodeIndex + 1}';
     final episodeUrl = episode['url'] ?? '';
-    final episodeNumber = episode['episode'] ?? '';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Card(
-        child: ListTile(
-          dense: true,
-          leading: CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            radius: 16,
-            child: Text(
-              episodeNumber.isNotEmpty ? episodeNumber : '${episodeIndex + 1}',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-          ),
-          title: Text(
-            episodeTitle,
-            style: const TextStyle(fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: const Icon(
-            Icons.play_arrow,
-            color: Color(0xFF8B5CF6),
-            size: 20,
-          ),
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
           onTap: () {
             print('选择剧集: $episodeTitle');
-            print('剧集URL: $episodeUrl');
             print('剧集序号: $episodeNumber');
+            print('剧集URL: $episodeUrl');
+            print('线路: $routeName');
+            print('条目: $sourceTitle');
             Navigator.of(context).pop();
           },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // 剧集信息
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 剧集标题
+                      Text(
+                        episodeTitle,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+
+                      // 条目和线路信息
+                      Text(
+                        sourceTitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+
+                      // 线路标签
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          routeName,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 播放图标
+                Icon(
+                  Icons.play_circle_outline,
+                  color: Colors.blue[600],
+                  size: 28,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +366,12 @@ class VideoSourceDrawer extends StatelessWidget {
                   children: [
                     Text(
                       animeName,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '筛选了 ${_calculateTotalItems()} 条资源',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -441,7 +384,7 @@ class VideoSourceDrawer extends StatelessWidget {
                         controller: scrollController,
                         itemCount: _calculateTotalItems(),
                         itemBuilder: (context, index) {
-                          return _buildListItem(context, index);
+                          return _buildEpisodeCard(context, index);
                         },
                       )
                     : const Center(
