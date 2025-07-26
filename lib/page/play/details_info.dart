@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
 import 'package:AnimeFlow/modules/episodes_data.dart';
+import 'package:AnimeFlow/page/play/episode.dart';
 
 class DetailPage extends StatefulWidget {
   final int? animeId;
@@ -54,40 +55,15 @@ class _DetailPageState extends State<DetailPage> {
           if (_loading) ...[
             const Center(child: CircularProgressIndicator()),
           ] else ...[
-            Text('剧集数量: ${_episodes.length}'),
+            // 使用新创建的EpisodeCountRow组件
+            EpisodeCountRow(
+              episodeCount: _episodes.length,
+              onRefresh: _fetchEpisodes,
+              episodes: _episodes, // 传递剧集列表
+            ),
             const SizedBox(height: 10),
             // Display episode list
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _episodes.length,
-              itemBuilder: (context, index) {
-                final episode = _episodes[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    title: Text(
-                      episode.nameCn.isNotEmpty 
-                          ? episode.nameCn 
-                          : episode.name.isNotEmpty 
-                              ? episode.name 
-                              : '第${episode.ep}集',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('第${episode.ep}集'),
-                        if (episode.airdate.isNotEmpty) 
-                          Text('播出日期: ${episode.airdate}'),
-                        if (episode.duration.isNotEmpty) 
-                          Text('时长: ${episode.duration}'),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+            EpisodeList(episodes: _episodes),
           ],
         ],
       ),

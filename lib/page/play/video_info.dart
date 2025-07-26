@@ -5,7 +5,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'dart:async';
 import 'comments.dart';
 import 'controls.dart';
-import 'detail.dart';
+import 'details_info.dart';
 
 class VideoInfoPage extends StatefulWidget {
   final String? videoUrl;
