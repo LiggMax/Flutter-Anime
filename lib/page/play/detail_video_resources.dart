@@ -14,8 +14,7 @@ class PlayData extends StatefulWidget {
   final Episode? selectedEpisode;
   final String? animeName;
 
-  const PlayData({Key? key, this.selectedEpisode, this.animeName})
-    : super(key: key);
+  const PlayData({super.key, this.selectedEpisode, this.animeName});
 
   @override
   State<PlayData> createState() => _PlayDataState();
@@ -70,6 +69,18 @@ class _PlayDataState extends State<PlayData> {
     }
   }
 
+  //获取视频url
+  Future<void> _getVideoUrl(String sourceUrl) async {
+    try {
+      final videoUrl = await VideoService.getPlayUrl(sourceUrl);
+      if (videoUrl != null) {
+        // TODO 回调videoUrl给父组件处理
+      }
+    } catch (e) {
+      print('获取播放地址失败: $e');
+    }
+  }
+
   void _showVideoSourceDrawer() {
     if (_videoSourceData == null) {
       // 如果没有数据，先获取数据
@@ -85,6 +96,7 @@ class _PlayDataState extends State<PlayData> {
         return VideoSourceDrawer(
           videoSourceData: _videoSourceData!,
           animeName: widget.animeName ?? '',
+          onEpisodeSelected: _getVideoUrl,
         );
       },
     );
@@ -184,11 +196,13 @@ class _PlayDataState extends State<PlayData> {
 class VideoSourceDrawer extends StatelessWidget {
   final List<Map<String, dynamic>> videoSourceData;
   final String animeName;
+  final Function(String) onEpisodeSelected;
 
   const VideoSourceDrawer({
     super.key,
     required this.videoSourceData,
     required this.animeName,
+    required this.onEpisodeSelected,
   });
 
   // 计算剧集卡片总数量
@@ -242,6 +256,7 @@ class VideoSourceDrawer extends StatelessWidget {
               route,
               episode,
               episodeIndex,
+              onEpisodeSelected, // 传递回调函数
             );
           }
           currentIndex++;
@@ -259,6 +274,7 @@ class VideoSourceDrawer extends StatelessWidget {
     Map<String, String> route,
     Map<String, String> episode,
     int episodeIndex,
+    Function(String) onEpisodeSelected,
   ) {
     final routeName = route['name'] ?? route['original'] ?? '未知线路';
     final episodeTitle = episode['title'] ?? '未知剧集';
@@ -278,6 +294,8 @@ class VideoSourceDrawer extends StatelessWidget {
             print('剧集URL: $episodeUrl');
             print('线路: $routeName');
             print('条目: $sourceTitle');
+            // 调用回调函数，传递episodeUrl
+            onEpisodeSelected(episodeUrl);
             Navigator.of(context).pop();
           },
           child: Padding(

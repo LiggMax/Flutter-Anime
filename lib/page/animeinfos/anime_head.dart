@@ -63,7 +63,7 @@ class AnimeDetailAppBar extends StatelessWidget {
       stretch: true,
       centerTitle: false,
       // 高度设置
-      expandedHeight: 300 + kTextTabBarHeight + kToolbarHeight, // 280 → 320 增加40px适应新间距
+      expandedHeight: 300 + kTextTabBarHeight + kToolbarHeight,
       collapsedHeight: kTextTabBarHeight +
           kToolbarHeight +
           MediaQuery.paddingOf(context).top,
@@ -497,7 +497,7 @@ class AnimePlayButton extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => VideoInfoPage(
                       // 使用更兼容的测试视频URL
-                      videoUrl: 'https://lf-cdn.trae.com.cn/obj/trae-com-cn/trae_website_prod_cn/static/media/solo-introduce.189b5726.mp4',
+                      videoUrl: 'https://tjdownload.pan.wo.cn/openapi/download?fid=E9DmP_OsZbmVT9xK3I0TtJBkRPxW7OWxgprnwJ/VPGQM/R/jE/aEWScrehn2zQJqU946ZyFK3yg/Ju5wDH0NnzSthiaw==',
                       animeId: animeId,
                       animeName: animeName,
                     ),

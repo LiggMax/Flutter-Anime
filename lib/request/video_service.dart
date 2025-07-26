@@ -8,7 +8,6 @@ import 'api.dart';
 import 'request.dart';
 import 'package:AnimeFlow/utils/analysis.dart';
 
-// 获取视频源
 class VideoService {
   static final Logger _log = Logger('VideoService');
 
@@ -16,7 +15,7 @@ class VideoService {
   static const String searchUrl = 'https://dm1.xfdm.pro/search.html?wd=';
   static const int requestInterval = 1;
 
-
+  ///  获取剧集源
   static Future<List<Map<String, dynamic>>?> getVideoSource(
     String keyword,
     int ep,
@@ -24,7 +23,7 @@ class VideoService {
     try {
       _log.info('搜索关键词: $keyword');
 
-      ///搜索条目
+      //搜索条目
       final response = await httpRequest.get(
         searchUrl + keyword,
         options: Options(headers: {'User-Agent': Api.userAgent}),
@@ -46,7 +45,7 @@ class VideoService {
           final link = links[i];
           final title = i < titles.length ? titles[i] : '未知标题';
 
-          ///搜索剧集
+          //搜索剧集
           final linkResponse = await httpRequest.get(
             websiteUrl + link,
             options: Options(headers: {'User-Agent': Api.userAgent}),
@@ -61,10 +60,8 @@ class VideoService {
             // 添加条目信息到剧集数据中
             episodeData['title'] = title;
             episodeData['link'] = link;
-            
-            episodeDataList.add(episodeData);
 
-            _log.info('链接 [$i] 解析结果: ${episodeData['routes']?.length ?? 0} 个线路, ${episodeData['episodes']?.length ?? 0} 个剧集面板');
+            episodeDataList.add(episodeData);
           }
 
           // 请求间隔，避免过于频繁的请求
@@ -81,5 +78,34 @@ class VideoService {
       _log.severe('获取视频源失败: $e');
       return null;
     }
+  }
+
+  ///发送请求获取播放地址
+  static Future<String?> getPlayUrl(String url) async {
+    try {
+      _log.info('获取播放地址: $url');
+      
+      final response = await httpRequest.get(
+        websiteUrl + url,
+        options: Options(headers: {'User-Agent': Api.userAgent}),
+      );
+
+      if (response.data != null) {
+        // 使用 VideoAnalysis 解析视频链接
+        final videoUrl = VideoAnalysis.parsePlayUrl(response.data.toString());
+        
+        if (videoUrl != null) {
+          _log.info('成功获取播放地址: $videoUrl');
+          return videoUrl;
+        } else {
+          _log.warning('未能解析出有效的视频链接');
+        }
+      } else {
+        _log.warning('响应数据为空');
+      }
+    } catch (e) {
+      _log.severe('获取播放地址失败: $e');
+    }
+    return null;
   }
 }
