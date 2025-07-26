@@ -37,6 +37,7 @@ dependencies:
   shared_preferences: ^2.3.4
   dio: ^5.4.0
   logging: ^1.0.3
+  html: ^0.15.4
 
   ##播放器
   media_kit: ^1.1.11 # 主要包装.

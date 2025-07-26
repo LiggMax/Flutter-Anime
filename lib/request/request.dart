@@ -42,9 +42,9 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.userAgent;
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
       }
-      
+
       return await _dio.get<T>(
         path,
         queryParameters: queryParameters,
@@ -69,9 +69,9 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.userAgent;
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
       }
-      
+
       return await _dio.post<T>(
         path,
         data: data,
@@ -97,9 +97,9 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.userAgent;
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
       }
-      
+
       return await _dio.put<T>(
         path,
         data: data,
@@ -125,9 +125,9 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.userAgent;
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
       }
-      
+
       return await _dio.delete<T>(
         path,
         data: data,
@@ -153,9 +153,9 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.userAgent;
+        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
       }
-      
+
       return await _dio.download(
         urlPath,
         savePath,
