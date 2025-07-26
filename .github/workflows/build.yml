@@ -157,7 +157,8 @@ jobs:
       - name : Create DMG
         run: |
           mkdir -p build/dist
-          cd  -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          cp -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          ln -s /Applications build/dist/Applications
           hdiutil create -fs HFS+ -volname ${{ env.APP_NAME }} -srcfolder build/dist ${{ env.APP_NAME }}.dmg
 
       - name: Archive artifacts
