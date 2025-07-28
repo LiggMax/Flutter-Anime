@@ -8,12 +8,14 @@ class DetailPage extends StatefulWidget {
   final int? animeId;
   final String? animeName;
   final Function(String)? onVideoUrlReceived;
+  final VoidCallback? onStartParsing;
 
   const DetailPage({
     super.key, 
     this.animeId, 
     this.animeName,
     this.onVideoUrlReceived,
+    this.onStartParsing,
   });
 
   @override
@@ -89,6 +91,7 @@ class _DetailPageState extends State<DetailPage>
               selectedEpisode: _selectedEpisode,
               animeName: widget.animeName,
               onVideoUrlReceived: widget.onVideoUrlReceived,
+              onStartParsing: widget.onStartParsing,
             ),
           ],
         ],

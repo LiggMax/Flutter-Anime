@@ -30,7 +30,12 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   Timer? _hideControlsTimer;
   bool _isFullscreen = false;
   bool _isTransitioning = false; // 防止连续快速切换
-  String? _currentVideoUrl; // 当前播放的视频URL
+
+  // 播放状态管理
+  String _playStatus = '等待选择视频中'; // 播放状态文本
+  bool _isLoadingVideo = false; // 是否正在加载视频
+  bool _hasVideoUrl = false; // 是否有视频URL
+  bool _isParsingVideo = false; // 是否正在解析视频
 
   @override
   void initState() {
@@ -50,9 +55,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     player.stream.log.listen((log) {
       print('播放器日志: $log');
     });
-
-    print('接收到的id${widget.animeId}');
-    print('接收到的标题${widget.animeName}');
 
     // 开始自动隐藏控件的计时器
     _startHideControlsTimer();
@@ -94,36 +96,67 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     });
   }
 
-  // 处理接收到的视频URL
-  void _onVideoUrlReceived(String videoUrl) {
-    print('接收到视频URL: $videoUrl');
-    
-    // 检查URL格式是否正确
-    if (videoUrl.contains(r'\/')) {
-      print('检测到转义字符，进行URL清理...');
-      final cleanedUrl = videoUrl.replaceAll(r'\/', '/');
-      print('清理后的URL: $cleanedUrl');
-      setState(() {
-        _currentVideoUrl = cleanedUrl;
-      });
-      _playVideo(cleanedUrl);
-    } else {
-      setState(() {
-        _currentVideoUrl = videoUrl;
-      });
-      _playVideo(videoUrl);
-    }
-  }
-
-  // 播放视频
+    // 播放视频
   void _playVideo(String videoUrl) {
     try {
       print('开始播放视频: $videoUrl');
+      
+      setState(() {
+        _isLoadingVideo = true;
+        _playStatus = '解析成功，开始播放';
+        _hasVideoUrl = true;
+      });
+      
       player.open(Media(videoUrl));
       player.play();
+      
+      // 监听播放状态变化
+      player.stream.playing.listen((isPlaying) {
+        if (mounted) {
+          setState(() {
+            if (isPlaying) {
+              _playStatus = '正在播放';
+              _isLoadingVideo = false;
+            } else {
+              _playStatus = '已暂停';
+              _isLoadingVideo = false;
+            }
+          });
+        }
+      });
+      
+      // 监听错误
+      player.stream.error.listen((error) {
+        if (mounted) {
+          setState(() {
+            _playStatus = '播放失败: $error';
+            _isLoadingVideo = false;
+          });
+        }
+      });
+      
     } catch (e) {
       print('播放视频失败: $e');
+      setState(() {
+        _playStatus = '播放失败: $e';
+        _isLoadingVideo = false;
+      });
     }
+  }
+
+  // 开始解析视频
+  void _startParsingVideo() {
+    setState(() {
+      _isParsingVideo = true;
+      _playStatus = '正在解析资源...';
+    });
+  }
+
+  // 解析完成
+  void _finishParsingVideo() {
+    setState(() {
+      _isParsingVideo = false;
+    });
   }
 
   void _showControlsTemporarily() {
@@ -243,7 +276,8 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                                   DetailPage(
                                                     animeId: widget.animeId,
                                                     animeName: widget.animeName,
-                                                    onVideoUrlReceived: _onVideoUrlReceived,
+                                                    onVideoUrlReceived: _playVideo,
+                                                    onStartParsing: _startParsingVideo,
                                                   ), // 详情页面
                                                   CommentsPage(), // 评论页面
                                                 ],
@@ -278,32 +312,34 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
               child: Container(
                 width: constraints.maxWidth,
                 color: Colors.black,
-                child: StreamBuilder<bool>(
-                  stream: player.stream.buffering,
-                  builder: (context, bufferingSnapshot) {
-                    final isBuffering = bufferingSnapshot.data ?? true;
+                child: _hasVideoUrl
+                  ? StreamBuilder<bool>(
+                      stream: player.stream.buffering,
+                      builder: (context, bufferingSnapshot) {
+                        final isBuffering = bufferingSnapshot.data ?? true;
 
-                    return Stack(
-                      children: [
-                        Video(
-                          controller: controller,
-                          controls: null, // 禁用默认控件
-                          aspectRatio: 16 / 9,
-                          fill: Colors.black,
-                          width: constraints.maxWidth,
-                          height: constraints.maxWidth * 9 / 16,
-                        ),
-                        // 加载指示器
-                        if (isBuffering)
-                          const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
+                        return Stack(
+                          children: [
+                            Video(
+                              controller: controller,
+                              controls: null, // 禁用默认控件
+                              aspectRatio: 16 / 9,
+                              fill: Colors.black,
+                              width: constraints.maxWidth,
+                              height: constraints.maxWidth * 9 / 16,
                             ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                            // 加载指示器
+                            if (isBuffering || _isLoadingVideo)
+                              const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    )
+                  : Container(color: Colors.black), // 空容器，等待状态由控件组件处理
               ),
             ),
 
@@ -320,29 +356,31 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         Positioned.fill(
           child: Container(
             color: Colors.black,
-            child: StreamBuilder<bool>(
-              stream: player.stream.buffering,
-              builder: (context, bufferingSnapshot) {
-                final isBuffering = bufferingSnapshot.data ?? true;
+            child: _hasVideoUrl
+              ? StreamBuilder<bool>(
+                  stream: player.stream.buffering,
+                  builder: (context, bufferingSnapshot) {
+                    final isBuffering = bufferingSnapshot.data ?? true;
 
-                return Stack(
-                  children: [
-                    Video(
-                      controller: controller,
-                      controls: null, // 禁用默认控件
-                      fill: Colors.black,
-                    ),
-                    // 加载指示器
-                    if (isBuffering)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
+                    return Stack(
+                      children: [
+                        Video(
+                          controller: controller,
+                          controls: null, // 禁用默认控件
+                          fill: Colors.black,
                         ),
-                      ),
-                  ],
-                );
-              },
-            ),
+                        // 加载指示器
+                        if (isBuffering || _isLoadingVideo)
+                          const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                )
+              : Container(color: Colors.black), // 空容器，等待状态由控件组件处理
           ),
         ),
 
@@ -365,6 +403,10 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         duration: duration,
         buffer: buffer,
         isFullscreen: _isFullscreen,
+        hasVideoUrl: _hasVideoUrl,
+        isLoadingVideo: _isLoadingVideo,
+        isParsingVideo: _isParsingVideo,
+        playStatus: _playStatus,
         onTap: _toggleControls,
         onBack: _isFullscreen
           ? _toggleFullscreen

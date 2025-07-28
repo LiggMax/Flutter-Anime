@@ -277,6 +277,10 @@ class VideoPlayerControls extends StatelessWidget {
   final Duration duration;
   final Duration buffer;
   final bool isFullscreen;
+  final bool hasVideoUrl; // 是否有视频URL
+  final bool isLoadingVideo; // 是否正在加载视频
+  final bool isParsingVideo; // 是否正在解析视频
+  final String playStatus; // 播放状态文本
   final VoidCallback? onTap;
   final VoidCallback? onBack;
   final VoidCallback? onSettings;
@@ -297,6 +301,10 @@ class VideoPlayerControls extends StatelessWidget {
     required this.duration,
     required this.buffer,
     required this.isFullscreen,
+    required this.hasVideoUrl,
+    required this.isLoadingVideo,
+    required this.isParsingVideo,
+    required this.playStatus,
     this.title,
     this.onTap,
     this.onBack,
@@ -321,6 +329,12 @@ class VideoPlayerControls extends StatelessWidget {
           ),
         ),
 
+        // 等待状态显示
+        if (!hasVideoUrl)
+          Positioned.fill(
+            child: _buildWaitingState(),
+          ),
+
         // 顶部控制栏
         if (showControls)
           Positioned(
@@ -339,7 +353,7 @@ class VideoPlayerControls extends StatelessWidget {
           ),
 
         // 底部控制栏
-        if (showControls)
+        if (showControls && hasVideoUrl)
           Positioned(
             bottom: 0,
             left: 0,
@@ -364,6 +378,39 @@ class VideoPlayerControls extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  // 构建等待状态界面
+  Widget _buildWaitingState() {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              playStatus,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (isLoadingVideo || isParsingVideo) ...[
+              const SizedBox(height: 16),
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

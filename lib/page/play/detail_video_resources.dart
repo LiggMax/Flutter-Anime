@@ -14,12 +14,14 @@ class PlayData extends StatefulWidget {
   final Episode? selectedEpisode;
   final String? animeName;
   final Function(String)? onVideoUrlReceived;
+  final VoidCallback? onStartParsing;
 
   const PlayData({
     super.key, 
     this.selectedEpisode, 
     this.animeName,
     this.onVideoUrlReceived,
+    this.onStartParsing,
   });
 
   @override
@@ -78,6 +80,9 @@ class _PlayDataState extends State<PlayData> {
   //获取视频url
   Future<void> _getVideoUrl(String sourceUrl) async {
     try {
+      // 通知开始解析
+      widget.onStartParsing?.call();
+      
       final videoUrl = await VideoService.getPlayUrl(sourceUrl);
       if (videoUrl != null) {
         // 回调videoUrl给父组件处理
