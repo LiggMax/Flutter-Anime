@@ -21,7 +21,7 @@ class _RecommendPageState extends State<RecommendPage> {
           ),
           SizedBox(height: 16),
           Text(
-            '推荐功能开发中...',
+            '推荐页面开发中...',
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey,

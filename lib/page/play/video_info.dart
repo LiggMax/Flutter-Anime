@@ -8,13 +8,11 @@ import 'controls.dart';
 import 'details_info.dart';
 
 class VideoInfoPage extends StatefulWidget {
-  final String? videoUrl;
   final int? animeId;
   final String? animeName;
 
   const VideoInfoPage({
     super.key,
-    this.videoUrl,
     this.animeId,
     this.animeName,
   });
@@ -32,6 +30,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
   Timer? _hideControlsTimer;
   bool _isFullscreen = false;
   bool _isTransitioning = false; // 防止连续快速切换
+  String? _currentVideoUrl; // 当前播放的视频URL
 
   @override
   void initState() {
@@ -54,10 +53,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
 
     print('接收到的id${widget.animeId}');
     print('接收到的标题${widget.animeName}');
-    // 如果提供了视频URL，则开始播放
-    if (widget.videoUrl != null) {
-      player.open(Media(widget.videoUrl!));
-    }
 
     // 开始自动隐藏控件的计时器
     _startHideControlsTimer();
@@ -97,6 +92,38 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         });
       }
     });
+  }
+
+  // 处理接收到的视频URL
+  void _onVideoUrlReceived(String videoUrl) {
+    print('接收到视频URL: $videoUrl');
+    
+    // 检查URL格式是否正确
+    if (videoUrl.contains(r'\/')) {
+      print('检测到转义字符，进行URL清理...');
+      final cleanedUrl = videoUrl.replaceAll(r'\/', '/');
+      print('清理后的URL: $cleanedUrl');
+      setState(() {
+        _currentVideoUrl = cleanedUrl;
+      });
+      _playVideo(cleanedUrl);
+    } else {
+      setState(() {
+        _currentVideoUrl = videoUrl;
+      });
+      _playVideo(videoUrl);
+    }
+  }
+
+  // 播放视频
+  void _playVideo(String videoUrl) {
+    try {
+      print('开始播放视频: $videoUrl');
+      player.open(Media(videoUrl));
+      player.play();
+    } catch (e) {
+      print('播放视频失败: $e');
+    }
   }
 
   void _showControlsTemporarily() {
@@ -216,6 +243,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                                                   DetailPage(
                                                     animeId: widget.animeId,
                                                     animeName: widget.animeName,
+                                                    onVideoUrlReceived: _onVideoUrlReceived,
                                                   ), // 详情页面
                                                   CommentsPage(), // 评论页面
                                                 ],

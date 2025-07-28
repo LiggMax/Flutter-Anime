@@ -12,16 +12,12 @@ import 'package:logging/logging.dart';
 class VideoAnalysis {
   static final Logger _log = Logger('analysisService');
 
-  static const String selectNames =
-      'body > .box-width .search-box .thumb-content > .thumb-txt';
-  static const String selectLinks =
-      'body > .box-width .search-box .thumb-menu > a';
-  static const String selectChannelNames =
-      '.anthology-tab > .swiper-wrapper a'; //线路名称
+  static const String selectNames = 'body > .box-width .search-box .thumb-content > .thumb-txt';
+  static const String selectLinks = 'body > .box-width .search-box .thumb-menu > a';
+  static const String selectChannelNames = '.anthology-tab > .swiper-wrapper a'; //线路名称
   static const String matchChannelName = r'^()?(?<ch>.+?)(\d+)?$'; //线路名称正则
   static const String selectEpisodeLists = '.anthology-list-box'; //剧集列表
-  static const String matchEpisodeSortFromName =
-      r'第\s*(?<ep>.+)\s*[话集]'; //剧集序号正则
+  static const String matchEpisodeSortFromName = r'第\s*(?<ep>.+)\s*[话集]'; //剧集序号正则
   static const String selectEpisodesFromList = 'a';
 
   /// 解析解析条目
@@ -123,31 +119,37 @@ class VideoAnalysis {
   ///解析视频链接
   static String? parsePlayUrl(String htmlData) {
     try {
-      // 视频链接匹配正则表达式
+      // 视频链接匹配正则表达式 - 支持转义和非转义的URL格式
       final videoUrlRegex = RegExp(
-        r'(^http(s)?:\/\/(?!.*http(s)?:\/\/).+((\.mp4)|(\.mkv)|(m3u8)).*(\?.+)?)|(akamaized)|(bilivideo.com)',
+        r'"url":"(https?:\\?/\\?/[^"]+\.(?:mp4|mkv|m3u8)[^"]*)"',
         caseSensitive: false,
       );
 
       // 在HTML数据中查找匹配的视频链接
       final matches = videoUrlRegex.allMatches(htmlData);
-      
+
       if (matches.isNotEmpty) {
         final match = matches.first;
-        final videoUrl = match.group(0);
-        
+        final videoUrl = match.group(1); // 获取第一个捕获组
+
         if (videoUrl != null && videoUrl.isNotEmpty) {
-          _log.info('解析到视频链接: $videoUrl');
-          return videoUrl;
+          // 处理转义的URL
+          _log.info('原始视频链接: $videoUrl');
+          
+          final unescapedUrl = videoUrl
+              .replaceAll(r'\\/', '/') // 移除转义的正斜杠
+              .replaceAll(r'\\"', '"') // 移除转义的引号
+              .replaceAll(r'\\', '') // 移除其他转义字符
+              .replaceAll(r'\/', '/'); // 移除JSON转义的正斜杠
+
+          _log.info('处理后的视频链接: $unescapedUrl');
+          return unescapedUrl;
         }
       }
-
-      _log.warning('未找到匹配的视频链接');
       return null;
     } catch (e) {
       _log.severe('视频链接解析错误: $e');
       return null;
     }
   }
-
 }

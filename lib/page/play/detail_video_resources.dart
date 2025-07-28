@@ -13,8 +13,14 @@ import 'package:AnimeFlow/modules/episodes_data.dart';
 class PlayData extends StatefulWidget {
   final Episode? selectedEpisode;
   final String? animeName;
+  final Function(String)? onVideoUrlReceived;
 
-  const PlayData({super.key, this.selectedEpisode, this.animeName});
+  const PlayData({
+    super.key, 
+    this.selectedEpisode, 
+    this.animeName,
+    this.onVideoUrlReceived,
+  });
 
   @override
   State<PlayData> createState() => _PlayDataState();
@@ -74,7 +80,8 @@ class _PlayDataState extends State<PlayData> {
     try {
       final videoUrl = await VideoService.getPlayUrl(sourceUrl);
       if (videoUrl != null) {
-        // TODO 回调videoUrl给父组件处理
+        // 回调videoUrl给父组件处理
+        widget.onVideoUrlReceived?.call(videoUrl);
       }
     } catch (e) {
       print('获取播放地址失败: $e');

@@ -83,25 +83,20 @@ class VideoService {
   ///发送请求获取播放地址
   static Future<String?> getPlayUrl(String url) async {
     try {
-      _log.info('获取播放地址: $url');
-      
       final response = await httpRequest.get(
         websiteUrl + url,
         options: Options(headers: {'User-Agent': Api.userAgent}),
       );
 
-      if (response.data != null) {
-        // 使用 VideoAnalysis 解析视频链接
-        final videoUrl = VideoAnalysis.parsePlayUrl(response.data.toString());
-        
-        if (videoUrl != null) {
-          _log.info('成功获取播放地址: $videoUrl');
-          return videoUrl;
-        } else {
-          _log.warning('未能解析出有效的视频链接');
-        }
+      //  解析视频链接
+      final videoUrl = VideoAnalysis.parsePlayUrl(response.data.toString());
+
+      if (videoUrl != null) {
+        _log.info('成功获取播放地址: $videoUrl');
+        return videoUrl;
       } else {
-        _log.warning('响应数据为空');
+        _log.warning('未能解析出有效的视频链接');
+        return null;
       }
     } catch (e) {
       _log.severe('获取播放地址失败: $e');

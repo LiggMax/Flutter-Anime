@@ -496,8 +496,6 @@ class AnimePlayButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => VideoInfoPage(
-                      // 使用更兼容的测试视频URL
-                      videoUrl: 'https://tjdownload.pan.wo.cn/openapi/download?fid=E9DmP_OsZbmVT9xK3I0TtJBkRPxW7OWxgprnwJ/VPGQM/R/jE/aEWScrehn2zQJqU946ZyFK3yg/Ju5wDH0NnzSthiaw==',
                       animeId: animeId,
                       animeName: animeName,
                     ),

@@ -7,8 +7,14 @@ import 'package:AnimeFlow/page/play/detail_video_resources.dart';
 class DetailPage extends StatefulWidget {
   final int? animeId;
   final String? animeName;
+  final Function(String)? onVideoUrlReceived;
 
-  const DetailPage({super.key, this.animeId, this.animeName});
+  const DetailPage({
+    super.key, 
+    this.animeId, 
+    this.animeName,
+    this.onVideoUrlReceived,
+  });
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -82,6 +88,7 @@ class _DetailPageState extends State<DetailPage>
             PlayData(
               selectedEpisode: _selectedEpisode,
               animeName: widget.animeName,
+              onVideoUrlReceived: widget.onVideoUrlReceived,
             ),
           ],
         ],
