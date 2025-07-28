@@ -36,7 +36,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -75,7 +78,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -109,9 +115,14 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          $APP_NAME = Select-String -Path pubspec.yaml -Pattern "^name:" | ForEach-Object { ($_ -split ":")[1].Trim() }
+          $content = Get-Content pubspec.yaml -Raw
+          $match = [regex]::Match($content, '^name:\s*(\S+)', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+          if ($match.Success) {
+            $APP_NAME = $match.Groups[1].Value.Trim()
+          } else {
+            $APP_NAME = "AnimeFlow"
+          }
           echo "APP_NAME=$APP_NAME" >> $env:GITHUB_ENV
-          echo "::set-output name=app_name::$APP_NAME"
 
       - name: Install dependencies
         run: flutter pub get
@@ -144,7 +155,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -185,7 +199,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies

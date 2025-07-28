@@ -76,7 +76,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -123,7 +126,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -159,7 +165,13 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          $APP_NAME = Select-String -Path pubspec.yaml -Pattern "^name:" | ForEach-Object { ($_ -split ":")[1].Trim() }
+          $content = Get-Content pubspec.yaml -Raw
+          $match = [regex]::Match($content, '^name:\s*(\S+)', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+          if ($match.Success) {
+            $APP_NAME = $match.Groups[1].Value.Trim()
+          } else {
+            $APP_NAME = "AnimeFlow"
+          }
           echo "APP_NAME=$APP_NAME" >> $env:GITHUB_ENV
 
       - name: Install dependencies
@@ -195,7 +207,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -238,7 +253,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -274,7 +292,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Download all artifacts
@@ -290,6 +311,7 @@ jobs:
           body: |
             ## 🎉 Release ${{ needs.get-version.outputs.version_name }}
             
+            ### 正式发布第一个版本${{needs.get-version}}
             ### 📱 支持的平台
             - Android (apk)
             - iOS (ipa)
@@ -299,16 +321,7 @@ jobs:
             
             ### 📦 下载
             请从下方附件中下载对应平台的安装包。
-            
-            ### 🔄 更新内容
-            - 修复全屏切换时的组件重新渲染问题
-            - 优化播放器控件状态管理
-            - 改进用户体验
-            
-            ### 🛠️ 技术改进
-            - 使用 AutomaticKeepAliveClientMixin 保持页面状态
-            - 优化全屏切换逻辑，减少不必要的重建
-            - 添加精确的状态更新方法
+
           files: |
             artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.apk
             artifacts/${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}/*.ipa
@@ -332,7 +345,10 @@ jobs:
       - name: Get app name
         id: app_name
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Download all artifacts
@@ -365,9 +381,7 @@ jobs:
 
           files: |
             artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.apk
-            artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.aab
             artifacts/${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}/*.ipa
-            artifacts/${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}/*.app
             artifacts/${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}/*.dmg
             artifacts/${{ env.APP_NAME }}-windows-${{ needs.get-version.outputs.version_name }}/*.exe
             artifacts/${{ env.APP_NAME }}-linux-${{ needs.get-version.outputs.version_name }}/*
