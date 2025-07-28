@@ -139,6 +139,9 @@ jobs:
         run: |
           flutter build linux --release
           echo "Linux build completed"
+          echo "=== Linux build output structure ==="
+          find build/linux -type f -name "*" | head -20
+          echo "=== End of Linux build output ==="
 
       - name: Archive Linux artifacts
         uses: actions/upload-artifact@v4
@@ -285,6 +288,8 @@ jobs:
     needs: [get-version, build-android, build-linux, build-windows, build-macos, build-ios]
     if: ${{ github.event.inputs.create_release != 'false' && github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -303,58 +308,11 @@ jobs:
         with:
           path: artifacts
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.get-version.outputs.version }}
-          name: ${{ env.APP_NAME }} ${{ needs.get-version.outputs.version_name }}
-          body: |
-            ## 🎉 Release ${{ needs.get-version.outputs.version_name }}
-            
-            ### 正式发布第一个版本${{needs.get-version}}
-            ### 📱 支持的平台
-            - Android (apk)
-            - iOS (ipa)
-            - macOS ( dmg)
-            - Windows (exe)
-            - Linux (AppImage)
-            
-            ### 📦 下载
-            请从下方附件中下载对应平台的安装包。
-
-          files: |
-            artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.apk
-            artifacts/${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}/*.ipa
-            artifacts/${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}/*.dmg
-            artifacts/${{ env.APP_NAME }}-windows-${{ needs.get-version.outputs.version_name }}/*.exe
-            artifacts/${{ env.APP_NAME }}-linux-${{ needs.get-version.outputs.version_name }}/*
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # 自动创建Release（当推送tag时）
-  auto-create-release:
-    needs: [get-version, build-android, build-linux, build-windows, build-macos, build-ios]
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Get app name
-        id: app_name
+      - name: List downloaded artifacts
         run: |
-          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
-          if [ -z "$APP_NAME" ]; then
-            APP_NAME="AnimeFlow"
-          fi
-          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
+          echo "=== Downloaded artifacts structure ==="
+          find artifacts -type f -name "*" | head -20
+          echo "=== End of artifacts list ==="
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -377,8 +335,71 @@ jobs:
             
             ### 🔄 更新内容
             - 初步实现番剧信息展示，番剧播放
-            
+          files: |
+            artifacts/**/*.apk
+            artifacts/**/*.aab
+            artifacts/**/*.ipa
+            artifacts/**/*.dmg
+            artifacts/**/*.app
+            artifacts/**/*.exe
+            artifacts/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # 自动创建Release（当推送tag时）
+  auto-create-release:
+    needs: [get-version, build-android, build-linux, build-windows, build-macos, build-ios]
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | sed 's/^name:[[:space:]]*//' | tr -d ' ')
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME="AnimeFlow"
+          fi
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "=== Downloaded artifacts structure ==="
+          find artifacts -type f -name "*" | head -20
+          echo "=== End of artifacts list ==="
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.get-version.outputs.version }}
+          name: ${{ env.APP_NAME }} ${{ needs.get-version.outputs.version_name }}
+          body: |
+            ## 🎉 Release ${{ needs.get-version.outputs.version_name }}
+            
+            ### 正式发布第一个版本${{needs.get-version}}
+            ### 📱 支持的平台
+            - Android (apk)
+            - iOS (ipa)
+            - macOS ( dmg)
+            - Windows (exe)
+            - Linux (AppImage)
+            
+            ### 📦 下载
+            请从下方附件中下载对应平台的安装包。
+            
+            ### 🔄 更新内容
+            - 初步实现番剧信息展示，番剧播放
           files: |
             artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.apk
             artifacts/${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}/*.ipa
