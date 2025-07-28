@@ -1,0 +1,376 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      platform:
+        type: choice
+        description: "Select platform to release"
+        options:
+          - android
+          - ios
+          - macos
+          - windows
+          - linux
+          - all
+        default: "all"
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  FLUTTER_VERSION: stable
+
+jobs:
+  # 获取版本信息
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      version_name: ${{ steps.get_version.outputs.version_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          
+          # 移除v前缀获取版本号
+          VERSION_NAME="${VERSION#v}"
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+
+  # 构建Android版本
+  build-android:
+    needs: get-version
+    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_VERSION }}
+          flutter-version-file: pubspec.yaml
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: |
+          flutter build apk --release
+          echo "Android APK build completed"
+
+      - name: Build Android App Bundle
+        run: |
+          flutter build appbundle --release
+          echo "Android App Bundle build completed"
+
+      - name: Archive Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+
+  # 构建Linux版本
+  build-linux:
+    needs: get-version
+    if: ${{ github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libasound2-dev libmpv-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_VERSION }}
+          flutter-version-file: pubspec.yaml
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: |
+          flutter build linux --release
+          echo "Linux build completed"
+
+      - name: Archive Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-linux-${{ needs.get-version.outputs.version_name }}
+          path: build/linux/
+          if-no-files-found: error
+
+  # 构建Windows版本
+  build-windows:
+    needs: get-version
+    if: ${{ github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event_name == 'push' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_VERSION }}
+          flutter-version-file: pubspec.yaml
+
+      - name: Get app name
+        id: app_name
+        run: |
+          $APP_NAME = Select-String -Path pubspec.yaml -Pattern "^name:" | ForEach-Object { ($_ -split ":")[1].Trim() }
+          echo "APP_NAME=$APP_NAME" >> $env:GITHUB_ENV
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: |
+          flutter build windows --release
+          echo "Windows build completed"
+
+      - name: Archive Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-windows-${{ needs.get-version.outputs.version_name }}
+          path: build/windows/x64/runner/Release/
+          if-no-files-found: error
+
+  # 构建macOS版本
+  build-macos:
+    needs: get-version
+    if: ${{ github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all' || github.event_name == 'push' }}
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_VERSION }}
+          flutter-version-file: pubspec.yaml
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: |
+          flutter build macos --release
+          echo "macOS build completed"
+
+      - name: Create DMG
+        run: |
+          mkdir -p build/dist
+          cp -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          ln -s /Applications build/dist/Applications
+          hdiutil create -fs HFS+ -volname "${{ env.APP_NAME }}-${{ needs.get-version.outputs.version_name }}" -srcfolder build/dist "${{ env.APP_NAME }}-${{ needs.get-version.outputs.version_name }}.dmg"
+
+      - name: Archive macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}
+          path: ${{ env.APP_NAME }}-${{ needs.get-version.outputs.version_name }}.dmg
+          if-no-files-found: error
+
+  # 构建iOS版本
+  build-ios:
+    needs: get-version
+    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all' || github.event_name == 'push' }}
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_VERSION }}
+          flutter-version-file: pubspec.yaml
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS
+        run: |
+          flutter build ios --release --no-codesign
+          echo "iOS build completed"
+
+      - name: Create IPA
+        run: |
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -q -r "${{ env.APP_NAME }}-${{ needs.get-version.outputs.version_name }}.ipa" Payload
+
+      - name: Archive iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}
+          path: "${{ env.APP_NAME }}-${{ needs.get-version.outputs.version_name }}.ipa"
+          if-no-files-found: error
+
+  # 创建GitHub Release
+  create-release:
+    needs: [get-version, build-android, build-linux, build-windows, build-macos, build-ios]
+    if: ${{ github.event.inputs.create_release != 'false' && github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.get-version.outputs.version }}
+          name: ${{ env.APP_NAME }} ${{ needs.get-version.outputs.version_name }}
+          body: |
+            ## 🎉 Release ${{ needs.get-version.outputs.version_name }}
+            
+            ### 📱 支持的平台
+            - Android (apk)
+            - iOS (ipa)
+            - macOS ( dmg)
+            - Windows (exe)
+            - Linux (AppImage)
+            
+            ### 📦 下载
+            请从下方附件中下载对应平台的安装包。
+            
+            ### 🔄 更新内容
+            - 修复全屏切换时的组件重新渲染问题
+            - 优化播放器控件状态管理
+            - 改进用户体验
+            
+            ### 🛠️ 技术改进
+            - 使用 AutomaticKeepAliveClientMixin 保持页面状态
+            - 优化全屏切换逻辑，减少不必要的重建
+            - 添加精确的状态更新方法
+          files: |
+            artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.apk
+            artifacts/${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}/*.ipa
+            artifacts/${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}/*.dmg
+            artifacts/${{ env.APP_NAME }}-windows-${{ needs.get-version.outputs.version_name }}/*.exe
+            artifacts/${{ env.APP_NAME }}-linux-${{ needs.get-version.outputs.version_name }}/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 自动创建Release（当推送tag时）
+  auto-create-release:
+    needs: [get-version, build-android, build-linux, build-windows, build-macos, build-ios]
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get app name
+        id: app_name
+        run: |
+          APP_NAME=$(grep '^name:' pubspec.yaml | cut -d ':' -f 2 | tr -d ' ')
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.get-version.outputs.version }}
+          name: ${{ env.APP_NAME }} ${{ needs.get-version.outputs.version_name }}
+          body: |
+            ## 🎉 Release ${{ needs.get-version.outputs.version_name }}
+            
+            ### 📱 支持的平台
+            - Android (apk)
+            - iOS (ipa)
+            - macOS ( dmg)
+            - Windows (exe)
+            - Linux (AppImage)
+            
+            ### 📦 下载
+            请从下方附件中下载对应平台的安装包。
+            
+            ### 🔄 更新内容
+            - 初步实现番剧信息展示，番剧播放
+            
+
+          files: |
+            artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.apk
+            artifacts/${{ env.APP_NAME }}-android-${{ needs.get-version.outputs.version_name }}/*.aab
+            artifacts/${{ env.APP_NAME }}-ios-${{ needs.get-version.outputs.version_name }}/*.ipa
+            artifacts/${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}/*.app
+            artifacts/${{ env.APP_NAME }}-macos-${{ needs.get-version.outputs.version_name }}/*.dmg
+            artifacts/${{ env.APP_NAME }}-windows-${{ needs.get-version.outputs.version_name }}/*.exe
+            artifacts/${{ env.APP_NAME }}-linux-${{ needs.get-version.outputs.version_name }}/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
