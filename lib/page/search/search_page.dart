@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/theme_controller.dart';
 import '../../utils/theme_extensions.dart';
+import '../../request/bangumi.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -15,7 +16,7 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<String> _searchHistory = [];
-  List<String> _searchSuggestions = [];
+  List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   String _currentQuery = '';
 
@@ -46,39 +47,44 @@ class _SearchPageState extends State<SearchPage> {
         _performSearch(query);
       } else {
         setState(() {
-          _searchSuggestions.clear();
+          _searchResults.clear();
         });
       }
     }
   }
 
-  void _performSearch(String query) {
+  Future<void> _performSearch(String query) async {
     setState(() {
       _isSearching = true;
     });
 
-    // 模拟搜索建议
-    Future.delayed(const Duration(milliseconds: 300), () {
+    try {
+      final result = await BangumiService.search(query);
       if (mounted && _currentQuery == query) {
         setState(() {
           _isSearching = false;
-          _searchSuggestions = [
-            '$query 第一季',
-            '$query 第二季',
-            '$query 剧场版',
-            '$query 特别篇',
-          ];
+          if (result != null && result['data'] != null) {
+            _searchResults = List<Map<String, dynamic>>.from(result['data']);
+          } else {
+            _searchResults = [];
+          }
         });
       }
-    });
+    } catch (e) {
+      if (mounted && _currentQuery == query) {
+        setState(() {
+          _isSearching = false;
+          _searchResults = [];
+        });
+      }
+      print('搜索失败: $e');
+    }
   }
 
   void _onSearchSubmitted(String query) {
     if (query.trim().isNotEmpty) {
       _addToHistory(query.trim());
       _performSearch(query.trim());
-      // TODO: 执行实际搜索
-      print('搜索: $query');
     }
   }
 
@@ -234,7 +240,7 @@ class _SearchPageState extends State<SearchPage> {
       );
     }
 
-    if (_searchSuggestions.isEmpty) {
+    if (_searchResults.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -252,9 +258,9 @@ class _SearchPageState extends State<SearchPage> {
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _searchSuggestions.length,
+      itemCount: _searchResults.length,
       itemBuilder: (context, index) {
-        return _buildSearchResultItem(_searchSuggestions[index]);
+        return _buildSearchResultItem(_searchResults[index]);
       },
     );
   }
@@ -282,15 +288,85 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildSearchResultItem(String result) {
-    return ListTile(
-      leading: const Icon(Icons.search),
-      title: Text(result),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // TODO: 跳转到搜索结果详情页
-        print('选择搜索结果: $result');
-      },
+  Widget _buildSearchResultItem(Map<String, dynamic> anime) {
+    final name = anime['name_cn'] ?? anime['name'] ?? '未知';
+    final summary = anime['summary'] ?? '';
+    final image = anime['images']?['small'] ?? anime['image'] ?? '';
+    final rating = anime['rating']?['score'] ?? 0.0;
+    final eps = anime['eps'] ?? 0;
+    final date = anime['date'] ?? '';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(12),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: image.isNotEmpty
+              ? Image.network(
+                  image,
+                  width: 60,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 60,
+                      height: 80,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    );
+                  },
+                )
+              : Container(
+                  width: 60,
+                  height: 80,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.image, color: Colors.grey),
+                ),
+        ),
+        title: Text(
+          name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (summary.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                summary,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                if (rating > 0) ...[
+                  Icon(Icons.star, size: 14, color: Colors.amber),
+                  Text(rating.toString(), style: const TextStyle(fontSize: 12)),
+                  const SizedBox(width: 8),
+                ],
+                if (eps > 0) ...[
+                  Text('${eps}话', style: const TextStyle(fontSize: 12)),
+                  const SizedBox(width: 8),
+                ],
+                if (date.isNotEmpty) ...[
+                  Text(date, style: const TextStyle(fontSize: 12)),
+                ],
+              ],
+            ),
+          ],
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          // TODO: 跳转到动漫详情页
+          print('选择搜索结果: $name');
+        },
+      ),
     );
   }
 }

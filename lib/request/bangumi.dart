@@ -40,4 +40,18 @@ class BangumiService {
       return null;
     }
   }
+
+  //条目搜索
+  static Future<Map<String, dynamic>?> search(String keyword) async {
+    try {
+      final response = await httpRequest.post(
+        Api.bangumiRankSearch.replaceAll('{0}', '20').replaceAll('{1}', '0'),
+        data: {'keyword': keyword, 'sort': 'heat'},
+      );
+      return response.data;
+    } catch (e) {
+      _log.severe('条目搜索失败: $e');
+      return null;
+    }
+  }
 }

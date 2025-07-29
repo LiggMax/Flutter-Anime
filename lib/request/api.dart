@@ -5,6 +5,8 @@ class Api {
   static const String bangumiInfoByID = 'https://api.bgm.tv/v0/subjects';
   // 从条目ID获取剧集ID
   static const String bangumiEpisodeByID = 'https://api.bgm.tv/v0/episodes';
+  // 条目搜索
+  static const String bangumiRankSearch = 'https://api.bgm.tv/v0/search/subjects?limit={0}&offset={1}';
   // bangumi请求头
   static const String bangumiUserAgent = 'Flutter-Anime/1.0.0 (https://github.com/LiggMax/Flutter-Anime.git)';
   //常规请求头
