@@ -46,7 +46,7 @@ class BangumiService {
     try {
       final response = await httpRequest.post(
         Api.bangumiRankSearch.replaceAll('{0}', '20').replaceAll('{1}', '0'),
-        data: {'keyword': keyword, 'sort': 'heat'},
+        data: {'keyword': keyword, 'sort': 'heat', 'type': 2},
       );
       return response.data;
     } catch (e) {

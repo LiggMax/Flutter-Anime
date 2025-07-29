@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import '../../controllers/theme_controller.dart';
-import '../../utils/theme_extensions.dart';
-import '../../request/bangumi.dart';
+import 'package:AnimeFlow/utils/theme_extensions.dart';
+import 'package:AnimeFlow/request/bangumi.dart';
+import 'package:AnimeFlow/modules/search_data.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -16,7 +15,7 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<String> _searchHistory = [];
-  List<Map<String, dynamic>> _searchResults = [];
+  SearchData? _searchData;
   bool _isSearching = false;
   String _currentQuery = '';
 
@@ -47,7 +46,7 @@ class _SearchPageState extends State<SearchPage> {
         _performSearch(query);
       } else {
         setState(() {
-          _searchResults.clear();
+          _searchData = null;
         });
       }
     }
@@ -63,10 +62,10 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted && _currentQuery == query) {
         setState(() {
           _isSearching = false;
-          if (result != null && result['data'] != null) {
-            _searchResults = List<Map<String, dynamic>>.from(result['data']);
+          if (result != null) {
+            _searchData = SearchDataParser.parseSearchResponse(result);
           } else {
-            _searchResults = [];
+            _searchData = null;
           }
         });
       }
@@ -74,7 +73,7 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted && _currentQuery == query) {
         setState(() {
           _isSearching = false;
-          _searchResults = [];
+          _searchData = null;
         });
       }
       print('搜索失败: $e');
@@ -240,7 +239,7 @@ class _SearchPageState extends State<SearchPage> {
       );
     }
 
-    if (_searchResults.isEmpty) {
+    if (_searchData == null || _searchData!.data.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -256,13 +255,74 @@ class _SearchPageState extends State<SearchPage> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        return _buildSearchResultItem(_searchResults[index]);
-      },
+    return Column(
+      children: [
+        // 搜索结果统计
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Text(
+                '找到 ${_searchData!.total} 个结果',
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+              const Spacer(),
+              // 排序按钮
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.sort),
+                onSelected: (value) {
+                  _sortResults(value);
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'score', child: Text('按评分排序')),
+                  const PopupMenuItem(value: 'date', child: Text('按日期排序')),
+                  const PopupMenuItem(
+                    value: 'collection',
+                    child: Text('按收藏数排序'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // 搜索结果列表
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            itemCount: _searchData!.data.length,
+            itemBuilder: (context, index) {
+              return _buildSearchResultItem(_searchData!.data[index]);
+            },
+          ),
+        ),
+      ],
     );
+  }
+
+  void _sortResults(String sortType) {
+    if (_searchData == null) return;
+
+    setState(() {
+      switch (sortType) {
+        case 'score':
+          _searchData!.data.sort((a, b) => b.score.compareTo(a.score));
+          break;
+        case 'date':
+          _searchData!.data.sort((a, b) {
+            if (a.date == null && b.date == null) return 0;
+            if (a.date == null) return 1;
+            if (b.date == null) return -1;
+            return b.date!.compareTo(a.date!);
+          });
+          break;
+        case 'collection':
+          _searchData!.data.sort(
+            (a, b) => b.collection.collect.compareTo(a.collection.collect),
+          );
+          break;
+      }
+    });
   }
 
   Widget _buildHistoryItem(String history) {
@@ -288,85 +348,164 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildSearchResultItem(Map<String, dynamic> anime) {
-    final name = anime['name_cn'] ?? anime['name'] ?? '未知';
-    final summary = anime['summary'] ?? '';
-    final image = anime['images']?['small'] ?? anime['image'] ?? '';
-    final rating = anime['rating']?['score'] ?? 0.0;
-    final eps = anime['eps'] ?? 0;
-    final date = anime['date'] ?? '';
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: image.isNotEmpty
-              ? Image.network(
-                  image,
-                  width: 60,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 60,
-                      height: 80,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, color: Colors.grey),
-                    );
-                  },
-                )
-              : Container(
-                  width: 60,
-                  height: 80,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image, color: Colors.grey),
-                ),
-        ),
-        title: Text(
-          name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
+  Widget _buildSearchResultItem(SearchAnimeItem anime) {
+    return GestureDetector(
+      onTap: () => _onAnimeTap(anime),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (summary.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                summary,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            // 左侧封面图片
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: anime.coverImage.isNotEmpty
+                  ? Image.network(
+                      anime.coverImage,
+                      width: 100,
+                      height: 150,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 60,
+                          height: 90,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        );
+                      },
+                    )
+                  : Container(
+                      width: 60,
+                      height: 90,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // 右侧信息
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 标题
+                  Text(
+                    anime.displayName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  // 基本信息
+                  Row(
+                    children: [
+                      if (anime.date != null && anime.date!.isNotEmpty) ...[
+                        Text(
+                          anime.date!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      if (anime.eps > 0) ...[
+                        Text(
+                          '全${anime.eps}话',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // 标签信息
+                  if (anime.tags.isNotEmpty) ...[
+                    Text(
+                      anime.tags.take(3).map((tag) => tag.name).join('/'),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+
+                  // 制作信息
+                  if (anime.infobox.isNotEmpty) ...[
+                    Builder(
+                      builder: (context) {
+                        final director = anime.infobox.firstWhere(
+                          (box) => box.key == '导演' || box.key == '监督',
+                          orElse: () => AnimeInfoBox(key: '', value: ''),
+                        );
+                        if (director.key.isNotEmpty) {
+                          return Text(
+                            '制作: ${director.valueString}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+
+
+                  // 评分信息
+                  Row(
+                    children: [
+                      if (anime.score > 0) ...[
+                        Icon(Icons.star, size: 14, color: Colors.amber),
+                        const SizedBox(width: 2),
+                        Text(
+                          anime.score.toString(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '#${anime.rating.rank}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${anime.rating.total}人评',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ),
-            ],
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                if (rating > 0) ...[
-                  Icon(Icons.star, size: 14, color: Colors.amber),
-                  Text(rating.toString(), style: const TextStyle(fontSize: 12)),
-                  const SizedBox(width: 8),
-                ],
-                if (eps > 0) ...[
-                  Text('${eps}话', style: const TextStyle(fontSize: 12)),
-                  const SizedBox(width: 8),
-                ],
-                if (date.isNotEmpty) ...[
-                  Text(date, style: const TextStyle(fontSize: 12)),
-                ],
-              ],
             ),
           ],
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () {
-          // TODO: 跳转到动漫详情页
-          print('选择搜索结果: $name');
-        },
       ),
     );
+  }
+
+  void _onAnimeTap(SearchAnimeItem anime) {
+    // TODO: 跳转到动漫详情页
+    print('选择搜索结果: ${anime.displayName}');
   }
 }
