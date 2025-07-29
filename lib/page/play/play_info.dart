@@ -11,11 +11,7 @@ class VideoInfoPage extends StatefulWidget {
   final int? animeId;
   final String? animeName;
 
-  const VideoInfoPage({
-    super.key,
-    this.animeId,
-    this.animeName,
-  });
+  const VideoInfoPage({super.key, this.animeId, this.animeName});
 
   @override
   State<VideoInfoPage> createState() => _VideoInfoPageState();
@@ -68,9 +64,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     player.dispose();
     super.dispose();
   }
@@ -96,20 +90,20 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     });
   }
 
-    // 播放视频
+  // 播放视频
   void _playVideo(String videoUrl) {
     try {
       print('开始播放视频: $videoUrl');
-      
+
       setState(() {
         _isLoadingVideo = true;
         _playStatus = '解析成功，开始播放';
         _hasVideoUrl = true;
       });
-      
+
       player.open(Media(videoUrl));
       player.play();
-      
+
       // 监听播放状态变化
       player.stream.playing.listen((isPlaying) {
         if (mounted) {
@@ -124,7 +118,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
           });
         }
       });
-      
+
       // 监听错误
       player.stream.error.listen((error) {
         if (mounted) {
@@ -134,7 +128,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
           });
         }
       });
-      
     } catch (e) {
       print('播放视频失败: $e');
       setState(() {
@@ -179,9 +172,7 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     try {
       if (!_isFullscreen) {
         // 进入全屏
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.immersiveSticky,
-        );
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
         await SystemChrome.setPreferredOrientations([
           DeviceOrientation.landscapeLeft,
           DeviceOrientation.landscapeRight,
@@ -207,7 +198,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       });
       // 再次等待确保布局稳定
       await Future.delayed(const Duration(milliseconds: 200));
-
     } finally {
       // 显示控件并重新开始计时
       setState(() {
@@ -246,51 +236,66 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                         final buffer = bufferSnapshot.data ?? Duration.zero;
 
                         return _isFullscreen
-                          ? _buildFullscreenPlayer(isPlaying, position, duration, buffer)
-                          : SafeArea(
-                              child: Column(
-                                children: [
-                                  // 视频播放器 - 保持16:9比例
-                                  Flexible(
-                                    flex: 0,
-                                    child: _buildVideoPlayer(isPlaying, position, duration, buffer),
-                                  ),
+                            ? _buildFullscreenPlayer(
+                                isPlaying,
+                                position,
+                                duration,
+                                buffer,
+                              )
+                            : SafeArea(
+                                child: Column(
+                                  children: [
+                                    // 视频播放器 - 保持16:9比例
+                                    Flexible(
+                                      flex: 0,
+                                      child: _buildVideoPlayer(
+                                        isPlaying,
+                                        position,
+                                        duration,
+                                        buffer,
+                                      ),
+                                    ),
 
-                                  // 视频下方的内容区域
-                                  Expanded(
-                                    child: Container(
-                                      color: Theme.of(context).scaffoldBackgroundColor,
-                                      child: DefaultTabController(
-                                        length: 2, // 两个标签页
-                                        child: Column(
-                                          children: [
-                                            TabBar(
-                                              tabs: [
-                                                Tab(text: '详情'),
-                                                Tab(text: '评论'),
-                                              ],
-                                            ),
-                                            Expanded(
-                                              child: TabBarView(
-                                                children: [
-                                                  DetailPage(
-                                                    animeId: widget.animeId,
-                                                    animeName: widget.animeName,
-                                                    onVideoUrlReceived: _playVideo,
-                                                    onStartParsing: _startParsingVideo,
-                                                  ), // 详情页面
-                                                  CommentsPage(), // 评论页面
+                                    // 视频下方的内容区域
+                                    Expanded(
+                                      child: Container(
+                                        color: Theme.of(
+                                          context,
+                                        ).scaffoldBackgroundColor,
+                                        child: DefaultTabController(
+                                          length: 2, // 两个标签页
+                                          child: Column(
+                                            children: [
+                                              TabBar(
+                                                tabs: [
+                                                  Tab(text: '详情'),
+                                                  Tab(text: '评论'),
                                                 ],
                                               ),
-                                            ),
-                                          ],
+                                              Expanded(
+                                                child: TabBarView(
+                                                  children: [
+                                                    DetailPage(
+                                                      animeId: widget.animeId,
+                                                      animeName:
+                                                          widget.animeName,
+                                                      onVideoUrlReceived:
+                                                          _playVideo,
+                                                      onStartParsing:
+                                                          _startParsingVideo,
+                                                    ), // 详情页面
+                                                    CommentsPage(), // 评论页面
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
+                                  ],
+                                ),
+                              );
                       },
                     );
                   },
@@ -302,7 +307,13 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
       ),
     );
   }
-  Widget _buildVideoPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
+
+  Widget _buildVideoPlayer(
+    bool isPlaying,
+    Duration position,
+    Duration duration,
+    Duration buffer,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
@@ -313,33 +324,33 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
                 width: constraints.maxWidth,
                 color: Colors.black,
                 child: _hasVideoUrl
-                  ? StreamBuilder<bool>(
-                      stream: player.stream.buffering,
-                      builder: (context, bufferingSnapshot) {
-                        final isBuffering = bufferingSnapshot.data ?? true;
+                    ? StreamBuilder<bool>(
+                        stream: player.stream.buffering,
+                        builder: (context, bufferingSnapshot) {
+                          final isBuffering = bufferingSnapshot.data ?? true;
 
-                        return Stack(
-                          children: [
-                            Video(
-                              controller: controller,
-                              controls: null, // 禁用默认控件
-                              aspectRatio: 16 / 9,
-                              fill: Colors.black,
-                              width: constraints.maxWidth,
-                              height: constraints.maxWidth * 9 / 16,
-                            ),
-                            // 加载指示器
-                            if (isBuffering || _isLoadingVideo)
-                              const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
+                          return Stack(
+                            children: [
+                              Video(
+                                controller: controller,
+                                controls: null, // 禁用默认控件
+                                aspectRatio: 16 / 9,
+                                fill: Colors.black,
+                                width: constraints.maxWidth,
+                                height: constraints.maxWidth * 9 / 16,
                               ),
-                          ],
-                        );
-                      },
-                    )
-                  : Container(color: Colors.black), // 空容器，等待状态由控件组件处理
+                              // 加载指示器
+                              if (isBuffering || _isLoadingVideo)
+                                const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      )
+                    : Container(color: Colors.black), // 空容器，等待状态由控件组件处理
               ),
             ),
 
@@ -350,37 +361,42 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     );
   }
 
-  Widget _buildFullscreenPlayer(bool isPlaying, Duration position, Duration duration, Duration buffer) {
+  Widget _buildFullscreenPlayer(
+    bool isPlaying,
+    Duration position,
+    Duration duration,
+    Duration buffer,
+  ) {
     return Stack(
       children: [
         Positioned.fill(
           child: Container(
             color: Colors.black,
             child: _hasVideoUrl
-              ? StreamBuilder<bool>(
-                  stream: player.stream.buffering,
-                  builder: (context, bufferingSnapshot) {
-                    final isBuffering = bufferingSnapshot.data ?? true;
+                ? StreamBuilder<bool>(
+                    stream: player.stream.buffering,
+                    builder: (context, bufferingSnapshot) {
+                      final isBuffering = bufferingSnapshot.data ?? true;
 
-                    return Stack(
-                      children: [
-                        Video(
-                          controller: controller,
-                          controls: null, // 禁用默认控件
-                          fill: Colors.black,
-                        ),
-                        // 加载指示器
-                        if (isBuffering || _isLoadingVideo)
-                          const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
+                      return Stack(
+                        children: [
+                          Video(
+                            controller: controller,
+                            controls: null, // 禁用默认控件
+                            fill: Colors.black,
                           ),
-                      ],
-                    );
-                  },
-                )
-              : Container(color: Colors.black), // 空容器，等待状态由控件组件处理
+                          // 加载指示器
+                          if (isBuffering || _isLoadingVideo)
+                            const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  )
+                : Container(color: Colors.black), // 空容器，等待状态由控件组件处理
           ),
         ),
 
@@ -389,7 +405,12 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     );
   }
 
-  Widget _buildVideoControls(bool isPlaying, Duration position, Duration duration, Duration buffer) {
+  Widget _buildVideoControls(
+    bool isPlaying,
+    Duration position,
+    Duration duration,
+    Duration buffer,
+  ) {
     return Positioned.fill(
       child: VideoPlayerControls(
         key: ValueKey('controls_$_isFullscreen'), // 确保全屏切换时重建
@@ -409,8 +430,8 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
         playStatus: _playStatus,
         onTap: _toggleControls,
         onBack: _isFullscreen
-          ? _toggleFullscreen
-          : () => Navigator.of(context).pop(),
+            ? _toggleFullscreen
+            : () => Navigator.of(context).pop(),
         onSettings: () {
           // TODO: 打开设置菜单
         },

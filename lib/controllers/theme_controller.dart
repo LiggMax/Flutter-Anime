@@ -52,7 +52,7 @@ class ThemeController extends ChangeNotifier {
     scaffoldBackgroundColor: Colors.white,
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
-      selectedItemColor: Colors.blue,
+      selectedItemColor: Colors.white,
       unselectedItemColor: Colors.grey,
     ),
   );
@@ -63,7 +63,7 @@ class ThemeController extends ChangeNotifier {
     brightness: Brightness.dark,
     colorScheme: const ColorScheme.dark(
       surface: Color(0xFF121012), // 深色主题的surface背景色
-      primary: Colors.blue, // 主色调
+      primary: Colors.black, // 主色调
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,

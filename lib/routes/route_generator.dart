@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_routes.dart';
 import 'route_arguments.dart';
 import '../page/tabs.dart';
+import '../page/search/search_page.dart';
 import 'package:AnimeFlow/page/animeinfos/anime_info.dart';
 
 class RouteGenerator {
@@ -11,6 +12,12 @@ class RouteGenerator {
       case AppRoutes.tabs:
         return MaterialPageRoute(
           builder: (_) => const Tabs(),
+          settings: settings,
+        );
+
+      case AppRoutes.search:
+        return MaterialPageRoute(
+          builder: (_) => const SearchPage(),
           settings: settings,
         );
 
@@ -46,23 +53,14 @@ class RouteGenerator {
   static Route<dynamic> _errorRoute(String? routeName) {
     return MaterialPageRoute(
       builder: (context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('页面不存在'),
-        ),
+        appBar: AppBar(title: const Text('页面不存在')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 80,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 80, color: Colors.red),
               const SizedBox(height: 20),
-              Text(
-                '找不到页面: $routeName',
-                style: const TextStyle(fontSize: 18),
-              ),
+              Text('找不到页面: $routeName', style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),

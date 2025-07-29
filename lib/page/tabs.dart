@@ -7,6 +7,7 @@ import './tabs/profile.dart';
 import './tabs/time.dart';
 import '../controllers/theme_controller.dart';
 import '../utils/theme_extensions.dart';
+import '../routes/app_routes.dart';
 
 class Tabs extends StatefulWidget {
   const Tabs({super.key});
@@ -29,11 +30,7 @@ class _TabsState extends State<Tabs> {
   }
 
   // 页面标题列表
-  final List<String> _pageTitles = [
-    "首页",
-    "时间表",
-    "个人中心",
-  ];
+  final List<String> _pageTitles = ["首页", "时间表", "个人中心"];
 
   // 页面创建工厂方法
   Widget _createPage(int index) {
@@ -63,6 +60,10 @@ class _TabsState extends State<Tabs> {
     });
   }
 
+  void _navigateToSearch() {
+    Navigator.pushNamed(context, AppRoutes.search);
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
@@ -71,13 +72,23 @@ class _TabsState extends State<Tabs> {
       appBar: AppBar(
         title: Text(_pageTitles[_currentIndex]),
         centerTitle: false,
-        automaticallyImplyLeading: false, // 禁用自动返回按钮
+        automaticallyImplyLeading: false,
+        // 禁用自动返回按钮
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent, // 状态栏透明
-          statusBarIconBrightness: context.isDarkMode ? Brightness.light : Brightness.dark,
-          statusBarBrightness: context.isDarkMode ? Brightness.dark : Brightness.light,
+          statusBarIconBrightness: context.isDarkMode
+              ? Brightness.light
+              : Brightness.dark,
+          statusBarBrightness: context.isDarkMode
+              ? Brightness.dark
+              : Brightness.light,
         ),
         actions: [
+          IconButton(
+            onPressed: _navigateToSearch,
+            icon: const Icon(Icons.search_outlined),
+            tooltip: '搜索',
+          ),
           IconButton(
             icon: Icon(context.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: () async {
@@ -109,21 +120,13 @@ class _TabsState extends State<Tabs> {
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 200),
         items: [
-          Icon(
-            Icons.home,
-            size: 30,
-            color: context.navigationIconColor,
-          ),
+          Icon(Icons.home, size: 30, color: context.navigationIconColor),
           Icon(
             Icons.timeline_sharp,
             size: 30,
             color: context.navigationIconColor,
           ),
-          Icon(
-            Icons.person,
-            size: 30,
-            color: context.navigationIconColor,
-          ),
+          Icon(Icons.person, size: 30, color: context.navigationIconColor),
         ],
         buttonBackgroundColor: context.navigationSelectedColor,
         animationCurve: Curves.easeInOut,

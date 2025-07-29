@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/bangumi_data.dart';
 
-import '../play/video_info.dart';
+import '../play/play_info.dart';
 
 /// 自定义AppBar组件
 class AnimeDetailAppBar extends StatelessWidget {
