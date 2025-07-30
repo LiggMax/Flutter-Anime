@@ -1,3 +1,4 @@
+import 'package:AnimeFlow/routes/route_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:AnimeFlow/utils/theme_extensions.dart';
@@ -81,7 +82,9 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _onSearchSubmitted(String query) {
-    if (query.trim().isNotEmpty) {
+    if (query
+        .trim()
+        .isNotEmpty) {
       _addToHistory(query.trim());
       _performSearch(query.trim());
     }
@@ -136,7 +139,7 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       child: TextField(
         controller: _searchController,
         focusNode: _searchFocusNode,
@@ -145,12 +148,12 @@ class _SearchPageState extends State<SearchPage> {
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    _searchFocusNode.requestFocus();
-                  },
-                )
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              _searchFocusNode.requestFocus();
+            },
+          )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -187,9 +190,13 @@ class _SearchPageState extends State<SearchPage> {
             children: [
               Text(
                 '搜索历史',
-                style: Theme.of(
+                style: Theme
+                    .of(
                   context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                )
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               TextButton(onPressed: _clearHistory, child: const Text('清空')),
             ],
@@ -202,9 +209,13 @@ class _SearchPageState extends State<SearchPage> {
         // 热门搜索
         Text(
           '热门搜索',
-          style: Theme.of(
+          style: Theme
+              .of(
             context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          )
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -232,7 +243,7 @@ class _SearchPageState extends State<SearchPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
-            SizedBox(height: 16),
+            SizedBox(height: 10),
             Text('搜索中...'),
           ],
         ),
@@ -259,7 +270,7 @@ class _SearchPageState extends State<SearchPage> {
       children: [
         // 搜索结果统计
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(10),
           child: Row(
             children: [
               Text(
@@ -273,8 +284,10 @@ class _SearchPageState extends State<SearchPage> {
                 onSelected: (value) {
                   _sortResults(value);
                 },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'score', child: Text('按评分排序')),
+                itemBuilder: (context) =>
+                [
+                  const PopupMenuItem(
+                      value: 'score', child: Text('按评分排序')),
                   const PopupMenuItem(value: 'date', child: Text('按日期排序')),
                   const PopupMenuItem(
                     value: 'collection',
@@ -318,7 +331,7 @@ class _SearchPageState extends State<SearchPage> {
           break;
         case 'collection':
           _searchData!.data.sort(
-            (a, b) => b.collection.collect.compareTo(a.collection.collect),
+                (a, b) => b.collection.collect.compareTo(a.collection.collect),
           );
           break;
       }
@@ -362,25 +375,25 @@ class _SearchPageState extends State<SearchPage> {
               borderRadius: BorderRadius.circular(8),
               child: anime.coverImage.isNotEmpty
                   ? Image.network(
-                      anime.coverImage,
-                      width: 100,
-                      height: 150,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 60,
-                          height: 90,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, color: Colors.grey),
-                        );
-                      },
-                    )
+                anime.coverImage,
+                width: 100,
+                height: 150,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 60,
+                    height: 90,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image, color: Colors.grey),
+                  );
+                },
+              )
                   : Container(
-                      width: 60,
-                      height: 90,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, color: Colors.grey),
-                    ),
+                width: 60,
+                height: 90,
+                color: Colors.grey[300],
+                child: const Icon(Icons.image, color: Colors.grey),
+              ),
             ),
 
             const SizedBox(width: 12),
@@ -443,7 +456,7 @@ class _SearchPageState extends State<SearchPage> {
                     Builder(
                       builder: (context) {
                         final director = anime.infobox.firstWhere(
-                          (box) => box.key == '导演' || box.key == '监督',
+                              (box) => box.key == '导演' || box.key == '监督',
                           orElse: () => AnimeInfoBox(key: '', value: ''),
                         );
                         if (director.key.isNotEmpty) {
@@ -507,5 +520,8 @@ class _SearchPageState extends State<SearchPage> {
   void _onAnimeTap(SearchAnimeItem anime) {
     // TODO: 跳转到动漫详情页
     print('选择搜索结果: ${anime.displayName}');
+    RouteHelper.goToAnimeData(context, animeId: anime.id,
+        animeName: anime.nameCn,
+        imageUrl: anime.image);
   }
 }
