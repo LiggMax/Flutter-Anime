@@ -15,7 +15,8 @@ class SearchPage extends StatefulWidget {
   State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends State<SearchPage>
+    with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<String> _searchHistory = [];
@@ -24,17 +25,48 @@ class _SearchPageState extends State<SearchPage> {
   String _currentQuery = '';
   bool _isGridView = false; // 布局切换状态：false为列表布局，true为网格布局
 
+  // 动画控制器
+  late AnimationController _layoutAnimationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
     _loadSearchHistory();
     _searchController.addListener(_onSearchChanged);
+
+    // 初始化动画控制器
+    _layoutAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _layoutAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _layoutAnimationController,
+      curve: Curves.easeOutBack,
+    ));
+
+    // 启动初始动画
+    _layoutAnimationController.forward();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _layoutAnimationController.dispose();
     super.dispose();
   }
 
@@ -140,6 +172,20 @@ class _SearchPageState extends State<SearchPage> {
     } catch (e) {
       print('清除搜索历史失败: $e');
     }
+  }
+
+  // 布局切换动画方法
+  void _toggleLayout() async {
+    // 先执行淡出动画
+    await _layoutAnimationController.reverse();
+
+    // 切换布局状态
+    setState(() {
+      _isGridView = !_isGridView;
+    });
+
+    // 执行淡入动画
+    _layoutAnimationController.forward();
   }
 
   @override
@@ -306,11 +352,7 @@ class _SearchPageState extends State<SearchPage> {
               // 布局切换按钮
               IconButton(
                 icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-                onPressed: () {
-                  setState(() {
-                    _isGridView = !_isGridView;
-                  });
-                },
+                onPressed: _toggleLayout,
               ),
               // 排序按钮
               PopupMenuButton<String>(
@@ -332,7 +374,20 @@ class _SearchPageState extends State<SearchPage> {
         ),
 
         // 搜索结果列表
-        Expanded(child: _isGridView ? _buildGridView() : _buildListView()),
+        Expanded(
+          child: AnimatedBuilder(
+            animation: _layoutAnimationController,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: _isGridView ? _buildGridView() : _buildListView(),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -349,7 +404,7 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildGridView() {
     return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 0.7,
@@ -366,41 +421,81 @@ class _SearchPageState extends State<SearchPage> {
   Widget _buildGridItem(SearchAnimeItem anime) {
     return GestureDetector(
       onTap: () => _onAnimeTap(anime),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 封面图片
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: anime.coverImage.isNotEmpty
-                  ? Image.network(
-                      anime.coverImage,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, color: Colors.grey),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, color: Colors.grey),
-                    ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            children: [
+              // 封面图片
+              Positioned.fill(
+                child: anime.coverImage.isNotEmpty
+                    ? Image.network(
+                        anime.coverImage,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image, color: Colors.grey),
+                      ),
+              ),
+              // 底部渐变背景和标题
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.1),
+                        Colors.black.withValues(alpha: 0.4),
+                        Colors.black.withValues(alpha: 0.6),
+                      ],
+                      stops: const [0.0, 0.3, 0.7, 1.0],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    anime.displayName,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(0, 1),
+                          blurRadius: 2,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          // 标题
-          Text(
-            anime.displayName,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }
