@@ -1,9 +1,12 @@
 import 'package:AnimeFlow/routes/route_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:AnimeFlow/utils/theme_extensions.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
 import 'package:AnimeFlow/modules/search_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -34,9 +37,21 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void _loadSearchHistory() {
-    // TODO: 从本地存储加载搜索历史
-    _searchHistory = ['进击的巨人', '鬼灭之刃', '咒术回战', '间谍过家家'];
+  Future<void> _loadSearchHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final historyJson = prefs.getString('search_history');
+      if (historyJson != null) {
+        final List<dynamic> historyList = jsonDecode(historyJson);
+        setState(() {
+          _searchHistory = historyList.cast<String>();
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('加载搜索历史失败: $e');
+      }
+    }
   }
 
   void _onSearchChanged() {
@@ -82,15 +97,13 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _onSearchSubmitted(String query) {
-    if (query
-        .trim()
-        .isNotEmpty) {
-      _addToHistory(query.trim());
+    if (query.trim().isNotEmpty) {
+      _addToHistory(query.trim()); // 异步调用，
       _performSearch(query.trim());
     }
   }
 
-  void _addToHistory(String query) {
+  Future<void> _addToHistory(String query) async {
     if (!_searchHistory.contains(query)) {
       setState(() {
         _searchHistory.insert(0, query);
@@ -98,15 +111,34 @@ class _SearchPageState extends State<SearchPage> {
           _searchHistory = _searchHistory.take(10).toList();
         }
       });
-      // TODO: 保存到本地存储
+
+      // 保存到本地存储
+      await _saveSearchHistory();
     }
   }
 
-  void _clearHistory() {
+  Future<void> _saveSearchHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final historyJson = jsonEncode(_searchHistory);
+      await prefs.setString('search_history', historyJson);
+    } catch (e) {
+      print('保存搜索历史失败: $e');
+    }
+  }
+
+  Future<void> _clearHistory() async {
     setState(() {
       _searchHistory.clear();
     });
-    // TODO: 清除本地存储
+
+    // 清除本地存储
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('search_history');
+    } catch (e) {
+      print('清除搜索历史失败: $e');
+    }
   }
 
   @override
@@ -148,12 +180,12 @@ class _SearchPageState extends State<SearchPage> {
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _searchController.clear();
-              _searchFocusNode.requestFocus();
-            },
-          )
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _searchFocusNode.requestFocus();
+                  },
+                )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -190,13 +222,9 @@ class _SearchPageState extends State<SearchPage> {
             children: [
               Text(
                 '搜索历史',
-                style: Theme
-                    .of(
+                style: Theme.of(
                   context,
-                )
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               TextButton(onPressed: _clearHistory, child: const Text('清空')),
             ],
@@ -209,13 +237,9 @@ class _SearchPageState extends State<SearchPage> {
         // 热门搜索
         Text(
           '热门搜索',
-          style: Theme
-              .of(
+          style: Theme.of(
             context,
-          )
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -284,10 +308,8 @@ class _SearchPageState extends State<SearchPage> {
                 onSelected: (value) {
                   _sortResults(value);
                 },
-                itemBuilder: (context) =>
-                [
-                  const PopupMenuItem(
-                      value: 'score', child: Text('按评分排序')),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'score', child: Text('按评分排序')),
                   const PopupMenuItem(value: 'date', child: Text('按日期排序')),
                   const PopupMenuItem(
                     value: 'collection',
@@ -331,7 +353,7 @@ class _SearchPageState extends State<SearchPage> {
           break;
         case 'collection':
           _searchData!.data.sort(
-                (a, b) => b.collection.collect.compareTo(a.collection.collect),
+            (a, b) => b.collection.collect.compareTo(a.collection.collect),
           );
           break;
       }
@@ -375,25 +397,25 @@ class _SearchPageState extends State<SearchPage> {
               borderRadius: BorderRadius.circular(8),
               child: anime.coverImage.isNotEmpty
                   ? Image.network(
-                anime.coverImage,
-                width: 100,
-                height: 150,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 60,
-                    height: 90,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image, color: Colors.grey),
-                  );
-                },
-              )
+                      anime.coverImage,
+                      width: 100,
+                      height: 150,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 60,
+                          height: 90,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        );
+                      },
+                    )
                   : Container(
-                width: 60,
-                height: 90,
-                color: Colors.grey[300],
-                child: const Icon(Icons.image, color: Colors.grey),
-              ),
+                      width: 60,
+                      height: 90,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
             ),
 
             const SizedBox(width: 12),
@@ -456,7 +478,7 @@ class _SearchPageState extends State<SearchPage> {
                     Builder(
                       builder: (context) {
                         final director = anime.infobox.firstWhere(
-                              (box) => box.key == '导演' || box.key == '监督',
+                          (box) => box.key == '导演' || box.key == '监督',
                           orElse: () => AnimeInfoBox(key: '', value: ''),
                         );
                         if (director.key.isNotEmpty) {
@@ -474,7 +496,6 @@ class _SearchPageState extends State<SearchPage> {
                       },
                     ),
                   ],
-
 
                   // 评分信息
                   Row(
@@ -517,11 +538,13 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  // 搜索结果跳转
   void _onAnimeTap(SearchAnimeItem anime) {
-    // TODO: 跳转到动漫详情页
-    print('选择搜索结果: ${anime.displayName}');
-    RouteHelper.goToAnimeData(context, animeId: anime.id,
-        animeName: anime.nameCn,
-        imageUrl: anime.image);
+    RouteHelper.goToAnimeData(
+      context,
+      animeId: anime.id,
+      animeName: anime.nameCn,
+      imageUrl: anime.image,
+    );
   }
 }
