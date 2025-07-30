@@ -22,6 +22,7 @@ class _SearchPageState extends State<SearchPage> {
   SearchData? _searchData;
   bool _isSearching = false;
   String _currentQuery = '';
+  bool _isGridView = false; // 布局切换状态：false为列表布局，true为网格布局
 
   @override
   void initState() {
@@ -292,7 +293,7 @@ class _SearchPageState extends State<SearchPage> {
 
     return Column(
       children: [
-        // 搜索结果统计
+        // 搜索结果统计和操作按钮
         Container(
           padding: const EdgeInsets.all(10),
           child: Row(
@@ -302,6 +303,15 @@ class _SearchPageState extends State<SearchPage> {
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
               const Spacer(),
+              // 布局切换按钮
+              IconButton(
+                icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+                onPressed: () {
+                  setState(() {
+                    _isGridView = !_isGridView;
+                  });
+                },
+              ),
               // 排序按钮
               PopupMenuButton<String>(
                 icon: const Icon(Icons.sort),
@@ -322,16 +332,76 @@ class _SearchPageState extends State<SearchPage> {
         ),
 
         // 搜索结果列表
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            itemCount: _searchData!.data.length,
-            itemBuilder: (context, index) {
-              return _buildSearchResultItem(_searchData!.data[index]);
-            },
-          ),
-        ),
+        Expanded(child: _isGridView ? _buildGridView() : _buildListView()),
       ],
+    );
+  }
+
+  Widget _buildListView() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      itemCount: _searchData!.data.length,
+      itemBuilder: (context, index) {
+        return _buildSearchResultItem(_searchData!.data[index]);
+      },
+    );
+  }
+
+  Widget _buildGridView() {
+    return GridView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: _searchData!.data.length,
+      itemBuilder: (context, index) {
+        return _buildGridItem(_searchData!.data[index]);
+      },
+    );
+  }
+
+  Widget _buildGridItem(SearchAnimeItem anime) {
+    return GestureDetector(
+      onTap: () => _onAnimeTap(anime),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 封面图片
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: anime.coverImage.isNotEmpty
+                  ? Image.network(
+                      anime.coverImage,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        );
+                      },
+                    )
+                  : Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // 标题
+          Text(
+            anime.displayName,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
