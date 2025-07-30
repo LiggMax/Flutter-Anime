@@ -145,13 +145,6 @@ class _VideoInfoPageState extends State<VideoInfoPage> {
     });
   }
 
-  // 解析完成
-  void _finishParsingVideo() {
-    setState(() {
-      _isParsingVideo = false;
-    });
-  }
-
   void _showControlsTemporarily() {
     setState(() {
       _showControls = true;
