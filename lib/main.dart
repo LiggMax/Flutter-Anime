@@ -43,11 +43,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
         debugShowCheckedModeBanner: false,
       );
     }
@@ -62,7 +58,9 @@ class _MyAppState extends State<MyApp> {
             child: MaterialApp(
               theme: ThemeController.lightTheme,
               darkTheme: ThemeController.darkTheme,
-              themeMode: themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              themeMode: themeController.isDarkMode
+                  ? ThemeMode.dark
+                  : ThemeMode.light,
               home: const Tabs(),
               onGenerateRoute: RouteGenerator.generateRoute,
               initialRoute: AppRoutes.tabs,
@@ -74,7 +72,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-
-
-

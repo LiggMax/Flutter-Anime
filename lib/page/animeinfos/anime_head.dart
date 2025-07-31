@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/bangumi_data.dart';
-import '../play/play_info.dart';
+import '../player/play_info.dart';
 import 'skeleton/head_skeleton.dart';
 
 /// 自定义AppBar组件

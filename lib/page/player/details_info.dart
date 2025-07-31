@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
 import 'package:AnimeFlow/modules/episodes_data.dart';
-import 'package:AnimeFlow/page/play/detail_episode.dart';
-import 'package:AnimeFlow/page/play/detail_video_resources.dart';
+import 'detail_episode.dart';
+import 'detail_video_resources.dart';
 
 class DetailPage extends StatefulWidget {
   final int? animeId;
@@ -11,8 +11,8 @@ class DetailPage extends StatefulWidget {
   final VoidCallback? onStartParsing;
 
   const DetailPage({
-    super.key, 
-    this.animeId, 
+    super.key,
+    this.animeId,
     this.animeName,
     this.onVideoUrlReceived,
     this.onStartParsing,
