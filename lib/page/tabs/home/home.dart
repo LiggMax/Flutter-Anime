@@ -32,8 +32,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Tab(text: '推荐'),
                 Tab(text: '排行榜'),
               ],
-              labelColor: Theme.of(context).primaryColor,
-              unselectedLabelColor: Colors.grey,
               indicatorColor: Theme.of(context).primaryColor,
               indicatorWeight: 3,
               labelStyle: const TextStyle(
@@ -50,10 +48,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: const [
-                RecommendPage(),
-                RankingPage(),
-              ],
+              children: const [RecommendPage(), RankingPage()],
             ),
           ),
         ],
@@ -67,4 +62,3 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 }
-
