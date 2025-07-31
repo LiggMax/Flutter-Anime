@@ -167,11 +167,7 @@ class AnimeInfoSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Container(
           padding: const EdgeInsets.all(10),
@@ -211,7 +207,7 @@ class AnimeInfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              style: const TextStyle(fontSize: 14),
             ),
           ),
         ],
@@ -302,7 +298,6 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
                         : '展开 (+${widget.tags.length - widget.maxInitialTags})',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.grey,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -312,7 +307,6 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
                     size: 16,
-                    color: Colors.grey,
                   ),
                 ],
               ),

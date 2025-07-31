@@ -34,10 +34,6 @@ class AnimeDetailAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
       scrolledUnderElevation: 0.0,
       // 添加滚动时的不透明背景
-      backgroundColor: innerBoxIsScrolled
-          ? Colors.white
-          : Colors.transparent,
-      foregroundColor: Colors.black,
       leading: IconButton(
         onPressed: () {
           Navigator.maybePop(context);
@@ -64,7 +60,8 @@ class AnimeDetailAppBar extends StatelessWidget {
       centerTitle: false,
       // 高度设置
       expandedHeight: 300 + kTextTabBarHeight + kToolbarHeight,
-      collapsedHeight: kTextTabBarHeight +
+      collapsedHeight:
+          kTextTabBarHeight +
           kToolbarHeight +
           MediaQuery.paddingOf(context).top,
       flexibleSpace: FlexibleSpaceBar(
@@ -111,12 +108,7 @@ class AnimeDetailHeader extends StatelessWidget {
           child: Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                16,
-                kToolbarHeight,
-                16,
-                0,
-              ),
+              padding: const EdgeInsets.fromLTRB(16, kToolbarHeight, 16, 0),
               child: Column(
                 children: [
                   BangumiInfoCard(
@@ -126,8 +118,7 @@ class AnimeDetailHeader extends StatelessWidget {
                   ),
                   // 播放按钮区域
                   AnimePlayButton(
-                    onPressed: onPlayPressed ?? () {
-                    },
+                    onPressed: onPlayPressed ?? () {},
                     animeId: bangumiItem.id,
                     animeName: bangumiItem.displayName,
                     isLoading: isLoading,
@@ -156,9 +147,7 @@ class AnimeDetailBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return AnimeBackgroundSkeleton(
-        bottomPadding: kTextTabBarHeight + 60,
-      );
+      return AnimeBackgroundSkeleton(bottomPadding: kTextTabBarHeight + 60);
     }
 
     return Positioned.fill(
@@ -240,20 +229,19 @@ class AnimeDetailTabBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(kTextTabBarHeight),
-      child: Container(
-        color: innerBoxIsScrolled ? Colors.white : Colors.transparent,
-        child: TabBar(
-          controller: tabController,
-          isScrollable: false,
-          tabAlignment: TabAlignment.center,
-          dividerHeight: 0,
-          labelColor: innerBoxIsScrolled ? Colors.black : Colors.black,
-          unselectedLabelColor: innerBoxIsScrolled ? Colors.black : Colors.black,
-          indicatorColor: innerBoxIsScrolled
-              ? Theme.of(context).primaryColor
-              : Colors.black26,
-          tabs: tabs.map((name) => Tab(text: name)).toList(),
-        ),
+      child: TabBar(
+        controller: tabController,
+        isScrollable: false,
+        tabAlignment: TabAlignment.center,
+        dividerHeight: 0,
+        labelColor: innerBoxIsScrolled ? Colors.black : Colors.black,
+        unselectedLabelColor: innerBoxIsScrolled
+            ? Colors.black
+            : Colors.black,
+        indicatorColor: innerBoxIsScrolled
+            ? Theme.of(context).primaryColor
+            : Colors.black26,
+        tabs: tabs.map((name) => Tab(text: name)).toList(),
       ),
     );
   }
@@ -349,7 +337,6 @@ class BangumiInfoCard extends StatelessWidget {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -358,10 +345,7 @@ class BangumiInfoCard extends StatelessWidget {
         // 放送日期和话数
         Text(
           '${bangumiItem.date} · 全 ${bangumiItem.totalEpisodes} 话',
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black,
-          ),
+          style: const TextStyle(fontSize: 14),
         ),
 
         // 评分区域
@@ -396,7 +380,6 @@ class BangumiInfoCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
               ),
             ],
@@ -409,7 +392,6 @@ class BangumiInfoCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.black87,
             ),
           ),
         ],
@@ -420,10 +402,7 @@ class BangumiInfoCard extends StatelessWidget {
         if (bangumiItem.collection != null) ...[
           Text(
             '${bangumiItem.totalCollectionCount} 收藏 / ${bangumiItem.collection!.doing} 在看 / ${bangumiItem.collection!.wish} 想看',
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontSize: 15),
           ),
         ],
         const SizedBox(height: 12),
@@ -466,16 +445,17 @@ class AnimePlayButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 追番按钮
-          Expanded(
-            flex: 1,
+          SizedBox(
+            width: 120,
             child: ElevatedButton.icon(
               onPressed: () {
                 // TODO: 处理追番功能
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey, // 左侧按钮颜色
+                backgroundColor: Colors.grey,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 shape: RoundedRectangleBorder(
@@ -487,33 +467,27 @@ class AnimePlayButton extends StatelessWidget {
               icon: const Icon(Icons.add_chart_rounded, size: 20), // 左侧图标
               label: const Text(
                 '追番',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
 
           const SizedBox(width: 10), // 按钮之间的间距
-
           // 开始观看按钮
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: 220,
             child: ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => VideoInfoPage(
-                      animeId: animeId,
-                      animeName: animeName,
-                    ),
+                    builder: (context) =>
+                        VideoInfoPage(animeId: animeId, animeName: animeName),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8B5CF6), // 紫色背景
+                backgroundColor: Colors.grey,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 shape: RoundedRectangleBorder(
@@ -522,16 +496,10 @@ class AnimePlayButton extends StatelessWidget {
                 elevation: 3,
                 shadowColor: const Color(0xFF8B5CF6).withAlpha(53),
               ),
-              icon: const Icon(
-                Icons.play_arrow_rounded,
-                size: 24,
-              ),
+              icon: const Icon(Icons.play_arrow_rounded, size: 24),
               label: const Text(
                 '开始观看',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -540,5 +508,3 @@ class AnimePlayButton extends StatelessWidget {
     );
   }
 }
-
-

@@ -1,3 +1,7 @@
+/*
+  @Author Ligg
+  @Time 2025/7/31
+ */
 import 'package:flutter/material.dart';
 
 /// 骨架屏加载组件
@@ -6,12 +10,7 @@ class SkeletonLoader extends StatefulWidget {
   final double? height;
   final BorderRadius? borderRadius;
 
-  const SkeletonLoader({
-    super.key,
-    this.width,
-    this.height,
-    this.borderRadius,
-  });
+  const SkeletonLoader({super.key, this.width, this.height, this.borderRadius});
 
   @override
   State<SkeletonLoader> createState() => _SkeletonLoaderState();
@@ -55,9 +54,9 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
               begin: Alignment(-1.0 + _animation.value, 0.0),
               end: Alignment(1.0 + _animation.value, 0.0),
               colors: const [
-                Color(0xFFE0E0E0),
-                Color(0xFFF5F5F5),
-                Color(0xFFE0E0E0),
+                Color(0xFF939393),
+                Color(0xFF979797),
+                Color(0xFF868686),
               ],
               stops: const [0.0, 0.5, 1.0],
             ),
@@ -72,10 +71,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
 class AnimeInfoSkeleton extends StatelessWidget {
   final double maxWidth;
 
-  const AnimeInfoSkeleton({
-    super.key,
-    required this.maxWidth,
-  });
+  const AnimeInfoSkeleton({super.key, required this.maxWidth});
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +123,7 @@ class AnimeInfoSkeleton extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(4)),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // 日期和话数骨架
                   const SkeletonLoader(
                     width: 150,
@@ -135,19 +131,22 @@ class AnimeInfoSkeleton extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(4)),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // 评分骨架
                   Row(
                     children: [
                       // 星星骨架
-                      ...List.generate(5, (index) => Container(
-                        margin: const EdgeInsets.only(right: 2),
-                        child: const SkeletonLoader(
-                          width: 20,
-                          height: 20,
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ...List.generate(
+                        5,
+                        (index) => Container(
+                          margin: const EdgeInsets.only(right: 2),
+                          child: const SkeletonLoader(
+                            width: 20,
+                            height: 20,
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
                         ),
-                      )),
+                      ),
                       const SizedBox(width: 8),
                       const SkeletonLoader(
                         width: 40,
@@ -157,7 +156,7 @@ class AnimeInfoSkeleton extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // 评分详情骨架
                   const SkeletonLoader(
                     width: 120,
@@ -165,7 +164,7 @@ class AnimeInfoSkeleton extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(4)),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // 收藏数据骨架
                   const SkeletonLoader(
                     width: 200,
@@ -187,10 +186,7 @@ class AnimeInfoSkeleton extends StatelessWidget {
 class AnimeBackgroundSkeleton extends StatelessWidget {
   final double bottomPadding;
 
-  const AnimeBackgroundSkeleton({
-    super.key,
-    this.bottomPadding = 60,
-  });
+  const AnimeBackgroundSkeleton({super.key, this.bottomPadding = 60});
 
   @override
   Widget build(BuildContext context) {
@@ -198,12 +194,11 @@ class AnimeBackgroundSkeleton extends StatelessWidget {
       bottom: bottomPadding,
       child: IgnorePointer(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFE0E0E0), Color(0xFFF5F5F5)],
-              stops: [0.0, 1.0],
+              stops: const [0.0, 1.0], colors: [],
             ),
           ),
         ),
@@ -221,10 +216,11 @@ class AnimePlayButtonSkeleton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 追番按钮骨架
-          Expanded(
-            flex: 1,
+          SizedBox(
+            width: 120,
             child: Container(
               height: 48,
               decoration: BoxDecoration(
@@ -246,10 +242,9 @@ class AnimePlayButtonSkeleton extends StatelessWidget {
           ),
 
           const SizedBox(width: 10), // 按钮之间的间距
-
           // 开始观看按钮骨架
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: 200,
             child: Container(
               height: 48,
               decoration: BoxDecoration(
@@ -279,31 +274,21 @@ class AnimePlayButtonSkeleton extends StatelessWidget {
 class AnimeDetailHeaderSkeleton extends StatelessWidget {
   final double maxWidth;
 
-  const AnimeDetailHeaderSkeleton({
-    super.key,
-    required this.maxWidth,
-  });
+  const AnimeDetailHeaderSkeleton({super.key, required this.maxWidth});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         // 背景骨架
-        AnimeBackgroundSkeleton(
-          bottomPadding: kTextTabBarHeight + 60,
-        ),
+        AnimeBackgroundSkeleton(bottomPadding: kTextTabBarHeight + 60),
         // 前景内容骨架
         SafeArea(
           bottom: false,
           child: Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                16,
-                kToolbarHeight,
-                16,
-                0,
-              ),
+              padding: const EdgeInsets.fromLTRB(16, kToolbarHeight, 16, 0),
               child: Column(
                 children: [
                   // 动画信息骨架
