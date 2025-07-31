@@ -200,7 +200,7 @@ class AnimeBackgroundSkeleton extends StatelessWidget {
               end: Alignment.bottomCenter,
               stops: const [0.0, 1.0],
               colors: [
-                Colors.black.withAlpha(55), // 上方颜色
+                Colors.black.withAlpha(55),
                 Colors.transparent,
               ],
             ),

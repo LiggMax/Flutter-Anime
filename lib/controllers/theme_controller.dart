@@ -39,7 +39,6 @@ class ThemeController extends ChangeNotifier {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
-        // 关键：systemNavigationBarColor必须与surface保持一致
         systemNavigationBarColor: Colors.white, // 与surface一致
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
