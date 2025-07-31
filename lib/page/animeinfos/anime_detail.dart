@@ -31,44 +31,55 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AnimeInfoSection(
-                title: '简介',
-                children: [
-                  AnimeExpandableSummary(
-                    summary: widget.bangumiItem.summary,
-                    isExpanded: summaryExpanded,
-                    onToggle: () {
-                      setState(() {
-                        summaryExpanded = !summaryExpanded;
-                      });
-                    },
-                  ),
-                ],
-              ),
-
-              if (widget.bangumiItem.mainTags.isNotEmpty) ...[
+              if (widget.bangumiItem.summary.isNotEmpty) ...[
                 AnimeInfoSection(
-                  title: '标签',
+                  title: '简介',
                   children: [
-                    AnimeTagsRow(tags: widget.bangumiItem.mainTags),
+                    AnimeExpandableSummary(
+                      summary: widget.bangumiItem.summary,
+                      isExpanded: summaryExpanded,
+                      onToggle: () {
+                        setState(() {
+                          summaryExpanded = !summaryExpanded;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ],
 
-              AnimeInfoSection(
-                title: '基本信息',
-                children: [
-                  AnimeInfoRow(label: '原名', value: widget.bangumiItem.name),
-                  AnimeInfoRow(label: '中文名', value: widget.bangumiItem.nameCn),
-                  AnimeInfoRow(label: '类型', value: widget.bangumiItem.typeText),
-                  AnimeInfoRow(
-                    label: '总集数',
-                    value: '${widget.bangumiItem.totalEpisodes}话',
-                  ),
-                  AnimeInfoRow(label: '放送日期', value: widget.bangumiItem.date),
-                  AnimeInfoRow(label: '播放平台', value: widget.bangumiItem.platform),
-                ],
-              ),
+              if (widget.bangumiItem.mainTags.isNotEmpty) ...[
+                AnimeInfoSection(
+                  title: '标签',
+                  children: [AnimeTagsRow(tags: widget.bangumiItem.mainTags)],
+                ),
+              ],
+
+              if (widget.bangumiItem.tags.isNotEmpty) ...[
+                AnimeInfoSection(
+                  title: '基本信息',
+                  children: [
+                    AnimeInfoRow(label: '原名', value: widget.bangumiItem.name),
+                    AnimeInfoRow(
+                      label: '中文名',
+                      value: widget.bangumiItem.nameCn,
+                    ),
+                    AnimeInfoRow(
+                      label: '类型',
+                      value: widget.bangumiItem.typeText,
+                    ),
+                    AnimeInfoRow(
+                      label: '总集数',
+                      value: '${widget.bangumiItem.totalEpisodes}话',
+                    ),
+                    AnimeInfoRow(label: '放送日期', value: widget.bangumiItem.date),
+                    AnimeInfoRow(
+                      label: '播放平台',
+                      value: widget.bangumiItem.platform,
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -111,10 +122,7 @@ class AnimeExpandableSummary extends StatelessWidget {
           text: formattedSummary,
           style: const TextStyle(fontSize: 14, height: 1.5),
         );
-        final tp = TextPainter(
-          text: span,
-          textDirection: TextDirection.ltr,
-        );
+        final tp = TextPainter(text: span, textDirection: TextDirection.ltr);
         tp.layout(maxWidth: constraints.maxWidth);
         final numLines = tp.computeLineMetrics().length;
 
@@ -141,7 +149,7 @@ class AnimeExpandableSummary extends StatelessWidget {
   }
 }
 
-/// 信息区域组件
+/// 简介组件
 class AnimeInfoSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
@@ -165,13 +173,9 @@ class AnimeInfoSection extends StatelessWidget {
             color: Colors.black87,
           ),
         ),
-        const SizedBox(height: 8),
         Container(
-          width: double.infinity,
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
           child: Column(children: children),
         ),
       ],
@@ -184,11 +188,7 @@ class AnimeInfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const AnimeInfoRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const AnimeInfoRow({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -240,13 +240,6 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.tags.isEmpty) {
-      return const Text(
-        '暂无标签',
-        style: TextStyle(fontSize: 14, color: Colors.grey),
-      );
-    }
-
     // 判断是否需要展开功能
     final bool needsExpansion = widget.tags.length > widget.maxInitialTags;
     final List<BangumiTag> tagsToShow = needsExpansion && !isExpanded
@@ -254,7 +247,7 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
         : widget.tags;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Wrap(
           spacing: 8,
@@ -263,7 +256,10 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
           children: tagsToShow
               .map(
                 (tag) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withAlpha(50),
                     borderRadius: BorderRadius.circular(10),
@@ -312,7 +308,9 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     size: 16,
                     color: Colors.grey,
                   ),
