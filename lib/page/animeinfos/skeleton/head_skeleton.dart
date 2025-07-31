@@ -198,7 +198,11 @@ class AnimeBackgroundSkeleton extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: const [0.0, 1.0], colors: [],
+              stops: const [0.0, 1.0],
+              colors: [
+                Colors.black.withAlpha(55), // 上方颜色
+                Colors.transparent,
+              ],
             ),
           ),
         ),
@@ -241,10 +245,10 @@ class AnimePlayButtonSkeleton extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 10), // 按钮之间的间距
+          const SizedBox(width: 10),
           // 开始观看按钮骨架
           SizedBox(
-            width: 200,
+            width: 230,
             child: Container(
               height: 48,
               decoration: BoxDecoration(
