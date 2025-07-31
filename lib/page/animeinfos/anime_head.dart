@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/bangumi_data.dart';
-
 import '../play/play_info.dart';
+import 'skeleton/head_skeleton.dart';
 
 /// 自定义AppBar组件
 class AnimeDetailAppBar extends StatelessWidget {
@@ -130,6 +130,7 @@ class AnimeDetailHeader extends StatelessWidget {
                     },
                     animeId: bangumiItem.id,
                     animeName: bangumiItem.displayName,
+                    isLoading: isLoading,
                   ),
                 ],
               ),
@@ -155,7 +156,9 @@ class AnimeDetailBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const SizedBox.shrink();
+      return AnimeBackgroundSkeleton(
+        bottomPadding: kTextTabBarHeight + 60,
+      );
     }
 
     return Positioned.fill(
@@ -275,7 +278,7 @@ class BangumiInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return AnimeInfoSkeleton(maxWidth: maxWidth);
     }
 
     return Container(
@@ -443,26 +446,33 @@ class AnimePlayButton extends StatelessWidget {
   final VoidCallback onPressed;
   final int? animeId;
   final String? animeName;
+  final bool isLoading;
 
   const AnimePlayButton({
     super.key,
     required this.onPressed,
     this.animeId,
     this.animeName,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 如果正在加载，显示骨架屏
+    if (isLoading) {
+      return const AnimePlayButtonSkeleton();
+    }
+
     return SizedBox(
       width: double.infinity,
       child: Row(
         children: [
-          // 新增的左侧按钮
+          // 追番按钮
           Expanded(
             flex: 1,
             child: ElevatedButton.icon(
               onPressed: () {
-                // TODO: 处理左侧按钮点击事件
+                // TODO: 处理追番功能
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey, // 左侧按钮颜色
