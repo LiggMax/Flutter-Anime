@@ -234,13 +234,15 @@ class AnimeDetailTabBar extends StatelessWidget implements PreferredSizeWidget {
         isScrollable: false,
         tabAlignment: TabAlignment.center,
         dividerHeight: 0,
-        labelColor: innerBoxIsScrolled ? Colors.black : Colors.black,
-        unselectedLabelColor: innerBoxIsScrolled
-            ? Colors.black
+        labelColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
             : Colors.black,
-        indicatorColor: innerBoxIsScrolled
-            ? Theme.of(context).primaryColor
-            : Colors.black26,
+        unselectedLabelColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey[400]
+            : Colors.grey[600],
+        indicatorColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.blue
+            : Theme.of(context).primaryColor,
         tabs: tabs.map((name) => Tab(text: name)).toList(),
       ),
     );
@@ -334,10 +336,7 @@ class BangumiInfoCard extends StatelessWidget {
         // 标题
         Text(
           bangumiItem.displayName,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -389,10 +388,7 @@ class BangumiInfoCard extends StatelessWidget {
 
           Text(
             '${bangumiItem.totalRatingCount} 人评分 / #${bangumiItem.rating!.rank}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           ),
         ],
 

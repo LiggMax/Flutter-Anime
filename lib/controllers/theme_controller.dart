@@ -63,7 +63,7 @@ class ThemeController extends ChangeNotifier {
     brightness: Brightness.dark,
     colorScheme: const ColorScheme.dark(
       surface: Color(0xFF121012), // 深色主题的surface背景色
-      primary: Colors.black, // 主色调
+      primary: Colors.blue, // 主色调改为蓝色，确保在深色主题下可见
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
