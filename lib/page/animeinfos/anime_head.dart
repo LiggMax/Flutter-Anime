@@ -474,13 +474,7 @@ class AnimePlayButton extends StatelessWidget {
             width: 220,
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        VideoInfoPage(animeId: animeId, animeName: animeName),
-                  ),
-                );
+                print('播放');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
