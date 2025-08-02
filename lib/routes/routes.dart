@@ -101,10 +101,12 @@ class Routes {
     return Navigator.pushNamedAndRemoveUntil(context, tabs, (route) => false);
   }
 
+  // 返回
   static void goBack(BuildContext context, [dynamic result]) {
     Navigator.pop(context, result);
   }
 
+  // 跳转并替换当前页面
   static Future<void> replaceTo(
     BuildContext context,
     String routeName, {
@@ -117,6 +119,7 @@ class Routes {
     );
   }
 
+  // 清空栈并跳转
   static Future<void> clearAndGoTo(
     BuildContext context,
     String routeName, {
