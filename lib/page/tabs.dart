@@ -7,7 +7,7 @@ import './tabs/profile.dart';
 import './tabs/time.dart';
 import '../controllers/theme_controller.dart';
 import '../utils/theme_extensions.dart';
-import '../routes/app_routes.dart';
+import '../routes/routes.dart';
 
 class Tabs extends StatefulWidget {
   const Tabs({super.key});
@@ -61,7 +61,7 @@ class _TabsState extends State<Tabs> {
   }
 
   void _navigateToSearch() {
-    Navigator.pushNamed(context, AppRoutes.search);
+    Navigator.pushNamed(context, Routes.search);
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
-import '../../routes/route_helper.dart';
+import 'package:AnimeFlow/routes/routes.dart';
 
 // 数据状态类
 class CalendarState {
@@ -349,7 +349,7 @@ class AnimeGrid extends StatelessWidget {
                       : subject['name'];
                   final imageUrl = subject['images']?['large'];
 
-                  RouteHelper.goToAnimeData(
+                  Routes.goToAnimeData(
                     context,
                     animeId: id,
                     animeName: animeName,

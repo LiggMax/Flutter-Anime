@@ -1,4 +1,4 @@
-import 'package:AnimeFlow/routes/route_helper.dart';
+import 'package:AnimeFlow/routes/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -705,7 +705,7 @@ class _SearchPageState extends State<SearchPage>
 
   // 搜索结果跳转
   void _onAnimeTap(SearchAnimeItem anime) {
-    RouteHelper.goToAnimeData(
+    Routes.goToAnimeData(
       context,
       animeId: anime.id,
       animeName: anime.nameCn,

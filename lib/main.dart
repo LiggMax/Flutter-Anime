@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
 import './page/tabs.dart';
 import './controllers/theme_controller.dart';
-import './routes/route_generator.dart';
-import './routes/app_routes.dart';
+import './routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,8 +61,8 @@ class _MyAppState extends State<MyApp> {
                   ? ThemeMode.dark
                   : ThemeMode.light,
               home: const Tabs(),
-              onGenerateRoute: RouteGenerator.generateRoute,
-              initialRoute: AppRoutes.tabs,
+              onGenerateRoute: Routes.generateRoute,
+              initialRoute: Routes.tabs,
               debugShowCheckedModeBanner: false,
             ),
           );
