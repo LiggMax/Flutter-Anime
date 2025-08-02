@@ -478,8 +478,6 @@ class AnimePlayButton extends StatelessWidget {
                 // 跳转到播放信息页面
                 Routes.goToPlayInfo(
                   context,
-                  videoUrl:
-                      'https://example.com/video.mp4', // 临时URL，实际应用中应该从API获取
                   title: animeName ?? '动漫播放',
                   videoInfo: {'animeId': animeId, 'animeName': animeName},
                 );
