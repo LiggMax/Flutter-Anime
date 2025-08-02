@@ -316,7 +316,7 @@ class AnimeGrid extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(5),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: _getCrossAxisCount(context),
