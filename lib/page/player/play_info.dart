@@ -141,14 +141,10 @@ class _PlayInfoState extends State<PlayInfo> {
           children: [
             // 视频预览区域
             Container(
-              height: 200,
-              margin: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
                 color: theme.colorScheme.surfaceContainerHighest,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
                 child: _isLoadingVideo
                     ? Center(
                         child: CircularProgressIndicator(
@@ -158,7 +154,7 @@ class _PlayInfoState extends State<PlayInfo> {
                     : _actualVideoUrl != null
                     ? VideoPlayer(
                         videoUrl: _actualVideoUrl!,
-                        showControls: false, // 不显示控件，仅预览
+                        showControls: false, // 不显示控件
                       )
                     : Center(
                         child: Text(
