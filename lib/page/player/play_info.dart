@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'video/video_page.dart';
-import '../../request/video_service.dart';
 
 class PlayInfo extends StatefulWidget {
   final String? title;
@@ -34,6 +33,10 @@ class _PlayInfoState extends State<PlayInfo> {
   }
 
   Future<void> _initializeVideo() async {
+    setState(() {
+      _isLoadingVideo = true;
+    });
+
     try {
       // 使用临时的视频URL
       _actualVideoUrl = _tempVideoUrl;
@@ -43,6 +46,12 @@ class _PlayInfoState extends State<PlayInfo> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('视频加载失败: $e'), backgroundColor: Colors.red),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingVideo = false;
+        });
       }
     }
   }
@@ -55,11 +64,22 @@ class _PlayInfoState extends State<PlayInfo> {
       await player.open(media);
       await player.setPlaylistMode(PlaylistMode.single);
       await player.setVolume(100.0);
+
+      // 视频加载成功后，确保加载状态为false
+      if (mounted) {
+        setState(() {
+          _isLoadingVideo = false;
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('视频加载失败: $e'), backgroundColor: Colors.red),
         );
+        // 加载失败时也要设置加载状态为false
+        setState(() {
+          _isLoadingVideo = false;
+        });
       }
     }
   }
@@ -72,22 +92,26 @@ class _PlayInfoState extends State<PlayInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           widget.title ?? '播放信息',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.play_circle_outline, color: Colors.white),
+            icon: Icon(
+              Icons.play_circle_outline,
+              color: theme.colorScheme.onSurface,
+            ),
             onPressed: () {
               // 导航到视频播放页面
               if (_actualVideoUrl != null) {
@@ -121,23 +145,27 @@ class _PlayInfoState extends State<PlayInfo> {
               margin: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.grey[900],
+                color: theme.colorScheme.surfaceContainerHighest,
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: _isLoadingVideo
-                    ? const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: theme.colorScheme.primary,
+                        ),
                       )
                     : _actualVideoUrl != null
                     ? VideoPlayer(
                         videoUrl: _actualVideoUrl!,
                         showControls: false, // 不显示控件，仅预览
                       )
-                    : const Center(
+                    : Center(
                         child: Text(
                           '视频加载失败',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
               ),
@@ -156,7 +184,6 @@ class _PlayInfoState extends State<PlayInfo> {
                         Text(
                           widget.title!,
                           style: const TextStyle(
-                            color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -193,19 +220,20 @@ class _PlayInfoState extends State<PlayInfo> {
   }
 
   Widget _buildPlaybackInfo() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '播放状态',
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -229,7 +257,7 @@ class _PlayInfoState extends State<PlayInfo> {
                   const SizedBox(width: 8),
                   Text(
                     isPlaying ? '正在播放' : '已暂停',
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                   ),
                 ],
               );
@@ -259,8 +287,10 @@ class _PlayInfoState extends State<PlayInfo> {
                 children: [
                   LinearProgressIndicator(
                     value: progress.clamp(0.0, 1.0),
-                    backgroundColor: Colors.grey[700],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                    backgroundColor: theme.colorScheme.outline.withAlpha(53),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -268,11 +298,15 @@ class _PlayInfoState extends State<PlayInfo> {
                     children: [
                       Text(
                         _formatDuration(position),
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       Text(
                         _formatDuration(duration),
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -290,11 +324,15 @@ class _PlayInfoState extends State<PlayInfo> {
               final volume = snapshot.data ?? 100.0;
               return Row(
                 children: [
-                  const Icon(Icons.volume_up, color: Colors.white, size: 16),
+                  Icon(
+                    Icons.volume_up,
+                    color: theme.colorScheme.onSurface,
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     '音量: ${volume.round()}%',
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                   ),
                 ],
               );
@@ -306,19 +344,20 @@ class _PlayInfoState extends State<PlayInfo> {
   }
 
   Widget _buildVideoInfo() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '视频信息',
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -364,32 +403,37 @@ class _PlayInfoState extends State<PlayInfo> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          Text(value, style: const TextStyle(color: Colors.white)),
+          Text(
+            label,
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          Text(value, style: TextStyle(color: theme.colorScheme.onSurface)),
         ],
       ),
     );
   }
 
   Widget _buildControlOptions() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '播放控制',
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -408,7 +452,7 @@ class _PlayInfoState extends State<PlayInfo> {
                     onPressed: () => player.playOrPause(),
                     icon: Icon(
                       isPlaying ? Icons.pause : Icons.play_arrow,
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                       size: 32,
                     ),
                   );
@@ -418,7 +462,11 @@ class _PlayInfoState extends State<PlayInfo> {
               // 停止
               IconButton(
                 onPressed: () => player.stop(),
-                icon: const Icon(Icons.stop, color: Colors.white, size: 32),
+                icon: Icon(
+                  Icons.stop,
+                  color: theme.colorScheme.onSurface,
+                  size: 32,
+                ),
               ),
 
               // 音量控制
@@ -435,14 +483,14 @@ class _PlayInfoState extends State<PlayInfo> {
                         },
                         icon: Icon(
                           volume > 0 ? Icons.volume_up : Icons.volume_off,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                           size: 24,
                         ),
                       ),
                       Text(
                         '${volume.round()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
                           fontSize: 12,
                         ),
                       ),
@@ -456,7 +504,11 @@ class _PlayInfoState extends State<PlayInfo> {
                 onPressed: () {
                   _showSettingsDialog();
                 },
-                icon: const Icon(Icons.settings, color: Colors.white, size: 24),
+                icon: Icon(
+                  Icons.settings,
+                  color: theme.colorScheme.onSurface,
+                  size: 24,
+                ),
               ),
             ],
           ),
