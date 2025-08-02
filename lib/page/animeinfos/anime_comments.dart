@@ -256,7 +256,7 @@ class AnimeCommentsList extends StatelessWidget {
   /// 构建单个评论项
   Widget _buildCommentItem(BangumiComment comment) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 15),
+      margin: const EdgeInsets.only(bottom: 15, left: 16, right: 16),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
