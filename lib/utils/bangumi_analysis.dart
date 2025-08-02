@@ -55,7 +55,7 @@ class BangumiTvAnalysis {
             // 通过/进行字段切割获取下标1的数据
             final parts = trimmedHref.split('/');
             if (parts.length > 1) {
-              return parts[1];
+              return parts[2];
             }
             return trimmedHref;
           })

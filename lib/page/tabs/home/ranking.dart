@@ -1,4 +1,5 @@
 import 'package:AnimeFlow/request/bangumi_tv.dart';
+import 'package:AnimeFlow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/utils/fullscreen_utils.dart';
 
@@ -115,8 +116,12 @@ class _RankingPageState extends State<RankingPage> {
               _hasMore = false;
             } else {
               // 合并数据
-              final currentTitles = List<String>.from(_rankData!['titles'] ?? []);
-              final currentCovers = List<String>.from(_rankData!['covers'] ?? []);
+              final currentTitles = List<String>.from(
+                _rankData!['titles'] ?? [],
+              );
+              final currentCovers = List<String>.from(
+                _rankData!['covers'] ?? [],
+              );
               final currentLinks = List<String>.from(_rankData!['links'] ?? []);
 
               currentTitles.addAll(newTitles);
@@ -173,18 +178,11 @@ class _RankingPageState extends State<RankingPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error,
-              size: 80,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error, size: 80, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               '加载失败: $_error',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.red,
-              ),
+              style: const TextStyle(fontSize: 16, color: Colors.red),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -196,55 +194,11 @@ class _RankingPageState extends State<RankingPage> {
       );
     }
 
-    if (_rankData == null) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.leaderboard,
-              size: 80,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              '暂无排行榜数据',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     final titles = List<String>.from(_rankData!['titles'] ?? []);
     final covers = List<String>.from(_rankData!['covers'] ?? []);
-    final links = List<String>.from(_rankData!['id'] ?? []);
-
-    if (titles.isEmpty || covers.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.leaderboard,
-              size: 80,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              '暂无排行榜数据',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final id = List<String>.from(
+      _rankData!['id'] ?? [],
+    ).map((s) => int.tryParse(s) ?? 0).toList();
 
     return Stack(
       children: [
@@ -253,7 +207,8 @@ class _RankingPageState extends State<RankingPage> {
             // 检查是否滚动到页面底部
             if (!_isLoadingMore &&
                 _hasMore &&
-                scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 200) {
               _loadMoreData();
               return true;
             }
@@ -267,7 +222,8 @@ class _RankingPageState extends State<RankingPage> {
               childAspectRatio: 0.7,
               crossAxisSpacing: 2,
             ),
-            itemCount: titles.length + (_hasMore ? 1 : 0), // 添加加载更多指示器
+            itemCount: titles.length + (_hasMore ? 1 : 0),
+            // 添加加载更多指示器
             itemBuilder: (context, index) {
               // 如果是最后一个item且正在加载更多，显示加载指示器
               if (_hasMore && index == titles.length) {
@@ -277,7 +233,7 @@ class _RankingPageState extends State<RankingPage> {
               return _buildRankItem(
                 title: titles[index],
                 coverUrl: index < covers.length ? covers[index] : '',
-                link: index < links.length ? links[index] : '',
+                link: index < id.length ? id[index] : 0,
               );
             },
           ),
@@ -289,7 +245,7 @@ class _RankingPageState extends State<RankingPage> {
             bottom: 16,
             child: FloatingActionButton(
               onPressed: _scrollToTop,
-              child: const Icon(Icons.keyboard_arrow_up,size: 33,),
+              child: const Icon(Icons.keyboard_arrow_up, size: 33),
             ),
           ),
       ],
@@ -301,69 +257,71 @@ class _RankingPageState extends State<RankingPage> {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(16),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
   Widget _buildRankItem({
     required String title,
     required String coverUrl,
-    required String link,
+    required int link,
   }) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 封面图片
-          _buildCoverImage(coverUrl),
+      child: InkWell(
+        onTap: () {
+          // 跳转到详情页面
+          Routes.goToAnimeData(context, animeId: link);
+        },
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 封面图片
+            _buildCoverImage(coverUrl),
 
-          // 底部蒙版和标题
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.1),
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.black.withValues(alpha: 0.5),
-                  ],
-                  stops: const [0.0, 0.5, 0.8, 1.0],
+            // 底部蒙版和标题
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.1),
+                      Colors.black.withValues(alpha: 0.3),
+                      Colors.black.withValues(alpha: 0.5),
+                    ],
+                    stops: const [0.0, 0.5, 0.8, 1.0],
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 2,
-                      color: Colors.black,
-                    ),
-                  ],
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 2,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -372,11 +330,7 @@ class _RankingPageState extends State<RankingPage> {
     if (coverUrl.isEmpty) {
       return Container(
         color: Colors.grey[300],
-        child: const Icon(
-          Icons.image,
-          color: Colors.grey,
-          size: 40,
-        ),
+        child: const Icon(Icons.image, color: Colors.grey, size: 40),
       );
     }
 
@@ -386,11 +340,7 @@ class _RankingPageState extends State<RankingPage> {
       errorBuilder: (context, error, stackTrace) {
         return Container(
           color: Colors.grey[300],
-          child: const Icon(
-            Icons.broken_image,
-            color: Colors.grey,
-            size: 40,
-          ),
+          child: const Icon(Icons.broken_image, color: Colors.grey, size: 40),
         );
       },
     );
