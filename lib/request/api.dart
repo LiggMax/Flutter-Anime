@@ -9,6 +9,8 @@ class Api {
   static const String bangumiRankSearch = 'https://api.bgm.tv/v0/search/subjects?limit={0}&offset={1}';
   //获取条目评论
   static const String bangumiComment = 'https://next.bgm.tv/p1/subjects/{subject_id}/comments';
+  //相关条目
+  static const String bangumiRelated = 'https://api.bgm.tv/v0/subjects/{subject_id}/subjects';
   //bangumi.tv动漫页
   static const String bangumiTV = 'https://bangumi.tv/anime/browser';
   // bangumi请求头

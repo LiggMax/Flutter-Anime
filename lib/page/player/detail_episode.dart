@@ -3,7 +3,7 @@
   @Time 2025/7/26
  */
 import 'package:flutter/material.dart';
-import 'package:AnimeFlow/modules/episodes_data.dart';
+import 'package:AnimeFlow/modules/bangumi/episodes_data.dart';
 
 class EpisodeItem extends StatelessWidget {
   final Episode episode;

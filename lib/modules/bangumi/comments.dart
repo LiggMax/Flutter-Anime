@@ -6,20 +6,18 @@
 import 'dart:convert';
 
 /// 评论数据解析模块
-class BangumiCommentsData {
+class CommentsData {
   late final int total;
   final List<BangumiComment> data;
 
-  BangumiCommentsData({
-    required this.total,
-    required this.data,
-  });
+  CommentsData({required this.total, required this.data});
 
   /// 从API响应数据解析评论数据
-  factory BangumiCommentsData.fromJson(Map<String, dynamic> json) {
-    return BangumiCommentsData(
+  factory CommentsData.fromJson(Map<String, dynamic> json) {
+    return CommentsData(
       total: json['total'] ?? 0,
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((item) => BangumiComment.fromJson(item))
               .toList() ??
           [],
@@ -27,17 +25,14 @@ class BangumiCommentsData {
   }
 
   /// 从JSON字符串解析
-  factory BangumiCommentsData.fromJsonString(String jsonString) {
+  factory CommentsData.fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString);
-    return BangumiCommentsData.fromJson(json);
+    return CommentsData.fromJson(json);
   }
 
   /// 转换为JSON
   Map<String, dynamic> toJson() {
-    return {
-      'total': total,
-      'data': data.map((item) => item.toJson()).toList(),
-    };
+    return {'total': total, 'data': data.map((item) => item.toJson()).toList()};
   }
 }
 
@@ -86,12 +81,18 @@ class BangumiComment {
   /// 获取评论类型文本
   String get typeText {
     switch (type) {
-      case 1: return '想看';
-      case 2: return '看过';
-      case 3: return '在看';
-      case 4: return '搁置';
-      case 5: return '抛弃';
-      default: return '未知';
+      case 1:
+        return '想看';
+      case 2:
+        return '看过';
+      case 3:
+        return '在看';
+      case 4:
+        return '搁置';
+      case 5:
+        return '抛弃';
+      default:
+        return '未知';
     }
   }
 
@@ -168,11 +169,16 @@ class BangumiUser {
   /// 获取用户组文本
   String get groupText {
     switch (group) {
-      case 1: return '管理员';
-      case 2: return '版主';
-      case 3: return '用户';
-      case 10: return '用户';
-      default: return '未知';
+      case 1:
+        return '管理员';
+      case 2:
+        return '版主';
+      case 3:
+        return '用户';
+      case 10:
+        return '用户';
+      default:
+        return '未知';
     }
   }
 
@@ -206,27 +212,24 @@ class BangumiUserAvatar {
 
   /// 转换为JSON
   Map<String, dynamic> toJson() {
-    return {
-      'small': small,
-      'medium': medium,
-      'large': large,
-    };
+    return {'small': small, 'medium': medium, 'large': large};
   }
 
   /// 获取默认头像URL
-  String get defaultAvatar => small.isNotEmpty ? small : 'https://lain.bgm.tv/pic/user/s/icon.jpg';
+  String get defaultAvatar =>
+      small.isNotEmpty ? small : 'https://lain.bgm.tv/pic/user/s/icon.jpg';
 }
 
 /// 评论数据解析工具类
 class BangumiCommentsParser {
   /// 解析评论响应数据
-  static BangumiCommentsData parseCommentsResponse(Map<String, dynamic> response) {
-    return BangumiCommentsData.fromJson(response);
+  static CommentsData parseCommentsResponse(Map<String, dynamic> response) {
+    return CommentsData.fromJson(response);
   }
 
   /// 解析评论响应数据（从JSON字符串）
-  static BangumiCommentsData parseCommentsResponseFromString(String jsonString) {
-    return BangumiCommentsData.fromJsonString(jsonString);
+  static CommentsData parseCommentsResponseFromString(String jsonString) {
+    return CommentsData.fromJsonString(jsonString);
   }
 
   /// 按评分排序评论
@@ -244,21 +247,32 @@ class BangumiCommentsParser {
   }
 
   /// 获取高评分评论（8分以上）
-  static List<BangumiComment> getHighRateComments(List<BangumiComment> comments) {
+  static List<BangumiComment> getHighRateComments(
+    List<BangumiComment> comments,
+  ) {
     return comments.where((comment) => comment.rate >= 8).toList();
   }
 
   /// 获取低评分评论（3分以下）
-  static List<BangumiComment> getLowRateComments(List<BangumiComment> comments) {
-    return comments.where((comment) => comment.rate <= 3 && comment.rate > 0).toList();
+  static List<BangumiComment> getLowRateComments(
+    List<BangumiComment> comments,
+  ) {
+    return comments
+        .where((comment) => comment.rate <= 3 && comment.rate > 0)
+        .toList();
   }
 
   /// 获取平均评分
   static double getAverageRate(List<BangumiComment> comments) {
-    final ratedComments = comments.where((comment) => comment.rate > 0).toList();
+    final ratedComments = comments
+        .where((comment) => comment.rate > 0)
+        .toList();
     if (ratedComments.isEmpty) return 0.0;
 
-    final totalRate = ratedComments.fold<int>(0, (sum, comment) => sum + comment.rate);
+    final totalRate = ratedComments.fold<int>(
+      0,
+      (sum, comment) => sum + comment.rate,
+    );
     return totalRate / ratedComments.length;
   }
 

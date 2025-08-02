@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'request.dart';
 import 'api.dart';
-import '../modules/bangumi_comments.dart';
+import '../modules/bangumi/comments.dart';
 
 class BangumiService {
   static final Logger _log = Logger('BangumiService');
@@ -58,7 +58,7 @@ class BangumiService {
   }
 
   ///条目评论
-  static Future<BangumiCommentsData?> getComments(
+  static Future<CommentsData?> getComments(
     int subjectId, {
     int limit = 20,
     int offset = 0,
@@ -71,9 +71,23 @@ class BangumiService {
       );
 
       // 解析评论数据
-      return BangumiCommentsData.fromJson(response.data);
+      return CommentsData.fromJson(response.data);
     } catch (e) {
       _log.severe('获取评论失败: $e');
+      return null;
+    }
+  }
+
+  ///相关条目
+  static Future<Map<String, dynamic>?> getRelated(int subjectId) async {
+    try {
+      final response = await httpRequest.get(
+        Api.bangumiRelated.replaceAll('{subject_id}', subjectId.toString()),
+        options: Options(headers: {'User-Agent': Api.bangumiUserAgent}),
+      );
+      return response.data;
+    } catch (e) {
+      _log.severe('获取相关条目失败: $e');
       return null;
     }
   }

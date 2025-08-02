@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:AnimeFlow/modules/bangumi_data.dart';
+import 'package:AnimeFlow/modules/bangumi/ata.dart';
 import 'skeleton/head_skeleton.dart';
 import '../../routes/routes.dart';
 

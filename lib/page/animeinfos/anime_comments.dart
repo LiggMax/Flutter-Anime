@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
-import 'package:AnimeFlow/modules/bangumi_comments.dart';
+import 'package:AnimeFlow/modules/bangumi/comments.dart';
 
 /// 评论内容组件
 class AnimeCommentsContent extends StatefulWidget {
@@ -20,7 +20,7 @@ class AnimeCommentsContent extends StatefulWidget {
 }
 
 class AnimeCommentsContentState extends State<AnimeCommentsContent> {
-  BangumiCommentsData? _commentsData;
+  CommentsData? _commentsData;
   bool _isLoading = true;
   bool _isLoadingMore = false;
   String? _error;
@@ -67,7 +67,7 @@ class AnimeCommentsContentState extends State<AnimeCommentsContent> {
             _isLoadingMore = false;
             if (data != null && data.data.isNotEmpty) {
               // 合并评论数据
-              _commentsData = BangumiCommentsData(
+              _commentsData = CommentsData(
                 total: data.total,
                 data: [..._commentsData!.data, ...data.data],
               );
@@ -137,7 +137,7 @@ class AnimeCommentsContentState extends State<AnimeCommentsContent> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
-            SizedBox(height: 16),
+            SizedBox(height: 5),
             Text('正在加载评论...'),
           ],
         ),
@@ -196,7 +196,7 @@ class AnimeCommentsContentState extends State<AnimeCommentsContent> {
 /// 评论列表组件
 class AnimeCommentsList extends StatelessWidget {
   final int animeId;
-  final BangumiCommentsData commentsData;
+  final CommentsData commentsData;
   final bool hasMore;
   final bool isLoadingMore;
   final VoidCallback? onLoadMore;
