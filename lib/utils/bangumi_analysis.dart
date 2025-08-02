@@ -44,16 +44,26 @@ class BangumiTvAnalysis {
 
       //解析详情链接列表
       final linkElements = titleElements;
-      final links = linkElements
+      final id = linkElements
           .map((element) {
             final href = element.attributes['href'];
-            return href != null ? href.trim() : '';
+            if (href == null) return '';
+
+            final trimmedHref = href.trim();
+            if (trimmedHref.isEmpty) return '';
+
+            // 通过/进行字段切割获取下标1的数据
+            final parts = trimmedHref.split('/');
+            if (parts.length > 1) {
+              return parts[1];
+            }
+            return trimmedHref;
           })
           .where((link) => link.isNotEmpty)
           .toList();
 
       //返回解析结果
-      return {'titles': titles, 'covers': covers, 'links': links};
+      return {'titles': titles, 'covers': covers, 'id': id};
     } catch (e) {
       _log.severe('解析动漫热度排行榜数据失败: $e');
       return {};

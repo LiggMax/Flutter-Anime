@@ -221,7 +221,7 @@ class _RankingPageState extends State<RankingPage> {
 
     final titles = List<String>.from(_rankData!['titles'] ?? []);
     final covers = List<String>.from(_rankData!['covers'] ?? []);
-    final links = List<String>.from(_rankData!['links'] ?? []);
+    final links = List<String>.from(_rankData!['id'] ?? []);
 
     if (titles.isEmpty || covers.isEmpty) {
       return const Center(
