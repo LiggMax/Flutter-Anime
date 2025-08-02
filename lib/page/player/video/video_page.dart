@@ -82,10 +82,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black.withOpacity(0.7),
+            Colors.black.withValues(alpha: 0.7),
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withOpacity(0.7),
+            Colors.black.withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -164,7 +164,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     }
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0), // 添加水平间隔
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                      ), // 添加水平间隔
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -178,7 +180,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     );
                   },
                 ),
-
 
                 // 底部控制栏
                 Row(
@@ -208,9 +209,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         return IconButton(
                           onPressed: () {
                             final newVolume = volume > 0 ? 0.0 : 100.0;
-                            state.widget.controller.player.setVolume(
-                              newVolume,
-                            );
+                            state.widget.controller.player.setVolume(newVolume);
                           },
                           icon: Icon(
                             volume > 0 ? Icons.volume_up : Icons.volume_off,
@@ -224,8 +223,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     // 进度条
                     Expanded(
                       child: StreamBuilder<Duration>(
-                        stream:
-                            state.widget.controller.player.stream.position,
+                        stream: state.widget.controller.player.stream.position,
                         builder: (context, snapshot) {
                           final position = snapshot.data ?? Duration.zero;
                           final duration =
@@ -236,14 +234,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
                           }
 
                           final progress =
-                              position.inMilliseconds /
-                              duration.inMilliseconds;
+                              position.inMilliseconds / duration.inMilliseconds;
 
                           return SliderTheme(
                             data: SliderTheme.of(state.context).copyWith(
                               activeTrackColor: Colors.red,
-                              inactiveTrackColor: Colors.white.withOpacity(
-                                0.3,
+                              inactiveTrackColor: Colors.white.withValues(
+                                alpha: 0.3,
                               ),
                               thumbColor: Colors.red,
                               thumbShape: const RoundSliderThumbShape(
@@ -258,8 +255,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                               onChanged: (value) {
                                 final newPosition = Duration(
                                   milliseconds:
-                                      (value * duration.inMilliseconds)
-                                          .round(),
+                                      (value * duration.inMilliseconds).round(),
                                 );
                                 state.widget.controller.player.seek(
                                   newPosition,
