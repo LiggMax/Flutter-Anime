@@ -7,7 +7,7 @@ import './tabs/profile.dart';
 import './tabs/time.dart';
 import '../controllers/theme_controller.dart';
 import '../utils/theme_extensions.dart';
-import '../routes/app_routes.dart';
+import '../routes/routes.dart';
 
 class Tabs extends StatefulWidget {
   const Tabs({super.key});
@@ -61,7 +61,7 @@ class _TabsState extends State<Tabs> {
   }
 
   void _navigateToSearch() {
-    Navigator.pushNamed(context, AppRoutes.search);
+    Navigator.pushNamed(context, Routes.search);
   }
 
   @override
@@ -69,11 +69,11 @@ class _TabsState extends State<Tabs> {
     final themeController = Provider.of<ThemeController>(context);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(_pageTitles[_currentIndex]),
         centerTitle: false,
         automaticallyImplyLeading: false,
-        // 禁用自动返回按钮
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent, // 状态栏透明
           statusBarIconBrightness: context.isDarkMode
@@ -116,20 +116,28 @@ class _TabsState extends State<Tabs> {
         index: _currentIndex,
         onTap: _navigateTo,
         height: 70,
-        color: context.navigationBarColor,
+        color: Theme.of(context).colorScheme.secondaryFixed,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 200),
         items: [
-          Icon(Icons.home, size: 30, color: context.navigationIconColor),
+          Icon(
+            Icons.home,
+            size: 30,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           Icon(
             Icons.timeline_sharp,
             size: 30,
-            color: context.navigationIconColor,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-          Icon(Icons.person, size: 30, color: context.navigationIconColor),
+          Icon(
+            Icons.person,
+            size: 30,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ],
-        buttonBackgroundColor: context.navigationSelectedColor,
-        animationCurve: Curves.easeInOut,
+        buttonBackgroundColor: Theme.of(context).colorScheme.primary,
+        animationCurve: Curves.linear,
       ),
     );
   }

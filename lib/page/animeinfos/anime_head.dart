@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/modules/bangumi_data.dart';
-import '../play/play_info.dart';
 import 'skeleton/head_skeleton.dart';
+import '../../routes/routes.dart';
 
 /// 自定义AppBar组件
 class AnimeDetailAppBar extends StatelessWidget {
@@ -474,12 +474,11 @@ class AnimePlayButton extends StatelessWidget {
             width: 220,
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.push(
+                // 跳转到播放信息页面
+                Routes.goToPlayInfo(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        VideoInfoPage(animeId: animeId, animeName: animeName),
-                  ),
+                  title: animeName ?? '动漫播放',
+                  videoInfo: {'animeId': animeId, 'animeName': animeName},
                 );
               },
               style: ElevatedButton.styleFrom(

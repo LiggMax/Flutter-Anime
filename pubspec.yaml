@@ -44,6 +44,9 @@ dependencies:
   media_kit_video: ^1.2.5 # 用于视频渲染.
   media_kit_libs_video: ^1.0.5 # 原生视频依赖项.
 
+  window_manager: ^0.3.8 # 桌面端窗口管理
+  device_info_plus: ^9.1.2 # 设备信息获取
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
