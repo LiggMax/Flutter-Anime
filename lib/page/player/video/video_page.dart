@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import '../../../utils/fullscreen_utils.dart';
 
 /// 视频播放器核心组件
 class VideoPlayer extends StatefulWidget {
@@ -8,6 +9,10 @@ class VideoPlayer extends StatefulWidget {
   final String? title;
   final VoidCallback? onBackPressed;
   final bool showControls;
+  final bool isFullscreen;
+  final VoidCallback? onToggleFullscreen;
+  final Player player; // 必需的播放器实例
+  final VideoController controller; // 必需的控制器实例
 
   const VideoPlayer({
     super.key,
@@ -15,6 +20,10 @@ class VideoPlayer extends StatefulWidget {
     this.title,
     this.onBackPressed,
     this.showControls = false,
+    this.isFullscreen = false,
+    this.onToggleFullscreen,
+    required this.player,
+    required this.controller,
   });
 
   @override
@@ -22,56 +31,43 @@ class VideoPlayer extends StatefulWidget {
 }
 
 class _VideoPlayerState extends State<VideoPlayer> {
-  // 创建播放器实例
-  late final player = Player();
-  // 创建视频控制器
-  late final controller = VideoController(player);
-
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
-  }
-
-  Future<void> _initializeVideo() async {
-    try {
-      // 创建媒体对象
-      final media = Media(widget.videoUrl);
-
-      // 打开视频
-      await player.open(media);
-
-      // 设置播放列表模式为单曲循环
-      await player.setPlaylistMode(PlaylistMode.single);
-
-      // 设置音量
-      await player.setVolume(100.0);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('视频加载失败: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
   }
 
   @override
   void dispose() {
-    // 释放播放器资源
-    player.dispose();
+    // 不在这里释放播放器资源，由父组件管理
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Video(
-        controller: controller,
-        // 自定义播放器控件
-        controls: widget.showControls ? _buildCustomControls : NoVideoControls,
-      ),
-    );
+    // 根据全屏状态调整布局
+    if (widget.isFullscreen) {
+      return Material(
+        color: Colors.black,
+        child: SizedBox.expand(
+          child: Video(
+            controller: widget.controller,
+            controls: widget.showControls
+                ? _buildCustomControls
+                : NoVideoControls,
+          ),
+        ),
+      );
+    } else {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Video(
+          controller: widget.controller,
+          controls: widget.showControls
+              ? _buildCustomControls
+              : NoVideoControls,
+        ),
+      );
+    }
   }
 
   // 自定义播放器控件
@@ -103,7 +99,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 children: [
                   // 返回按钮
                   IconButton(
-                    onPressed: () => Navigator.of(state.context).pop(),
+                    onPressed: () {
+                      if (widget.onBackPressed != null) {
+                        widget.onBackPressed!();
+                      } else {
+                        Navigator.of(state.context).pop();
+                      }
+                    },
                     icon: const Icon(
                       Icons.arrow_back,
                       color: Colors.white,
@@ -128,10 +130,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   // 设置按钮
                   IconButton(
                     onPressed: () {
-                      _showSettingsDialog(
-                        state.context,
-                        state.widget.controller,
-                      );
+                      _showSettingsDialog(state.context, widget.controller);
                     },
                     icon: const Icon(
                       Icons.settings,
@@ -153,20 +152,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
               children: [
                 // 时间显示
                 StreamBuilder<Duration>(
-                  stream: state.widget.controller.player.stream.position,
+                  stream: widget.controller.player.stream.position,
                   builder: (context, snapshot) {
                     final position = snapshot.data ?? Duration.zero;
-                    final duration =
-                        state.widget.controller.player.state.duration;
+                    final duration = widget.controller.player.state.duration;
 
                     if (duration.inSeconds == 0) {
                       return const SizedBox.shrink();
                     }
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                      ), // 添加水平间隔
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -186,12 +182,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   children: [
                     // 播放/暂停按钮
                     StreamBuilder<bool>(
-                      stream: state.widget.controller.player.stream.playing,
+                      stream: widget.controller.player.stream.playing,
                       builder: (context, snapshot) {
                         final isPlaying = snapshot.data ?? false;
                         return IconButton(
                           onPressed: () =>
-                              state.widget.controller.player.playOrPause(),
+                              widget.controller.player.playOrPause(),
                           icon: Icon(
                             isPlaying ? Icons.pause : Icons.play_arrow,
                             color: Colors.white,
@@ -203,13 +199,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
                     // 音量控制
                     StreamBuilder<double>(
-                      stream: state.widget.controller.player.stream.volume,
+                      stream: widget.controller.player.stream.volume,
                       builder: (context, snapshot) {
                         final volume = snapshot.data ?? 100.0;
                         return IconButton(
                           onPressed: () {
                             final newVolume = volume > 0 ? 0.0 : 100.0;
-                            state.widget.controller.player.setVolume(newVolume);
+                            widget.controller.player.setVolume(newVolume);
                           },
                           icon: Icon(
                             volume > 0 ? Icons.volume_up : Icons.volume_off,
@@ -223,11 +219,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     // 进度条
                     Expanded(
                       child: StreamBuilder<Duration>(
-                        stream: state.widget.controller.player.stream.position,
+                        stream: widget.controller.player.stream.position,
                         builder: (context, snapshot) {
                           final position = snapshot.data ?? Duration.zero;
                           final duration =
-                              state.widget.controller.player.state.duration;
+                              widget.controller.player.state.duration;
 
                           if (duration.inSeconds == 0) {
                             return const SizedBox.shrink();
@@ -257,9 +253,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                                   milliseconds:
                                       (value * duration.inMilliseconds).round(),
                                 );
-                                state.widget.controller.player.seek(
-                                  newPosition,
-                                );
+                                widget.controller.player.seek(newPosition);
                               },
                             ),
                           );
@@ -270,10 +264,21 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     // 全屏按钮
                     IconButton(
                       onPressed: () {
-                        // 这里可以添加全屏逻辑
+                        if (widget.onToggleFullscreen != null) {
+                          widget.onToggleFullscreen!();
+                        } else {
+                          ScaffoldMessenger.of(state.context).showSnackBar(
+                            const SnackBar(
+                              content: Text('全屏功能不可用'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
                       },
-                      icon: const Icon(
-                        Icons.fullscreen,
+                      icon: Icon(
+                        widget.isFullscreen
+                            ? Icons.fullscreen_exit
+                            : Icons.fullscreen,
                         color: Colors.white,
                         size: 30,
                       ),
@@ -353,7 +358,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   ),
                   onTap: () {
                     controller.player.setRate(speed);
-                    Navigator.of(context).pop(); // 关闭设置对话框
+                    Navigator.of(context).pop();
                   },
                 ),
               )
@@ -364,10 +369,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   // 获取播放器实例（供外部使用）
-  Player get playerInstance => player;
+  Player get playerInstance => widget.player;
 
   // 获取控制器实例（供外部使用）
-  VideoController get controllerInstance => controller;
+  VideoController get controllerInstance => widget.controller;
 }
 
 /// 视频播放器页面
@@ -383,28 +388,106 @@ class VideoPage extends StatefulWidget {
 }
 
 class _VideoPageState extends State<VideoPage> {
+  bool _isFullscreen = false;
+  late final Player player = Player();
+  late final VideoController controller = VideoController(player);
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      // 创建媒体对象
+      final media = Media(widget.videoUrl);
+
+      // 打开视频
+      await player.open(media);
+
+      // 设置播放列表模式为单曲循环
+      await player.setPlaylistMode(PlaylistMode.single);
+
+      // 设置音量
+      await player.setVolume(100.0);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('视频加载失败: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // 退出时重置系统UI和方向
+    FullscreenUtils.exitFullScreen();
+    player.dispose();
+    super.dispose();
+  }
+
+  // 切换全屏状态
+  void _toggleFullscreen() async {
+    print('VideoPage: 切换全屏状态，当前状态: $_isFullscreen');
+
+    setState(() {
+      _isFullscreen = !_isFullscreen;
+    });
+
+    if (_isFullscreen) {
+      // 进入全屏
+      print('VideoPage: 进入全屏模式');
+      await FullscreenUtils.enterFullScreen();
+    } else {
+      // 退出全屏
+      print('VideoPage: 退出全屏模式');
+      await FullscreenUtils.exitFullScreen();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+    if (_isFullscreen) {
+      // 全屏模式：直接返回VideoPlayer，不包装在Scaffold中
+      return VideoPlayer(
+        videoUrl: widget.videoUrl,
+        title: widget.title,
+        showControls: true,
+        isFullscreen: _isFullscreen,
+        onToggleFullscreen: _toggleFullscreen,
+        onBackPressed: () => _toggleFullscreen(), // 返回按钮退出全屏
+        player: player, // 传递播放器实例
+        controller: controller, // 传递控制器实例
+      );
+    } else {
+      // 正常模式：带AppBar
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: widget.title != null
+              ? Text(widget.title!, style: const TextStyle(color: Colors.white))
+              : null,
         ),
-        title: widget.title != null
-            ? Text(widget.title!, style: const TextStyle(color: Colors.white))
-            : null,
-      ),
-      body: SafeArea(
-        child: VideoPlayer(
-          videoUrl: widget.videoUrl,
-          title: widget.title,
-          showControls: true, // 显示自定义控件
+        body: SafeArea(
+          child: VideoPlayer(
+            videoUrl: widget.videoUrl,
+            title: widget.title,
+            showControls: true,
+            isFullscreen: _isFullscreen,
+            onToggleFullscreen: _toggleFullscreen,
+            player: player, // 传递播放器实例
+            controller: controller, // 传递控制器实例
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 }
