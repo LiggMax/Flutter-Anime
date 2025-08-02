@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'video/video_page.dart';
@@ -93,49 +94,18 @@ class _PlayInfoState extends State<PlayInfo> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // 设置状态栏为深色
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          widget.title ?? '播放信息',
-          style: TextStyle(color: theme.colorScheme.onSurface),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.play_circle_outline,
-              color: theme.colorScheme.onSurface,
-            ),
-            onPressed: () {
-              // 导航到视频播放页面
-              if (_actualVideoUrl != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => VideoPage(
-                      videoUrl: _actualVideoUrl!,
-                      title: widget.title,
-                    ),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('视频还未加载完成'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -144,26 +114,30 @@ class _PlayInfoState extends State<PlayInfo> {
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
               ),
-              child: ClipRRect(
-                child: _isLoadingVideo
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: theme.colorScheme.primary,
-                        ),
-                      )
-                    : _actualVideoUrl != null
-                    ? VideoPlayer(
-                        videoUrl: _actualVideoUrl!,
-                        showControls: true, // 显示自定义控件
-                      )
-                    : Center(
-                        child: Text(
-                          '视频加载失败',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    child: _isLoadingVideo
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: theme.colorScheme.primary,
+                            ),
+                          )
+                        : _actualVideoUrl != null
+                        ? VideoPlayer(
+                            videoUrl: _actualVideoUrl!,
+                            showControls: true, // 显示自定义控件
+                          )
+                        : Center(
+                            child: Text(
+                              '视频加载失败',
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                  ),
+                ],
               ),
             ),
 
@@ -201,9 +175,6 @@ class _PlayInfoState extends State<PlayInfo> {
                       _buildControlOptions(),
 
                       const SizedBox(height: 24),
-
-                      // 播放按钮
-                      _buildPlayButton(),
                     ],
                   ),
                 ),
@@ -509,53 +480,6 @@ class _PlayInfoState extends State<PlayInfo> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPlayButton() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
-        onPressed: () {
-          if (_actualVideoUrl != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    VideoPage(videoUrl: _actualVideoUrl!, title: widget.title),
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('视频还未加载完成'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.play_arrow, color: Colors.white),
-            SizedBox(width: 8),
-            Text(
-              '开始播放',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
