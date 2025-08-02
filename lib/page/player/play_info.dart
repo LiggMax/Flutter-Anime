@@ -154,7 +154,7 @@ class _PlayInfoState extends State<PlayInfo> {
                     : _actualVideoUrl != null
                     ? VideoPlayer(
                         videoUrl: _actualVideoUrl!,
-                        showControls: false, // 不显示控件
+                        showControls: true, // 显示自定义控件
                       )
                     : Center(
                         child: Text(
