@@ -19,14 +19,14 @@ class CalendarProvider {
   // 静态缓存
   static Map<String, dynamic>? _cachedData;
   static DateTime? _cacheTime;
-  static const Duration _cacheExpiration = Duration(minutes: 30); // 缓存30分钟
+  static const Duration _cacheExpiration = Duration(minutes: 3); // 缓存时间
 
   CalendarProvider() {
     // 检查是否有有效缓存
     if (_hasValidCache()) {
       _stateController.add(CalendarState(data: _cachedData, isLoading: false));
     } else {
-    _stateController.add(CalendarState(isLoading: true));
+      _stateController.add(CalendarState(isLoading: true));
       loadCalendar();
     }
   }
@@ -34,8 +34,8 @@ class CalendarProvider {
   // 检查缓存是否有效
   bool _hasValidCache() {
     return _cachedData != null &&
-           _cacheTime != null &&
-           DateTime.now().difference(_cacheTime!) < _cacheExpiration;
+        _cacheTime != null &&
+        DateTime.now().difference(_cacheTime!) < _cacheExpiration;
   }
 
   Future<void> loadCalendar({bool forceRefresh = false}) async {
@@ -80,13 +80,8 @@ class AnimeCard extends StatelessWidget {
   final dynamic animeData;
   final Function(int id)? onTap; // 添加点击回调
 
-  const AnimeCard({
-    super.key,
-    required this.animeData,
-    this.onTap,
-  });
+  const AnimeCard({super.key, required this.animeData, this.onTap});
 
-  @override
   Widget build(BuildContext context) {
     final subject = animeData['subject'];
     final id = subject['id'] as int;
@@ -98,15 +93,13 @@ class AnimeCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap?.call(id), // 点击时传递 id
       child: Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         clipBehavior: Clip.antiAlias, // 确保内容不会超出圆角
         child: Stack(
           fit: StackFit.expand,
-        children: [
-          // 封面图片
+          children: [
+            // 封面图片
             _buildImage(imageUrl),
             // 底部渐变蒙版和标题
             Positioned(
@@ -125,12 +118,12 @@ class AnimeCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
-                    name ?? '未知动漫',
-                    style: const TextStyle(
+                  name ?? '未知动漫',
+                  style: const TextStyle(
                     fontSize: 11,
-                      fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
                       Shadow(
@@ -139,14 +132,14 @@ class AnimeCard extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ],
-          ),
+        ),
       ),
     );
   }
@@ -167,17 +160,13 @@ class AnimeCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: Colors.grey[300],
-      child: const Icon(
-        Icons.movie,
-        size: 30,
-        color: Colors.grey,
-      ),
+      child: const Icon(Icons.movie, size: 30, color: Colors.grey),
     );
   }
 }
 
 // 星期动漫网格组件
-class WeeklyAnimeGrid extends StatelessWidget {
+class WeeklyAnimeGrid extends StatefulWidget {
   final Map<String, dynamic> calendarData;
   final VoidCallback? onRefresh;
 
@@ -188,11 +177,20 @@ class WeeklyAnimeGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  State<WeeklyAnimeGrid> createState() => _WeeklyAnimeGridState();
+}
 
+class _WeeklyAnimeGridState extends State<WeeklyAnimeGrid>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // 必须调用以支持 keep alive
     //获取当前星期(1-7）并计算 Tab 的初始索引（0-6）
     final todayWeekday = DateTime.now().weekday;
-    final initialIndex = todayWeekday -1;// weekday 1 对应 index 0
+    final initialIndex = todayWeekday - 1; // weekday 1 对应 index 0
 
     return DefaultTabController(
       initialIndex: initialIndex, // 设置初始索引
@@ -221,11 +219,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
             ),
           ),
           // 星期内容
-          Expanded(
-            child: TabBarView(
-              children: _buildWeekViews(),
-            ),
-          ),
+          Expanded(child: TabBarView(children: _buildWeekViews())),
         ],
       ),
     );
@@ -236,7 +230,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
     return weekNames.asMap().entries.map((entry) {
       final dayIndex = entry.key + 1; // 1-7
       final dayName = entry.value;
-      final animeCount = calendarData[dayIndex.toString()]?.length ?? 0;
+      final animeCount = widget.calendarData[dayIndex.toString()]?.length ?? 0;
 
       return Tab(
         child: Column(
@@ -252,10 +246,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
               ),
               child: Text(
                 '$animeCount',
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 10, color: Colors.white),
               ),
             ),
           ],
@@ -267,39 +258,31 @@ class WeeklyAnimeGrid extends StatelessWidget {
   List<Widget> _buildWeekViews() {
     return List.generate(7, (index) {
       final dayIndex = index + 1; // 1-7
-      final dayAnimes = calendarData[dayIndex.toString()] as List<dynamic>? ?? [];
+      final dayAnimes =
+          widget.calendarData[dayIndex.toString()] as List<dynamic>? ?? [];
 
       if (dayAnimes.isEmpty) {
         return RefreshIndicator(
-          onRefresh: () async => onRefresh != null ? onRefresh!() : Future.value(),
+          onRefresh: () async =>
+              widget.onRefresh != null ? widget.onRefresh!() : Future.value(),
           child: const SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             child: SizedBox(
               height: 400,
               child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.tv_off,
-                size: 80,
-                color: Colors.grey,
-              ),
-              SizedBox(height: 16),
-              Text(
-                '今天没有新番',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.tv_off, size: 80, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      '今天没有新番',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
                     SizedBox(height: 8),
                     Text(
                       '下拉刷新试试',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -310,8 +293,12 @@ class WeeklyAnimeGrid extends StatelessWidget {
       }
 
       return RefreshIndicator(
-        onRefresh: () async => onRefresh != null ? onRefresh!() : Future.value(),
-        child: AnimeGrid(animes: dayAnimes),
+        onRefresh: () async =>
+            widget.onRefresh != null ? widget.onRefresh!() : Future.value(),
+        child: AnimeGrid(
+          key: ValueKey('day_$dayIndex'), // 添加唯一key
+          animes: dayAnimes,
+        ),
       );
     });
   }
@@ -321,10 +308,7 @@ class WeeklyAnimeGrid extends StatelessWidget {
 class AnimeGrid extends StatelessWidget {
   final List<dynamic> animes;
 
-  const AnimeGrid({
-    super.key,
-    required this.animes,
-  });
+  const AnimeGrid({super.key, required this.animes});
 
   @override
   Widget build(BuildContext context) {
@@ -338,17 +322,19 @@ class AnimeGrid extends StatelessWidget {
               crossAxisCount: _getCrossAxisCount(context),
               childAspectRatio: 0.75,
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => AnimeCard(
-                animeData: animes[index],
-                onTap: (id) {
-                  final animeData = animes[index];
-                  final subject = animeData['subject'];
-                  final animeName = subject['nameCN']?.isNotEmpty == true
-                      ? subject['nameCN']
-                      : subject['name'];
-                  final imageUrl = subject['images']?['large'];
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final animeData = animes[index];
+              final subject = animeData['subject'];
+              final id = subject['id'] as int;
+              final animeName = subject['nameCN']?.isNotEmpty == true
+                  ? subject['nameCN']
+                  : subject['name'];
+              final imageUrl = subject['images']?['large'];
 
+              return AnimeCard(
+                key: ValueKey('anime_$id'), // 添加唯一key
+                animeData: animeData,
+                onTap: (id) {
                   Routes.goToAnimeData(
                     context,
                     animeId: id,
@@ -356,9 +342,8 @@ class AnimeGrid extends StatelessWidget {
                     imageUrl: imageUrl,
                   );
                 },
-              ),
-              childCount: animes.length,
-            ),
+              );
+            }, childCount: animes.length),
           ),
         ),
       ],
@@ -382,7 +367,8 @@ class TimePage extends StatefulWidget {
   State<TimePage> createState() => _TimePageState();
 }
 
-class _TimePageState extends State<TimePage> with AutomaticKeepAliveClientMixin {
+class _TimePageState extends State<TimePage>
+    with AutomaticKeepAliveClientMixin {
   late CalendarProvider _calendarProvider;
 
   @override
