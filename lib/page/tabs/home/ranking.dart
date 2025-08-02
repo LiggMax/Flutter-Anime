@@ -17,6 +17,7 @@ class _RankingPageState extends State<RankingPage> {
   int _currentPage = 1;
   bool _hasMore = true;
   final ScrollController _scrollController = ScrollController();
+  bool _showBackToTop = false; // 控制返回顶部按钮的显示
 
   @override
   void initState() {
@@ -40,6 +41,21 @@ class _RankingPageState extends State<RankingPage> {
         _scrollController.position.maxScrollExtent - 200) {
       // 触发加载更多
       _loadMoreData();
+    }
+
+    // 控制返回顶部按钮的显示
+    if (_scrollController.position.pixels > 300) {
+      if (!_showBackToTop) {
+        setState(() {
+          _showBackToTop = true;
+        });
+      }
+    } else {
+      if (_showBackToTop) {
+        setState(() {
+          _showBackToTop = false;
+        });
+      }
     }
   }
 
@@ -126,6 +142,15 @@ class _RankingPageState extends State<RankingPage> {
         });
       }
     }
+  }
+
+  // 返回顶部方法
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -221,39 +246,53 @@ class _RankingPageState extends State<RankingPage> {
       );
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        // 检查是否滚动到页面底部
-        if (!_isLoadingMore &&
-            _hasMore &&
-            scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-          _loadMoreData();
-          return true;
-        }
-        return false;
-      },
-      child: GridView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(10),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: FullscreenUtils.getCrossAxisCount(context),
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 2,
-        ),
-        itemCount: titles.length + (_hasMore ? 1 : 0), // 添加加载更多指示器
-        itemBuilder: (context, index) {
-          // 如果是最后一个item且正在加载更多，显示加载指示器
-          if (_hasMore && index == titles.length) {
-            return _buildLoadingMoreIndicator();
-          }
+    return Stack(
+      children: [
+        NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            // 检查是否滚动到页面底部
+            if (!_isLoadingMore &&
+                _hasMore &&
+                scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+              _loadMoreData();
+              return true;
+            }
+            return false;
+          },
+          child: GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(10),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: FullscreenUtils.getCrossAxisCount(context),
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 2,
+            ),
+            itemCount: titles.length + (_hasMore ? 1 : 0), // 添加加载更多指示器
+            itemBuilder: (context, index) {
+              // 如果是最后一个item且正在加载更多，显示加载指示器
+              if (_hasMore && index == titles.length) {
+                return _buildLoadingMoreIndicator();
+              }
 
-          return _buildRankItem(
-            title: titles[index],
-            coverUrl: index < covers.length ? covers[index] : '',
-            link: index < links.length ? links[index] : '',
-          );
-        },
-      ),
+              return _buildRankItem(
+                title: titles[index],
+                coverUrl: index < covers.length ? covers[index] : '',
+                link: index < links.length ? links[index] : '',
+              );
+            },
+          ),
+        ),
+        // 返回顶部按钮
+        if (_showBackToTop)
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: FloatingActionButton(
+              onPressed: _scrollToTop,
+              child: const Icon(Icons.keyboard_arrow_up,size: 33,),
+            ),
+          ),
+      ],
     );
   }
 
