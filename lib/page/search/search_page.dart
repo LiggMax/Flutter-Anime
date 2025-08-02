@@ -15,8 +15,7 @@ class SearchPage extends StatefulWidget {
   State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage>
-    with TickerProviderStateMixin {
+class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<String> _searchHistory = [];
@@ -42,21 +41,19 @@ class _SearchPageState extends State<SearchPage>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _layoutAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _layoutAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _layoutAnimationController,
-      curve: Curves.easeOutBack,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _layoutAnimationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
 
     // 启动初始动画
     _layoutAnimationController.forward();
@@ -549,155 +546,159 @@ class _SearchPageState extends State<SearchPage>
   }
 
   Widget _buildSearchResultItem(SearchAnimeItem anime) {
-    return GestureDetector(
-      onTap: () => _onAnimeTap(anime),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 左侧封面图片
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: anime.coverImage.isNotEmpty
-                  ? Image.network(
-                      anime.coverImage,
-                      width: 100,
-                      height: 150,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 100,
-                          height: 150,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, color: Colors.grey),
-                        );
-                      },
-                    )
-                  : Container(
-                      width: 100,
-                      height: 150,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, color: Colors.grey),
-                    ),
-            ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Card(
+        elevation: 0,
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => _onAnimeTap(anime),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 左侧封面图片
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: anime.coverImage.isNotEmpty
+                    ? Image.network(
+                        anime.coverImage,
+                        width: 110,
+                        height: 160,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 110,
+                            height: 160,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          );
+                        },
+                      )
+                    : Container(
+                        width: 110,
+                        height: 160,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image, color: Colors.grey),
+                      ),
+              ),
 
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
 
-            // 右侧信息
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 标题
-                  Text(
-                    anime.displayName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  // 基本信息
-                  Row(
-                    children: [
-                      if (anime.date != null && anime.date!.isNotEmpty) ...[
-                        Text(
-                          anime.date!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      if (anime.eps > 0) ...[
-                        Text(
-                          '全${anime.eps}话',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                    ],
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  // 标签信息
-                  if (anime.tags.isNotEmpty) ...[
+              // 右侧信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 标题
                     Text(
-                      anime.tags.take(3).map((tag) => tag.name).join('/'),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      anime.displayName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
-                  ],
 
-                  // 制作信息
-                  if (anime.infobox.isNotEmpty) ...[
-                    Builder(
-                      builder: (context) {
-                        final director = anime.infobox.firstWhere(
-                          (box) => box.key == '导演' || box.key == '监督',
-                          orElse: () => AnimeInfoBox(key: '', value: ''),
-                        );
-                        if (director.key.isNotEmpty) {
-                          return Text(
-                            '制作: ${director.valueString}',
+                    // 基本信息
+                    Row(
+                      children: [
+                        if (anime.date != null && anime.date!.isNotEmpty) ...[
+                          Text(
+                            anime.date!,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        if (anime.eps > 0) ...[
+                          Text(
+                            '全${anime.eps}话',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ],
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    // 标签信息
+                    if (anime.tags.isNotEmpty) ...[
+                      Text(
+                        anime.tags.take(3).map((tag) => tag.name).join('/'),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+
+                    // 制作信息
+                    if (anime.infobox.isNotEmpty) ...[
+                      Builder(
+                        builder: (context) {
+                          final director = anime.infobox.firstWhere(
+                            (box) => box.key == '导演' || box.key == '监督',
+                            orElse: () => AnimeInfoBox(key: '', value: ''),
                           );
-                        }
-                        return const SizedBox.shrink();
-                      },
+                          if (director.key.isNotEmpty) {
+                            return Text(
+                              '制作: ${director.valueString}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ],
+
+                    // 评分信息
+                    Row(
+                      children: [
+                        if (anime.score > 0) ...[
+                          Icon(Icons.star, size: 14, color: Colors.amber),
+                          const SizedBox(width: 2),
+                          Text(
+                            anime.score.toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '#${anime.rating.rank}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${anime.rating.total}人评',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
-
-                  // 评分信息
-                  Row(
-                    children: [
-                      if (anime.score > 0) ...[
-                        Icon(Icons.star, size: 14, color: Colors.amber),
-                        const SizedBox(width: 2),
-                        Text(
-                          anime.score.toString(),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '#${anime.rating.rank}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${anime.rating.total}人评',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
