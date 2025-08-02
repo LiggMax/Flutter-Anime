@@ -1,10 +1,19 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 class FullscreenUtils {
+  static int getCrossAxisCount(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 400) return 3;
+    if (width < 600) return 4;
+    if (width < 900) return 5;
+    return 7; // 超大屏幕显示7列
+  }
+
   /// 判断是否为桌面设备
   static bool isDesktop() {
     return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
@@ -12,7 +21,6 @@ class FullscreenUtils {
 
   /// 判断设备是否为平板
   static bool isTablet() {
-    // 这里可以根据需要实现平板检测逻辑
     return false;
   }
 
