@@ -7,7 +7,7 @@ import 'dart:convert';
 
 /// 评论数据解析模块
 class BangumiCommentsData {
-  final int total;
+  late final int total;
   final List<BangumiComment> data;
 
   BangumiCommentsData({

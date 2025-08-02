@@ -13,7 +13,7 @@ class AnimeCommentsContent extends StatefulWidget {
 }
 
 class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
-  late Future<BangumiCommentsData?> _commentsFuture;
+  Future<BangumiCommentsData?>? _commentsFuture;
 
   @override
   void initState() {
@@ -22,13 +22,33 @@ class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
   }
 
   void _loadComments() {
-    setState(() {
-      _commentsFuture = BangumiService.getComments(widget.animeId);
-    });
+    if (mounted) {
+      setState(() {
+        _commentsFuture = BangumiService.getComments(widget.animeId);
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 确保在依赖项改变时重新加载
+    if (_commentsFuture == null && mounted) {
+      _loadComments();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_commentsFuture == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
     return FutureBuilder<BangumiCommentsData?>(
       future: _commentsFuture,
       builder: (context, snapshot) {
@@ -69,7 +89,12 @@ class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
           );
         } else {
           // 没有数据
-          return const Center(child: Text('暂无评论数据'));
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text('暂无评论数据'),
+            ),
+          );
         }
       },
     );
@@ -89,28 +114,19 @@ class AnimeCommentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
             '评论 (${commentsData.total})',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          // 使用列布局渲染评论列表
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: commentsData.data.length,
-            itemBuilder: (context, index) {
-              final comment = commentsData.data[index];
-              return _buildCommentItem(comment);
-            },
-          ),
-        ],
-      ),
+        ),
+        // 评论列表 - 使用简单的Column，让父级CustomScrollView处理滚动
+        ...commentsData.data.map((comment) => _buildCommentItem(comment)).toList(),
+      ],
     );
   }
 
@@ -129,12 +145,15 @@ class AnimeCommentsList extends StatelessWidget {
                 // 用户头像
                 CircleAvatar(
                   radius: 20,
-                  backgroundImage: NetworkImage(
-                    comment.user.avatar.defaultAvatar,
-                  ),
+                  backgroundImage: comment.user.avatar.defaultAvatar.isNotEmpty
+                      ? NetworkImage(comment.user.avatar.defaultAvatar)
+                      : null,
                   onBackgroundImageError: (exception, stackTrace) {
                     // 处理图片加载错误
                   },
+                  child: comment.user.avatar.defaultAvatar.isEmpty
+                      ? const Icon(Icons.person, size: 24)
+                      : null,
                 ),
                 const SizedBox(width: 10),
                 // 用户名称和信息
@@ -165,7 +184,7 @@ class AnimeCommentsList extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ...List.generate(5, (index) {
-                            final starValue = comment.rate / 2; // 将0-10转换为0-5
+                            final starValue = comment.rate / 2;
                             final isFilled = index < starValue;
                             final isHalf =
                                 (starValue - index) > 0 &&

@@ -66,15 +66,10 @@ class BangumiService {
     try {
       final response = await httpRequest.get(
         Api.bangumiComment.replaceAll('{subject_id}', subjectId.toString()),
-        options: Options(
-          headers: {'User-Agent': Api.bangumiUserAgent},
-        ),
-        queryParameters: {
-          'limit': limit,
-          'offset': offset,
-        },
+        options: Options(headers: {'User-Agent': Api.bangumiUserAgent}),
+        queryParameters: {'limit': limit, 'offset': offset},
       );
-      
+
       // 解析评论数据
       return BangumiCommentsData.fromJson(response.data);
     } catch (e) {

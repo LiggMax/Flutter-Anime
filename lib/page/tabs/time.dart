@@ -351,14 +351,6 @@ class AnimeGrid extends StatelessWidget {
       ],
     );
   }
-
-  int _getCrossAxisCount(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 400) return 3;
-    if (width < 600) return 4;
-    if (width < 900) return 5;
-    return 7; // 超大屏幕显示7列
-  }
 }
 
 // 主页面组件
