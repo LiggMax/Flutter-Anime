@@ -430,19 +430,15 @@ class _VideoPageState extends State<VideoPage> {
 
   // 切换全屏状态
   void _toggleFullscreen() async {
-    print('VideoPage: 切换全屏状态，当前状态: $_isFullscreen');
-
     setState(() {
       _isFullscreen = !_isFullscreen;
     });
 
     if (_isFullscreen) {
       // 进入全屏
-      print('VideoPage: 进入全屏模式');
       await FullscreenUtils.enterFullScreen();
     } else {
       // 退出全屏
-      print('VideoPage: 退出全屏模式');
       await FullscreenUtils.exitFullScreen();
     }
   }
@@ -450,7 +446,7 @@ class _VideoPageState extends State<VideoPage> {
   @override
   Widget build(BuildContext context) {
     if (_isFullscreen) {
-      // 全屏模式：直接返回VideoPlayer，不包装在Scaffold中
+      // 全屏模式：直接返回VideoPlayer
       return VideoPlayer(
         videoUrl: widget.videoUrl,
         title: widget.title,
