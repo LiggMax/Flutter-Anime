@@ -129,105 +129,113 @@ class _PlayInfoState extends State<PlayInfo> {
       ),
     );
 
-    if (_isFullscreen) {
-      // 全屏模式：直接返回VideoPlayer，不包装在Scaffold中
-      return VideoPlayer(
-        videoUrl: _actualVideoUrl ?? '',
-        title: widget.title,
-        showControls: true,
-        isFullscreen: _isFullscreen,
-        onToggleFullscreen: _toggleFullscreen,
-        onBackPressed: () => _toggleFullscreen(), // 返回按钮退出全屏
-        player: player, // 传递播放器实例
-        controller: controller, // 传递控制器实例
-      );
-    } else {
-      // 正常模式：带完整界面
-      return Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        body: SafeArea(
-          child: Column(
-            children: [
-              // 视频预览区域
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                ),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      child: _isLoadingVideo
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: theme.colorScheme.primary,
-                              ),
-                            )
-                          : _actualVideoUrl != null
-                          ? VideoPlayer(
-                              videoUrl: _actualVideoUrl!,
-                              showControls: true,
-                              isFullscreen: _isFullscreen,
-                              onToggleFullscreen: _toggleFullscreen,
-                              player: player, // 传递播放器实例
-                              controller: controller, // 传递控制器实例
-                            )
-                          : Center(
-                              child: Text(
-                                '视频加载失败',
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // 正常模式：带完整界面
+            Opacity(
+              opacity: _isFullscreen ? 0.0 : 1.0,
+              child: Column(
+                children: [
+                  // 视频预览区域
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
                     ),
-                  ],
-                ),
-              ),
-
-              // 播放信息区域
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Stack(
                       children: [
-                        // 标题
-                        if (widget.title != null)
-                          Text(
-                            widget.title!,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                        const SizedBox(height: 16),
-
-                        // 播放状态信息
-                        _buildPlaybackInfo(),
-
-                        const SizedBox(height: 24),
-
-                        // 视频信息
-                        if (widget.videoInfo != null) _buildVideoInfo(),
-
-                        const SizedBox(height: 24),
-
-                        // 控制选项
-                        _buildControlOptions(),
-
-                        const SizedBox(height: 24),
+                        ClipRRect(
+                          child: _isLoadingVideo
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                )
+                              : _actualVideoUrl != null
+                              ? VideoPlayer(
+                                  videoUrl: _actualVideoUrl!,
+                                  showControls: true,
+                                  isFullscreen: _isFullscreen,
+                                  onToggleFullscreen: _toggleFullscreen,
+                                  player: player, // 传递播放器实例
+                                  controller: controller, // 传递控制器实例
+                                )
+                              : Center(
+                                  child: Text(
+                                    '视频加载失败',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                        ),
                       ],
                     ),
                   ),
-                ),
+
+                  // 播放信息区域
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 标题
+                            if (widget.title != null)
+                              Text(
+                                widget.title!,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                            const SizedBox(height: 16),
+
+                            // 播放状态信息
+                            _buildPlaybackInfo(),
+
+                            const SizedBox(height: 24),
+
+                            // 视频信息
+                            if (widget.videoInfo != null) _buildVideoInfo(),
+
+                            const SizedBox(height: 24),
+
+                            // 控制选项
+                            _buildControlOptions(),
+
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+
+            // 全屏模式：覆盖整个屏幕
+            Opacity(
+              opacity: _isFullscreen ? 1.0 : 0.0,
+              child: VideoPlayer(
+                videoUrl: _actualVideoUrl ?? '',
+                title: widget.title,
+                showControls: true,
+                isFullscreen: _isFullscreen,
+                onToggleFullscreen: _toggleFullscreen,
+                onBackPressed: () => _toggleFullscreen(), // 返回按钮退出全屏
+                player: player, // 传递播放器实例
+                controller: controller, // 传递控制器实例
+              ),
+            ),
+          ],
         ),
-      );
-    }
+      ),
+    );
   }
 
   Widget _buildPlaybackInfo() {
