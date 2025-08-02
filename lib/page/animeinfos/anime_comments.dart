@@ -9,7 +9,7 @@ class AnimeCommentsContent extends StatefulWidget {
   final Function(bool)? onLoadingStateChanged;
 
   const AnimeCommentsContent({
-    super.key, 
+    super.key,
     required this.animeId,
     this.onLoadMoreTriggered,
     this.onLoadingStateChanged,
@@ -42,7 +42,7 @@ class AnimeCommentsContentState extends State<AnimeCommentsContent> {
         _currentOffset = 0;
         _hasMore = true;
       });
-      
+
       _fetchComments(0);
     }
   }
@@ -102,7 +102,7 @@ class AnimeCommentsContentState extends State<AnimeCommentsContent> {
       setState(() {
         _isLoadingMore = true;
       });
-      
+
       // 通知父组件加载状态改变
       widget.onLoadingStateChanged?.call(true);
 
@@ -222,7 +222,7 @@ class AnimeCommentsList extends StatelessWidget {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-        // 评论列表 - 使用简单的Column，让父级CustomScrollView处理滚动
+        // 评论列表 - 使用Column，让父级CustomScrollView处理滚动
         ...commentsData.data.map((comment) => _buildCommentItem(comment)),
         // 加载更多指示器
         if (hasMore && isLoadingMore) _buildLoadingMoreIndicator(),
@@ -256,7 +256,7 @@ class AnimeCommentsList extends StatelessWidget {
   /// 构建单个评论项
   Widget _buildCommentItem(BangumiComment comment) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 10.0),
+      margin: const EdgeInsets.only(bottom: 15),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(

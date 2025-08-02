@@ -177,17 +177,9 @@ class AnimeInfoTabView extends StatefulWidget {
 
 class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     with SingleTickerProviderStateMixin {
-  // 添加一个全局的滚动控制器来监听评论页面的滚动
-  final ScrollController _commentsScrollController = ScrollController();
   bool _isCommentsLoadingMore = false;
   // 使用 GlobalKey 来访问 AnimeCommentsContent 的方法
   final GlobalKey<AnimeCommentsContentState> _commentsKey = GlobalKey<AnimeCommentsContentState>();
-
-  @override
-  void dispose() {
-    _commentsScrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +229,6 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
           },
           child: CustomScrollView(
             key: const PageStorageKey<String>('评论'),
-            controller: _commentsScrollController,
             slivers: <Widget>[
               SliverOverlapInjector(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
