@@ -54,7 +54,6 @@ class Routes {
         if (args != null) {
           return MaterialPageRoute(
             builder: (_) => PlayInfo(
-              videoUrl: args['videoUrl'] as String,
               title: args['title'] as String?,
               videoInfo: args['videoInfo'] as Map<String, dynamic>?,
             ),
@@ -88,14 +87,13 @@ class Routes {
 
   static Future<void> goToPlayInfo(
     BuildContext context, {
-    required String videoUrl,
     String? title,
     Map<String, dynamic>? videoInfo,
   }) {
     return Navigator.pushNamed(
       context,
       playInfo,
-      arguments: {'videoUrl': videoUrl, 'title': title, 'videoInfo': videoInfo},
+      arguments: {'title': title, 'videoInfo': videoInfo},
     );
   }
 
