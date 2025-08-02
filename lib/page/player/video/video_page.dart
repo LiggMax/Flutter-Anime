@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import '../../../utils/fullscreen_utils.dart';
+import '../../../routes/routes.dart';
 
 /// 视频播放器核心组件
 class VideoPlayer extends StatefulWidget {
@@ -100,17 +101,21 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   // 返回按钮
                   IconButton(
                     onPressed: () {
-                      if (widget.onBackPressed != null) {
-                        widget.onBackPressed!();
+                      if (widget.isFullscreen) {
+                        // 全屏模式：退出全屏
+                        if (widget.onToggleFullscreen != null) {
+                          widget.onToggleFullscreen!();
+                        }
                       } else {
-                        Navigator.of(state.context).pop();
+                        // 非全屏模式：返回上一级
+                        if (widget.onBackPressed != null) {
+                          widget.onBackPressed!();
+                        } else {
+                          Routes.goBack(state.context);
+                        }
                       }
                     },
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 24),
                   ),
                   // 标题
                   if (widget.title != null)
@@ -446,15 +451,15 @@ class _VideoPageState extends State<VideoPage> {
   @override
   Widget build(BuildContext context) {
     if (_isFullscreen) {
-      // 全屏模式：直接返回VideoPlayer
+      // 全屏模式：直接返回VideoPlayer，不包装在Scaffold中
       return VideoPlayer(
         videoUrl: widget.videoUrl,
         title: widget.title,
         showControls: true,
         isFullscreen: _isFullscreen,
         onToggleFullscreen: _toggleFullscreen,
-        onBackPressed: () => _toggleFullscreen(), // 返回按钮退出全屏
-        player: player, // 传递播放器实例
+        player: player,
+        // 传递播放器实例
         controller: controller, // 传递控制器实例
       );
     } else {
@@ -479,7 +484,10 @@ class _VideoPageState extends State<VideoPage> {
             showControls: true,
             isFullscreen: _isFullscreen,
             onToggleFullscreen: _toggleFullscreen,
-            player: player, // 传递播放器实例
+            onBackPressed: () => Navigator.of(context).pop(),
+            // 正常模式：返回上一级
+            player: player,
+            // 传递播放器实例
             controller: controller, // 传递控制器实例
           ),
         ),

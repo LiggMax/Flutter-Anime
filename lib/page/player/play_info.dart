@@ -99,19 +99,15 @@ class _PlayInfoState extends State<PlayInfo> {
 
   // 切换全屏状态
   void _toggleFullscreen() async {
-    print('PlayInfo: 切换全屏状态，当前状态: $_isFullscreen');
-
     setState(() {
       _isFullscreen = !_isFullscreen;
     });
 
     if (_isFullscreen) {
       // 进入全屏
-      print('PlayInfo: 进入全屏模式');
       await FullscreenUtils.enterFullScreen();
     } else {
       // 退出全屏
-      print('PlayInfo: 退出全屏模式');
       await FullscreenUtils.exitFullScreen();
     }
   }
@@ -159,6 +155,8 @@ class _PlayInfoState extends State<PlayInfo> {
                                   showControls: true,
                                   isFullscreen: _isFullscreen,
                                   onToggleFullscreen: _toggleFullscreen,
+                                  onBackPressed: () =>
+                                      Navigator.of(context).pop(), // 正常模式：返回上一级
                                   player: player, // 传递播放器实例
                                   controller: controller, // 传递控制器实例
                                 )
@@ -227,7 +225,6 @@ class _PlayInfoState extends State<PlayInfo> {
                 showControls: true,
                 isFullscreen: _isFullscreen,
                 onToggleFullscreen: _toggleFullscreen,
-                onBackPressed: () => _toggleFullscreen(), // 返回按钮退出全屏
                 player: player, // 传递播放器实例
                 controller: controller, // 传递控制器实例
               ),
