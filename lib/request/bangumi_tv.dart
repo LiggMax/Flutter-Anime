@@ -4,12 +4,10 @@
  */
 import 'package:AnimeFlow/request/request.dart';
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import '../utils/bangumi_analysis.dart';
 import 'api.dart';
 
 class BangumiTvService {
-  static final Logger _log = Logger('BangumiTvService');
 
   //获取热度榜
   static Future<Map<String, dynamic>?> getRank(int count) async {
