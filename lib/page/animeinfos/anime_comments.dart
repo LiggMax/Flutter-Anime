@@ -69,9 +69,7 @@ class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
           );
         } else {
           // 没有数据
-          return const Center(
-            child: Text('暂无评论数据'),
-          );
+          return const Center(child: Text('暂无评论数据'));
         }
       },
     );
@@ -91,10 +89,7 @@ class AnimeCommentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (commentsData.data.isEmpty) {
-      return const Center(child: Text('暂无评论'));
-    }
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -104,35 +99,25 @@ class AnimeCommentsList extends StatelessWidget {
             '评论 (${commentsData.total})',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
-          if (commentsData.data.isEmpty) ...[
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Text('暂无评论'),
-              ),
-            )
-          ] else ...[
-            // 使用列布局渲染评论列表
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: commentsData.data.length,
-              itemBuilder: (context, index) {
-                final comment = commentsData.data[index];
-                return _buildCommentItem(comment);
-              },
-            ),
-          ]
+          // 使用列布局渲染评论列表
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: commentsData.data.length,
+            itemBuilder: (context, index) {
+              final comment = commentsData.data[index];
+              return _buildCommentItem(comment);
+            },
+          ),
         ],
       ),
     );
   }
-  
+
   /// 构建单个评论项
   Widget _buildCommentItem(BangumiComment comment) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -144,7 +129,9 @@ class AnimeCommentsList extends StatelessWidget {
                 // 用户头像
                 CircleAvatar(
                   radius: 20,
-                  backgroundImage: NetworkImage(comment.user.avatar.defaultAvatar),
+                  backgroundImage: NetworkImage(
+                    comment.user.avatar.defaultAvatar,
+                  ),
                   onBackgroundImageError: (exception, stackTrace) {
                     // 处理图片加载错误
                   },
@@ -169,60 +156,61 @@ class AnimeCommentsList extends StatelessWidget {
                     ],
                   ),
                 ),
-                // 评分信息
+                // 评分信息使用星星图标展示
                 if (comment.rate > 0) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: comment.rate >= 8 
-                          ? Colors.green 
-                          : comment.rate >= 5 
-                              ? Colors.orange 
-                              : Colors.red,
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      comment.rateText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...List.generate(5, (index) {
+                            final starValue = comment.rate / 2; // 将0-10转换为0-5
+                            final isFilled = index < starValue;
+                            final isHalf =
+                                (starValue - index) > 0 &&
+                                (starValue - index) < 1;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 1),
+                              child: Icon(
+                                isHalf ? Icons.star_half : Icons.star,
+                                size: 14,
+                                color: isFilled || isHalf
+                                    ? Colors.amber
+                                    : Colors.grey.shade300,
+                              ),
+                            );
+                          }),
+                          const SizedBox(width: 4),
+                          Text(
+                            comment.rateText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      // 评论类型标签
+                      Text(
+                        comment.typeText,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
                   ),
                 ],
               ],
             ),
+
             const SizedBox(height: 8),
             // 评论内容
             if (comment.comment.isNotEmpty) ...[
-              Text(
-                comment.comment,
-                style: const TextStyle(fontSize: 14),
-              ),
+              Text(comment.comment, style: const TextStyle(fontSize: 14)),
               const SizedBox(height: 8),
             ],
-            // 评论类型标签
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6.0,
-                vertical: 2.0,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.blue),
-                borderRadius: BorderRadius.circular(4.0),
-              ),
-              child: Text(
-                comment.typeText,
-                style: const TextStyle(
-                  color: Colors.blue,
-                  fontSize: 12,
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -235,11 +223,7 @@ class AnimeCommentsInput extends StatefulWidget {
   final int animeId;
   final VoidCallback? onSubmit;
 
-  const AnimeCommentsInput({
-    super.key,
-    required this.animeId,
-    this.onSubmit,
-  });
+  const AnimeCommentsInput({super.key, required this.animeId, this.onSubmit});
 
   @override
   State<AnimeCommentsInput> createState() => _AnimeCommentsInputState();

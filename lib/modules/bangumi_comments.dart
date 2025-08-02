@@ -257,7 +257,7 @@ class BangumiCommentsParser {
   static double getAverageRate(List<BangumiComment> comments) {
     final ratedComments = comments.where((comment) => comment.rate > 0).toList();
     if (ratedComments.isEmpty) return 0.0;
-    
+
     final totalRate = ratedComments.fold<int>(0, (sum, comment) => sum + comment.rate);
     return totalRate / ratedComments.length;
   }
@@ -265,12 +265,12 @@ class BangumiCommentsParser {
   /// 获取评论统计信息
   static Map<String, int> getCommentStats(List<BangumiComment> comments) {
     final stats = <String, int>{};
-    
+
     for (final comment in comments) {
       final type = comment.typeText;
       stats[type] = (stats[type] ?? 0) + 1;
     }
-    
+
     return stats;
   }
 }
