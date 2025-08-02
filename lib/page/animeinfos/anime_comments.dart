@@ -5,15 +5,28 @@ import 'package:AnimeFlow/modules/bangumi_comments.dart';
 /// 评论内容组件
 class AnimeCommentsContent extends StatefulWidget {
   final int animeId;
+  final VoidCallback? onLoadMoreTriggered;
+  final Function(bool)? onLoadingStateChanged;
 
-  const AnimeCommentsContent({super.key, required this.animeId});
+  const AnimeCommentsContent({
+    super.key, 
+    required this.animeId,
+    this.onLoadMoreTriggered,
+    this.onLoadingStateChanged,
+  });
 
   @override
-  State<AnimeCommentsContent> createState() => _AnimeCommentsContentState();
+  State<AnimeCommentsContent> createState() => AnimeCommentsContentState();
 }
 
-class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
-  Future<BangumiCommentsData?>? _commentsFuture;
+class AnimeCommentsContentState extends State<AnimeCommentsContent> {
+  BangumiCommentsData? _commentsData;
+  bool _isLoading = true;
+  bool _isLoadingMore = false;
+  String? _error;
+  int _currentOffset = 0;
+  bool _hasMore = true;
+  static const int _pageSize = 20;
 
   @override
   void initState() {
@@ -24,8 +37,86 @@ class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
   void _loadComments() {
     if (mounted) {
       setState(() {
-        _commentsFuture = BangumiService.getComments(widget.animeId);
+        _isLoading = true;
+        _error = null;
+        _currentOffset = 0;
+        _hasMore = true;
       });
+      
+      _fetchComments(0);
+    }
+  }
+
+  Future<void> _fetchComments(int offset) async {
+    try {
+      final data = await BangumiService.getComments(
+        widget.animeId,
+        limit: _pageSize,
+        offset: offset,
+      );
+
+      if (mounted) {
+        setState(() {
+          if (offset == 0) {
+            // 首次加载或刷新
+            _commentsData = data;
+            _isLoading = false;
+            _currentOffset = _pageSize;
+          } else {
+            // 加载更多
+            _isLoadingMore = false;
+            if (data != null && data.data.isNotEmpty) {
+              // 合并评论数据
+              _commentsData = BangumiCommentsData(
+                total: data.total,
+                data: [..._commentsData!.data, ...data.data],
+              );
+              _currentOffset += _pageSize;
+            } else {
+              _hasMore = false;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+          _isLoadingMore = false;
+        });
+      }
+    }
+  }
+
+  /// 公共方法：加载更多评论
+  Future<void> loadMoreComments() async {
+    await _loadMoreComments();
+  }
+
+  Future<void> _loadMoreComments() async {
+    // 如果正在加载或没有更多数据，则不执行
+    if (_isLoadingMore || !_hasMore || _isLoading) return;
+
+    try {
+      setState(() {
+        _isLoadingMore = true;
+      });
+      
+      // 通知父组件加载状态改变
+      widget.onLoadingStateChanged?.call(true);
+
+      await _fetchComments(_currentOffset);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+          _error = e.toString();
+        });
+      }
+    } finally {
+      // 通知父组件加载状态改变
+      widget.onLoadingStateChanged?.call(false);
     }
   }
 
@@ -33,70 +124,71 @@ class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 确保在依赖项改变时重新加载
-    if (_commentsFuture == null && mounted) {
+    if (_commentsData == null && mounted) {
       _loadComments();
     }
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_commentsFuture == null) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('正在加载评论...'),
+          ],
+        ),
+      );
     }
-    
-    return FutureBuilder<BangumiCommentsData?>(
-      future: _commentsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, size: 80, color: Colors.red),
-                const SizedBox(height: 20),
-                const Text(
-                  '加载评论失败',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  snapshot.error.toString(),
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                ElevatedButton(
-                  onPressed: _loadComments,
-                  child: const Text('重新加载'),
-                ),
-              ],
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, size: 80, color: Colors.red),
+            const SizedBox(height: 20),
+            const Text(
+              '加载评论失败',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          );
-        } else if (snapshot.hasData && snapshot.data != null) {
-          // 成功获取数据，显示评论列表
-          return AnimeCommentsList(
-            animeId: widget.animeId,
-            commentsData: snapshot.data!,
-          );
-        } else {
-          // 没有数据
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text('暂无评论数据'),
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
-          );
-        }
-      },
+            ElevatedButton(
+              onPressed: _loadComments,
+              child: const Text('重新加载'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_commentsData == null || _commentsData!.data.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('暂无评论数据'),
+        ),
+      );
+    }
+
+    // 成功获取数据，显示评论列表
+    return AnimeCommentsList(
+      animeId: widget.animeId,
+      commentsData: _commentsData!,
+      hasMore: _hasMore,
+      isLoadingMore: _isLoadingMore,
+      onLoadMore: _loadMoreComments,
     );
   }
 }
@@ -105,11 +197,17 @@ class _AnimeCommentsContentState extends State<AnimeCommentsContent> {
 class AnimeCommentsList extends StatelessWidget {
   final int animeId;
   final BangumiCommentsData commentsData;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final VoidCallback? onLoadMore;
 
   const AnimeCommentsList({
     super.key,
     required this.animeId,
     required this.commentsData,
+    required this.hasMore,
+    required this.isLoadingMore,
+    this.onLoadMore,
   });
 
   @override
@@ -125,8 +223,33 @@ class AnimeCommentsList extends StatelessWidget {
           ),
         ),
         // 评论列表 - 使用简单的Column，让父级CustomScrollView处理滚动
-        ...commentsData.data.map((comment) => _buildCommentItem(comment)).toList(),
+        ...commentsData.data.map((comment) => _buildCommentItem(comment)),
+        // 加载更多指示器
+        if (hasMore && isLoadingMore) _buildLoadingMoreIndicator(),
+        // 没有更多数据的提示
+        if (!hasMore && commentsData.data.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                '已加载全部评论',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
       ],
+    );
+  }
+
+  // 加载更多指示器
+  Widget _buildLoadingMoreIndicator() {
+    return Container(
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(16),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 

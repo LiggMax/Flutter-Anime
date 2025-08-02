@@ -82,7 +82,7 @@ class _AnimeDataPageState extends State<AnimeDataPage>
       await infoController.queryBangumiInfoByID(id, type: type);
       setState(() {});
     } catch (e) {
-      print('加载动漫数据错误: $e');
+      // 加载动漫数据错误: $e
     }
   }
 
@@ -177,6 +177,18 @@ class AnimeInfoTabView extends StatefulWidget {
 
 class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     with SingleTickerProviderStateMixin {
+  // 添加一个全局的滚动控制器来监听评论页面的滚动
+  final ScrollController _commentsScrollController = ScrollController();
+  bool _isCommentsLoadingMore = false;
+  // 使用 GlobalKey 来访问 AnimeCommentsContent 的方法
+  final GlobalKey<AnimeCommentsContentState> _commentsKey = GlobalKey<AnimeCommentsContentState>();
+
+  @override
+  void dispose() {
+    _commentsScrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return TabBarView(
@@ -212,27 +224,56 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
   Widget _buildCommentsTab() {
     return Builder(
       builder: (BuildContext context) {
-        return CustomScrollView(
-          key: const PageStorageKey<String>('评论'),
-          slivers: <Widget>[
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
-            SliverToBoxAdapter(
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: AnimeCommentsContent(
-                  animeId: widget.bangumiItem.id, // 传递animeId
+        return NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            // 检查是否滚动到页面底部，触发加载更多
+            if (!_isCommentsLoadingMore &&
+                scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 200) {
+              // 触发加载更多
+              _triggerLoadMore();
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            key: const PageStorageKey<String>('评论'),
+            controller: _commentsScrollController,
+            slivers: <Widget>[
+              SliverOverlapInjector(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              SliverToBoxAdapter(
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: AnimeCommentsContent(
+                    key: _commentsKey,
+                    animeId: widget.bangumiItem.id,
+                    onLoadingStateChanged: _onLoadingStateChanged,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
   }
 
+  /// 触发加载更多
+  void _triggerLoadMore() {
+    if (!_isCommentsLoadingMore) {
+      // 直接调用 AnimeCommentsContent 的加载更多方法
+      _commentsKey.currentState?.loadMoreComments();
+    }
+  }
+
+  /// 加载状态改变回调
+  void _onLoadingStateChanged(bool isLoading) {
+    setState(() {
+      _isCommentsLoadingMore = isLoading;
+    });
+  }
 
   /// 详情内容实现
   Widget _buildDetailInfoContent() {
