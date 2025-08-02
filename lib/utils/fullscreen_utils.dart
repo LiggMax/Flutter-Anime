@@ -8,9 +8,9 @@ import 'package:window_manager/window_manager.dart';
 class FullscreenUtils {
   static int getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < 400) return 3;
-    if (width < 600) return 4;
-    if (width < 900) return 5;
+    if (width < 600) return 3;
+    if (width < 800) return 4;
+    if (width < 1000) return 5;
     return 7; // 超大屏幕显示7列
   }
 

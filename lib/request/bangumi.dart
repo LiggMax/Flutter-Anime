@@ -1,11 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'request.dart';
 import 'api.dart';
+import '../modules/bangumi_comments.dart';
 
 class BangumiService {
   static final Logger _log = Logger('BangumiService');
 
-  //获取每日放送
+  ///获取每日放送
   static Future<Map<String, dynamic>?> getCalendar() async {
     try {
       final response = await httpRequest.get(Api.bangumiCalendar);
@@ -16,7 +18,7 @@ class BangumiService {
     }
   }
 
-  // 获取条目详情
+  /// 获取条目详情
   static Future<Map<String, dynamic>?> getInfoByID(int id) async {
     try {
       final response = await httpRequest.get('${Api.bangumiInfoByID}/$id');
@@ -27,7 +29,7 @@ class BangumiService {
     }
   }
 
-  //获取剧集详情
+  ///获取剧集详情
   static Future<Map<String, dynamic>?> getEpisodesByID(int id) async {
     try {
       final response = await httpRequest.get(
@@ -41,7 +43,7 @@ class BangumiService {
     }
   }
 
-  //条目搜索
+  ///条目搜索
   static Future<Map<String, dynamic>?> search(String keyword) async {
     try {
       final response = await httpRequest.post(
@@ -51,6 +53,32 @@ class BangumiService {
       return response.data;
     } catch (e) {
       _log.severe('条目搜索失败: $e');
+      return null;
+    }
+  }
+
+  ///条目评论
+  static Future<BangumiCommentsData?> getComments(
+    int subjectId, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await httpRequest.get(
+        Api.bangumiComment.replaceAll('{subject_id}', subjectId.toString()),
+        options: Options(
+          headers: {'User-Agent': Api.bangumiUserAgent},
+        ),
+        queryParameters: {
+          'limit': limit,
+          'offset': offset,
+        },
+      );
+      
+      // 解析评论数据
+      return BangumiCommentsData.fromJson(response.data);
+    } catch (e) {
+      _log.severe('获取评论失败: $e');
       return null;
     }
   }

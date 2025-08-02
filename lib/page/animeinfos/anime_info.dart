@@ -222,7 +222,9 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
               child: SafeArea(
                 top: false,
                 bottom: false,
-                child: const AnimeCommentsContent(),
+                child: AnimeCommentsContent(
+                  animeId: widget.bangumiItem.id, // 传递animeId
+                ),
               ),
             ),
           ],
@@ -230,6 +232,7 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
       },
     );
   }
+
 
   /// 详情内容实现
   Widget _buildDetailInfoContent() {
