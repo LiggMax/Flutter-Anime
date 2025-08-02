@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi.dart';
 import 'package:AnimeFlow/routes/routes.dart';
 
+import '../../utils/fullscreen_utils.dart';
+
 // 数据状态类
 class CalendarState {
   final Map<String, dynamic>? data;
@@ -319,7 +321,7 @@ class AnimeGrid extends StatelessWidget {
           padding: const EdgeInsets.all(5),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: _getCrossAxisCount(context),
+              crossAxisCount: FullscreenUtils.getCrossAxisCount(context),
               childAspectRatio: 0.75,
             ),
             delegate: SliverChildBuilderDelegate((context, index) {
