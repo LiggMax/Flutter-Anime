@@ -78,7 +78,6 @@ class RelatedItemCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // TODO: 导航到条目详情页面
-        // Navigator.pushNamed(context, '/anime-detail', arguments: item.id);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -104,13 +103,10 @@ class RelatedItemCard extends StatelessWidget {
                         item.images.defaultImage,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[300],
-                            child: const Icon(
-                              Icons.image_not_supported,
-                              color: Colors.grey,
-                              size: 48,
-                            ),
+                          return const Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey,
+                            size: 48,
                           );
                         },
                         loadingBuilder: (context, child, loadingProgress) {
@@ -123,14 +119,11 @@ class RelatedItemCard extends StatelessWidget {
                           );
                         },
                       )
-                    : Container(
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: Colors.grey,
-                          size: 48,
-                        ),
-                      ),
+                    : const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey,
+                      size: 48,
+                    ),
 
                 // 底部渐变蒙版
                 Positioned(
@@ -170,7 +163,7 @@ class RelatedItemCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.8),
+                            color: Colors.tealAccent.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
