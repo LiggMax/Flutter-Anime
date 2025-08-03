@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'request.dart';
 import 'api/api.dart';
 import '../modules/bangumi/comments.dart';
+import '../modules/bangumi/Related.dart';
 
 class BangumiService {
   static final Logger _log = Logger('BangumiService');
@@ -79,13 +80,14 @@ class BangumiService {
   }
 
   ///相关条目
-  static Future<Map<String, dynamic>?> getRelated(int subjectId) async {
+  static Future<RelatedData?> getRelated(int subjectId) async {
     try {
       final response = await httpRequest.get(
         Api.bangumiRelated.replaceAll('{subject_id}', subjectId.toString()),
         options: Options(headers: {'User-Agent': Api.bangumiUserAgent}),
       );
-      return response.data;
+
+      return RelatedData.fromJson(response.data);
     } catch (e) {
       _log.severe('获取相关条目失败: $e');
       return null;
