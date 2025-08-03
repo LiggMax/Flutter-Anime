@@ -5,7 +5,7 @@
 import 'package:AnimeFlow/request/request.dart';
 import 'package:dio/dio.dart';
 import '../utils/bangumi_analysis.dart';
-import 'api.dart';
+import 'api/api.dart';
 
 class BangumiTvService {
 

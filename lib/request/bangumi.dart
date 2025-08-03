@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'request.dart';
-import 'api.dart';
+import 'api/api.dart';
 import '../modules/bangumi/comments.dart';
 
 class BangumiService {

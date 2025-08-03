@@ -4,7 +4,7 @@
  */
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'api.dart';
+import 'api/api.dart';
 import 'request.dart';
 import 'package:AnimeFlow/utils/analysis.dart';
 

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'api.dart';
+import 'api/api.dart';
 
 class HttpRequest {
   static final HttpRequest _instance = HttpRequest._internal();
