@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import '../modules/bangumi/search_data.dart';
 import 'request.dart';
 import 'api/api.dart';
 import '../modules/bangumi/comments.dart';
@@ -45,13 +46,19 @@ class BangumiService {
   }
 
   ///条目搜索
-  static Future<Map<String, dynamic>?> search(String keyword) async {
+  static Future<SearchData?> search(String keyword) async {
     try {
       final response = await httpRequest.post(
         Api.bangumiRankSearch.replaceAll('{0}', '20').replaceAll('{1}', '0'),
-        data: {'keyword': keyword, 'sort': 'heat', 'type': 2},
+        data: {
+          'keyword': keyword,
+          'sort': 'rank',
+          'filter': {
+            "type": [2],
+          },
+        },
       );
-      return response.data;
+      return SearchDataParser.parseSearchResponse(response.data);
     } catch (e) {
       _log.severe('条目搜索失败: $e');
       return null;

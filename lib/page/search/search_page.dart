@@ -109,7 +109,7 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
         setState(() {
           _isSearching = false;
           if (result != null) {
-            _searchData = SearchDataParser.parseSearchResponse(result);
+            _searchData = result;
           } else {
             _searchData = null;
           }
