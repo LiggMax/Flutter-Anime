@@ -52,12 +52,14 @@ class BangumiTvAnalysis {
             final trimmedHref = href.trim();
             if (trimmedHref.isEmpty) return '';
 
-            // 通过/进行字段切割获取下标1的数据
+            // 通过/进行字段切割获取ID
             final parts = trimmedHref.split('/');
-            if (parts.length > 1) {
-              return parts[2];
+            if (parts.length > 2) {
+              // 确保获取正确的ID部分
+              final idPart = parts[2];
+              return idPart;
             }
-            return trimmedHref;
+            return '';
           })
           .where((link) => link.isNotEmpty)
           .toList();

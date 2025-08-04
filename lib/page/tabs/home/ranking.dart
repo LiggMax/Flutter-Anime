@@ -110,7 +110,7 @@ class _RankingPageState extends State<RankingPage> {
             // 追加新数据
             final newTitles = List<String>.from(data['titles'] ?? []);
             final newCovers = List<String>.from(data['covers'] ?? []);
-            final newLinks = List<String>.from(data['links'] ?? []);
+            final newIds = List<String>.from(data['id'] ?? []);
 
             if (newTitles.isEmpty) {
               _hasMore = false;
@@ -122,16 +122,23 @@ class _RankingPageState extends State<RankingPage> {
               final currentCovers = List<String>.from(
                 _rankData!['covers'] ?? [],
               );
-              final currentLinks = List<String>.from(_rankData!['links'] ?? []);
+              final currentIds = List<String>.from(_rankData!['id'] ?? []);
 
               currentTitles.addAll(newTitles);
               currentCovers.addAll(newCovers);
-              currentLinks.addAll(newLinks);
+              currentIds.addAll(newIds);
+
+              // 确保数据长度一致
+              final minLength = [
+                currentTitles.length,
+                currentCovers.length,
+                currentIds.length,
+              ].reduce((a, b) => a < b ? a : b);
 
               _rankData = {
-                'titles': currentTitles,
-                'covers': currentCovers,
-                'links': currentLinks,
+                'titles': currentTitles.take(minLength).toList(),
+                'covers': currentCovers.take(minLength).toList(),
+                'id': currentIds.take(minLength).toList(),
               };
 
               _currentPage = nextPage;
