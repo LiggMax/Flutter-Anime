@@ -179,7 +179,8 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
     with SingleTickerProviderStateMixin {
   bool _isCommentsLoadingMore = false;
   // 使用 GlobalKey 来访问 AnimeCommentsContent 的方法
-  final GlobalKey<AnimeCommentsContentState> _commentsKey = GlobalKey<AnimeCommentsContentState>();
+  final GlobalKey<AnimeCommentsContentState> _commentsKey =
+      GlobalKey<AnimeCommentsContentState>();
 
   @override
   Widget build(BuildContext context) {
@@ -229,9 +230,13 @@ class _AnimeInfoTabViewState extends State<AnimeInfoTabView>
           },
           child: CustomScrollView(
             key: const PageStorageKey<String>('评论'),
+            // 优化滚动性能
+            cacheExtent: 500,
             slivers: <Widget>[
               SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
               ),
               SliverToBoxAdapter(
                 child: SafeArea(
