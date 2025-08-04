@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'tabs/home/home.dart';
-import './tabs/profile.dart';
+import 'tabs/user/profile.dart';
 import './tabs/time.dart';
 import '../controllers/theme_controller.dart';
 import '../utils/theme_extensions.dart';
