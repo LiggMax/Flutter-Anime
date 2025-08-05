@@ -2,7 +2,7 @@
   @Author Ligg
   @Time 2025/8/5
  */
-import 'package:AnimeFlow/request/bangumi.dart';
+import 'package:AnimeFlow/request/bangumi/bangumi.dart';
 import 'package:AnimeFlow/modules/bangumi/character_data.dart';
 import 'package:flutter/material.dart';
 import 'detail_info.dart';

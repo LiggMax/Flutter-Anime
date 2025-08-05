@@ -4,8 +4,8 @@
  */
 import 'package:AnimeFlow/request/request.dart';
 import 'package:dio/dio.dart';
-import '../utils/bangumi_analysis.dart';
-import 'api/common_api.dart';
+import '../../utils/bangumi_analysis.dart';
+import '../api/common_api.dart';
 
 class BangumiTvService {
 

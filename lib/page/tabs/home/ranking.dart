@@ -1,4 +1,4 @@
-import 'package:AnimeFlow/request/bangumi_tv.dart';
+import 'package:AnimeFlow/request/bangumi/bangumi_tv.dart';
 import 'package:AnimeFlow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/utils/fullscreen_utils.dart';

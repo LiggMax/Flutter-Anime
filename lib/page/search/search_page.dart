@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:AnimeFlow/utils/theme_extensions.dart';
-import 'package:AnimeFlow/request/bangumi.dart';
+import 'package:AnimeFlow/request/bangumi/bangumi.dart';
 import 'package:AnimeFlow/modules/bangumi/search_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';

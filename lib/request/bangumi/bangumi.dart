@@ -1,13 +1,13 @@
 import 'package:AnimeFlow/modules/bangumi/character_data.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import '../modules/bangumi/search_data.dart';
-import 'request.dart';
-import 'api/bangumi/v0_api.dart';
-import '../modules/bangumi/comments.dart';
-import '../modules/bangumi/related.dart';
-import 'api/common_api.dart';
-import 'api/bangumi/p1_api.dart';
+import '../../modules/bangumi/search_data.dart';
+import '../request.dart';
+import '../api/bangumi/v0_api.dart';
+import '../../modules/bangumi/comments.dart';
+import '../../modules/bangumi/related.dart';
+import '../api/common_api.dart';
+import '../api/bangumi/p1_api.dart';
 
 class BangumiService {
   static final Logger _log = Logger('BangumiService');

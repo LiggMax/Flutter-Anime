@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:AnimeFlow/request/bangumi.dart';
+import 'package:AnimeFlow/request/bangumi/bangumi.dart';
 import 'package:AnimeFlow/modules/bangumi/ata.dart';
 import 'anime_head.dart';
 import 'detail/detail_info.dart';

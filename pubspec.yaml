@@ -38,6 +38,8 @@ dependencies:
   dio: ^5.4.0
   logging: ^1.0.3
   html: ^0.15.4
+  url_launcher: ^6.2.5
+  app_links: ^3.4.5
 
   ##播放器
   media_kit: ^1.1.11 # 主要包装.

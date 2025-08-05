@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:AnimeFlow/request/bangumi.dart';
+import 'package:AnimeFlow/request/bangumi/bangumi.dart';
 import 'package:AnimeFlow/modules/bangumi/comments.dart';
 
 /// 评论内容组件
