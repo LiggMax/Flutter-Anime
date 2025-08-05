@@ -191,15 +191,6 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
       appBar: AppBar(
         title: const Text('搜索'),
         centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: context.isDarkMode
-              ? Brightness.light
-              : Brightness.dark,
-          statusBarBrightness: context.isDarkMode
-              ? Brightness.dark
-              : Brightness.light,
-        ),
       ),
       body: Column(
         children: [
