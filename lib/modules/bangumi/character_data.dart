@@ -100,6 +100,9 @@ class Character {
   /// 获取角色类型名称
   String get roleName => CharacterRole.fromValue(role).label;
 
+  /// 获取角色显示名称（优先使用中文名）
+  String get characterDisplayName => nameCN.isNotEmpty ? nameCN : name;
+
   factory Character.fromJson(Map<String, dynamic> json) {
     return Character(
       id: json['id'],
@@ -179,6 +182,9 @@ class Actor {
       'images': images.toJson(),
     };
   }
+
+  /// 获取声优显示名称（优先使用中文名）
+  String get actorDisplayName => nameCN.isNotEmpty ? nameCN : name;
 }
 
 class CharacterImages {

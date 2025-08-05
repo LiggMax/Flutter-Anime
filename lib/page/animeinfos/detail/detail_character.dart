@@ -130,7 +130,7 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                characterItem.character.nameCN,
+                characterItem.character.characterDisplayName,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -140,7 +140,7 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.nameCN : ''}',
+                '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.actorDisplayName : ''}',
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -261,7 +261,7 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                characterItem.character.nameCN,
+                characterItem.character.characterDisplayName,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -271,7 +271,7 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.nameCN : ''}',
+                '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.actorDisplayName : ''}',
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
