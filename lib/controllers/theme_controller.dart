@@ -30,12 +30,15 @@ class ThemeController extends ChangeNotifier {
       seedColor: Color(0xFF5CDCF6),
       brightness: Brightness.light,
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
-        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarColor: ColorScheme.fromSeed(
+          seedColor: Color(0xFF5CDCF6),
+          brightness: Brightness.light,
+        ).surface,
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
       ),

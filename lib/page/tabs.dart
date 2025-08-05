@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'tabs/home/home.dart';
 import 'tabs/user/profile.dart';
@@ -19,40 +18,8 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> {
   int _currentIndex = 0;
 
-  // 用于存储已创建的页面
-  final Map<int, Widget> _createdPages = {};
-
-  @override
-  void initState() {
-    super.initState();
-    // 预创建首页，确保应用启动时能正常显示
-    _createdPages[0] = const HomePage();
-  }
-
   // 页面标题列表
   final List<String> _pageTitles = ["首页", "时间表", "个人中心"];
-
-  // 页面创建工厂方法
-  Widget _createPage(int index) {
-    switch (index) {
-      case 0:
-        return const HomePage();
-      case 1:
-        return const TimePage();
-      case 2:
-        return const ProfilePage();
-      default:
-        return const HomePage();
-    }
-  }
-
-  // 获取页面，如果没有创建则创建
-  Widget _getPage(int index) {
-    if (!_createdPages.containsKey(index)) {
-      _createdPages[index] = _createPage(index);
-    }
-    return _createdPages[index]!;
-  }
 
   void _navigateTo(int index) {
     setState(() {
@@ -69,7 +36,7 @@ class _TabsState extends State<Tabs> {
     final themeController = Provider.of<ThemeController>(context);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(_pageTitles[_currentIndex]),
         centerTitle: false,
@@ -82,6 +49,13 @@ class _TabsState extends State<Tabs> {
           statusBarBrightness: context.isDarkMode
               ? Brightness.dark
               : Brightness.light,
+          systemNavigationBarColor: Theme.of(
+            context,
+          ).colorScheme.surface,
+          systemNavigationBarIconBrightness: context.isDarkMode
+              ? Brightness.light
+              : Brightness.dark,
+          systemNavigationBarDividerColor: Colors.transparent, // 底部导航栏分割线透明
         ),
         actions: [
           IconButton(
@@ -100,44 +74,29 @@ class _TabsState extends State<Tabs> {
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: List.generate(3, (index) {
-          // 如果是当前页面或者已经创建过的页面，返回真实页面
-          if (index == _currentIndex) {
-            return _getPage(index);
-          } else if (_createdPages.containsKey(index)) {
-            return _createdPages[index]!;
-          } else {
-            // 返回空占位符，避免不必要的页面创建
-            return const SizedBox.shrink();
-          }
-        }),
+        children: const [HomePage(), TimePage(), ProfilePage()],
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-        index: _currentIndex,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
         onTap: _navigateTo,
-        height: 70,
-        color: Theme.of(context).colorScheme.secondaryFixed,
-        backgroundColor: Colors.transparent,
-        animationDuration: const Duration(milliseconds: 200),
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
         items: [
-          Icon(
-            Icons.home,
-            size: 30,
-            color: Theme.of(context).colorScheme.onSurface,
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: _pageTitles[0],
           ),
-          Icon(
-            Icons.timeline_sharp,
-            size: 30,
-            color: Theme.of(context).colorScheme.onSurface,
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.timeline_sharp),
+            label: _pageTitles[1],
           ),
-          Icon(
-            Icons.person,
-            size: 30,
-            color: Theme.of(context).colorScheme.onSurface,
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: _pageTitles[2],
           ),
         ],
-        buttonBackgroundColor: Theme.of(context).colorScheme.primary,
-        animationCurve: Curves.linear,
       ),
     );
   }
