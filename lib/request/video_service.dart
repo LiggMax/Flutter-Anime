@@ -4,9 +4,9 @@
  */
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'api/api.dart';
 import 'request.dart';
 import 'package:AnimeFlow/utils/analysis.dart';
+import 'api/common_api.dart';
 
 class VideoService {
   static final Logger _log = Logger('VideoService');
@@ -26,7 +26,7 @@ class VideoService {
       //搜索条目
       final response = await httpRequest.get(
         searchUrl + keyword,
-        options: Options(headers: {'User-Agent': Api.userAgent}),
+        options: Options(headers: {'User-Agent': CommonApi.userAgent}),
       );
 
       if (response.data != null) {
@@ -48,7 +48,7 @@ class VideoService {
           //搜索剧集
           final linkResponse = await httpRequest.get(
             websiteUrl + link,
-            options: Options(headers: {'User-Agent': Api.userAgent}),
+            options: Options(headers: {'User-Agent': CommonApi.userAgent}),
           );
 
           if (linkResponse.data != null) {
@@ -85,7 +85,7 @@ class VideoService {
     try {
       final response = await httpRequest.get(
         websiteUrl + url,
-        options: Options(headers: {'User-Agent': Api.userAgent}),
+        options: Options(headers: {'User-Agent': CommonApi.userAgent}),
       );
 
       //  解析视频链接

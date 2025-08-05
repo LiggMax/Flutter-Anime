@@ -4,6 +4,7 @@ import 'detail_related.dart';
 import 'detail_summary.dart';
 import 'detail_tags.dart';
 import 'detail_basic_info.dart';
+import 'detail_character.dart';
 
 /// 详情内容主组件
 class AnimeDetailContent extends StatefulWidget {
@@ -42,6 +43,9 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
               // 基本信息组件
               AnimeBasicInfoSection(bangumiItem: widget.bangumiItem),
 
+              // 角色信息组件
+              AnimeCharacter(animeId: widget.bangumiItem.id),
+
               // 相关条目组件
               AnimeRelatedSection(subjectId: widget.bangumiItem.id),
             ],
@@ -51,8 +55,6 @@ class _AnimeDetailContentState extends State<AnimeDetailContent> {
     );
   }
 }
-
-
 
 /// 布局容器
 class AnimeInfoSection extends StatelessWidget {
@@ -75,7 +77,7 @@ class AnimeInfoSection extends StatelessWidget {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(0),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
           child: Column(children: children),
         ),

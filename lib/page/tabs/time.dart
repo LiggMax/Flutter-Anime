@@ -84,6 +84,7 @@ class AnimeCard extends StatelessWidget {
 
   const AnimeCard({super.key, required this.animeData, this.onTap});
 
+  @override
   Widget build(BuildContext context) {
     final subject = animeData['subject'];
     final id = subject['id'] as int;

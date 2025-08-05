@@ -8,10 +8,7 @@ import 'package:AnimeFlow/utils/fullscreen_utils.dart';
 class AnimeRelatedSection extends StatefulWidget {
   final int subjectId;
 
-  const AnimeRelatedSection({
-    super.key,
-    required this.subjectId,
-  });
+  const AnimeRelatedSection({super.key, required this.subjectId});
 
   @override
   State<AnimeRelatedSection> createState() => _AnimeRelatedSectionState();
@@ -28,12 +25,12 @@ class _AnimeRelatedSectionState extends State<AnimeRelatedSection> {
 
   /// 加载相关条目数据
   Future<void> _loadRelatedData() async {
-      final data = await BangumiService.getRelated(widget.subjectId);
-      if (mounted) {
-        setState(() {
-          _relatedData = data;
-        });
-      }
+    final data = await BangumiService.getRelated(widget.subjectId);
+    if (mounted) {
+      setState(() {
+        _relatedData = data;
+      });
+    }
   }
 
   @override
@@ -48,10 +45,11 @@ class _AnimeRelatedSectionState extends State<AnimeRelatedSection> {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: FullscreenUtils.getCrossAxisCount(context),
             childAspectRatio: 0.7,
-            crossAxisSpacing: 12,
+            crossAxisSpacing: 8,
           ),
           itemCount: _relatedData!.data.length,
           itemBuilder: (context, index) {
@@ -68,10 +66,7 @@ class _AnimeRelatedSectionState extends State<AnimeRelatedSection> {
 class RelatedItemCard extends StatelessWidget {
   final RelatedItem item;
 
-  const RelatedItemCard({
-    super.key,
-    required this.item,
-  });
+  const RelatedItemCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -120,10 +115,10 @@ class RelatedItemCard extends StatelessWidget {
                         },
                       )
                     : const Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey,
-                      size: 48,
-                    ),
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                        size: 48,
+                      ),
 
                 // 底部渐变蒙版
                 Positioned(
@@ -208,5 +203,3 @@ class RelatedItemCard extends StatelessWidget {
     );
   }
 }
-
-

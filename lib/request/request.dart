@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'api/api.dart';
+import 'api/common_api.dart';
 
 class HttpRequest {
   static final HttpRequest _instance = HttpRequest._internal();
@@ -42,7 +42,7 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+        opts.headers!['User-Agent'] = CommonApi.bangumiUserAgent;
       }
 
       return await _dio.get<T>(
@@ -69,7 +69,7 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+        opts.headers!['User-Agent'] = CommonApi.bangumiUserAgent;
       }
 
       return await _dio.post<T>(
@@ -97,7 +97,7 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+        opts.headers!['User-Agent'] = CommonApi.bangumiUserAgent;
       }
 
       return await _dio.put<T>(
@@ -125,7 +125,7 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+        opts.headers!['User-Agent'] = CommonApi.bangumiUserAgent;
       }
 
       return await _dio.delete<T>(
@@ -153,7 +153,7 @@ class HttpRequest {
       final opts = options ?? Options();
       opts.headers ??= {};
       if (!opts.headers!.containsKey('User-Agent')) {
-        opts.headers!['User-Agent'] = Api.bangumiUserAgent;
+        opts.headers!['User-Agent'] = CommonApi.bangumiUserAgent;
       }
 
       return await _dio.download(
