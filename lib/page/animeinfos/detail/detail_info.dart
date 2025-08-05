@@ -77,7 +77,7 @@ class AnimeInfoSection extends StatelessWidget {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Container(
-          padding: const EdgeInsets.all(0),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
           child: Column(children: children),
         ),

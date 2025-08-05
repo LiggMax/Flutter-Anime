@@ -69,7 +69,7 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
     }
 
     return AnimeInfoSection(
-      title: '角色',
+      title: '角色信息',
       children: [
         // 主角网格展示
         GridView.builder(
@@ -92,7 +92,8 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
         if (_allCharacters.length > 4)
           Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Center(
+            child: Align(
+              alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => _showAllCharacters(context),
                 child: const Text('查看全部'),
@@ -104,66 +105,53 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
   }
 
   Widget _buildCharacterCard(CharacterItem characterItem) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withAlpha(53),
+    return Row(
+      children: [
+        // 角色头像
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(characterItem.character.images.medium),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          // 角色头像
-          ClipRRect(
-            borderRadius: BorderRadius.circular(25),
-            child: Image.network(
-              characterItem.character.images.small,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 50,
-                  height: 50,
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.person, size: 25),
-                );
-              },
-            ),
-          ),
-          const SizedBox(width: 12),
-          // 角色信息
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  characterItem.character.nameCN,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        const SizedBox(width: 12),
+        // 角色信息
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                characterItem.character.nameCN,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.nameCN : ''}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.nameCN : ''}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ],
-            ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -219,19 +207,20 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
                   ],
                 ),
               ),
               // 角色列表
               Expanded(
-                child: ListView.builder(
+                child: GridView.builder(
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 2.5,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
                   itemCount: _allCharacters.length,
                   itemBuilder: (context, index) {
                     final character = _allCharacters[index];
@@ -247,71 +236,53 @@ class _AnimeCharacterState extends State<AnimeCharacter> {
   }
 
   Widget _buildCharacterListItem(CharacterItem characterItem) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withAlpha(53),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          // 角色头像
-          ClipRRect(
-            borderRadius: BorderRadius.circular(25),
-            child: Image.network(
-              characterItem.character.images.small,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 50,
-                  height: 50,
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.person, size: 25),
-                );
-              },
+    return Row(
+      children: [
+        // 角色头像
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(characterItem.character.images.medium),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          // 角色信息
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  characterItem.character.nameCN,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+        ),
+        const SizedBox(width: 12),
+        // 角色信息
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                characterItem.character.nameCN,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  characterItem.character.roleName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${characterItem.character.roleName}·${characterItem.actors.isNotEmpty ? characterItem.actors.first.nameCN : ''}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                if (characterItem.actors.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'CV: ${characterItem.actors.first.nameCN}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
