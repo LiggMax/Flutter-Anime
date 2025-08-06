@@ -76,24 +76,51 @@ class _TabsState extends State<Tabs> {
         index: _currentIndex,
         children: const [HomePage(), TimePage(), ProfilePage()],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _navigateTo,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: _navigateTo,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        destinations: [
+          NavigationDestination(
+            icon: Icon(
+              Icons.home_outlined,
+              color: _currentIndex == 0
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            selectedIcon: Icon(
+              Icons.home,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             label: _pageTitles[0],
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.timeline_sharp),
+          NavigationDestination(
+            icon: Icon(
+              Icons.timeline_outlined,
+              color: _currentIndex == 1
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            selectedIcon: Icon(
+              Icons.timeline,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             label: _pageTitles[1],
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
+          NavigationDestination(
+            icon: Icon(
+              Icons.person_outline,
+              color: _currentIndex == 2
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            selectedIcon: Icon(
+              Icons.person,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             label: _pageTitles[2],
           ),
         ],
