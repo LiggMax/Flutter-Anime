@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
-import './page/tabs.dart';
+import 'dart:async';
 import './controllers/theme_controller.dart';
-import './routes/routes.dart';
+import './page/tabs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,8 +61,6 @@ class _MyAppState extends State<MyApp> {
                   ? ThemeMode.dark
                   : ThemeMode.light,
               home: const Tabs(),
-              onGenerateRoute: Routes.generateRoute,
-              initialRoute: Routes.tabs,
               debugShowCheckedModeBanner: false,
             ),
           );

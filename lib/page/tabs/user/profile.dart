@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:app_links/app_links.dart';
 import 'dart:async';
-import '../../../request/bangumi/bangumi_oauth.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -11,143 +11,287 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Bangumi授权登录URL，这里使用占位符，您可以替换为实际的URL
-  final String _authUrl =
-      'https://bgm.tv/oauth/authorize?response_type=code&client_id=bgm42366890dd59f2baf&redirect_uri=animeflow://auth/callback';
-
-  StreamSubscription<String>? _codeSubscription;
-  String? _lastReceivedCode;
+  String? _authCode;
+  String? _errorMessage;
+  bool _isLoading = false;
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
     super.initState();
-    _initializeOAuth();
+    _initAppLinks();
+  }
+
+  void _initAppLinks() {
+    _appLinks = AppLinks();
+
+    // 监听应用链接回调
+    _linkSubscription = _appLinks.uriLinkStream.listen(
+      (Uri? uri) {
+        if (uri != null) {
+          _handleAuthCallback(uri);
+        }
+      },
+      onError: (err) {
+        print('应用链接监听错误: $err');
+      },
+    );
+  }
+
+  void _handleAuthCallback(Uri uri) {
+    if (uri.scheme == 'animeflow' &&
+        uri.host == 'auth' &&
+        uri.path == '/callback') {
+      final code = uri.queryParameters['code'];
+      final error = uri.queryParameters['error'];
+
+      setState(() {
+        if (code != null) {
+          _authCode = code;
+          _errorMessage = null;
+        } else if (error != null) {
+          _errorMessage = '授权失败: $error';
+          _authCode = null;
+        }
+        _isLoading = false;
+      });
+
+      // 显示结果
+      if (code != null) {
+        _showSuccessDialog(code);
+      } else if (error != null) {
+        _showErrorDialog(error);
+      }
+    }
+  }
+
+  Future<void> _startOAuthFlow() async {
+    setState(() {
+      _isLoading = true;
+      _authCode = null;
+      _errorMessage = null;
+    });
+
+    const oauthUrl =
+        'https://bgm.tv/oauth/authorize?response_type=code&client_id=bgm42366890dd59f2baf&redirect_uri=animeflow://auth/callback';
+
+    try {
+      final uri = Uri.parse(oauthUrl);
+      final canLaunch = await canLaunchUrl(uri);
+
+      if (canLaunch) {
+        // 在应用内打开授权页面
+        await launchUrl(
+          uri,
+          mode: LaunchMode.inAppWebView, // 在应用内WebView中打开
+          webViewConfiguration: const WebViewConfiguration(
+            enableJavaScript: true,
+            enableDomStorage: true,
+          ),
+        );
+      } else {
+        setState(() {
+          _errorMessage = '无法打开授权页面';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = '启动授权流程失败: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSuccessDialog(String code) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('授权成功'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('已获取授权码:'),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: SelectableText(
+                  code,
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('授权失败'),
+          content: Text('错误信息: $error'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   void dispose() {
-    _codeSubscription?.cancel();
+    _linkSubscription?.cancel();
     super.dispose();
-  }
-
-  /// 初始化OAuth处理
-  Future<void> _initializeOAuth() async {
-    await OAuthCallbackHandler.initialize();
-
-    // 监听授权码
-    _codeSubscription = OAuthCallbackHandler.codeStream.listen((code) {
-      setState(() {
-        _lastReceivedCode = code;
-      });
-
-      // 显示获取到的授权码
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('成功获取授权码: $code'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    });
-  }
-
-  // 打开授权登录网页
-  Future<void> _launchAuthUrl() async {
-    final Uri url = Uri.parse(_authUrl);
-    if (!await launchUrl(url)) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('无法打开授权页面')));
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Bangumi 授权登录',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '点击下方按钮进行 Bangumi 账号授权登录',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _launchAuthUrl,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BGM.tv OAuth 授权',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text('点击下方按钮开始OAuth授权流程，授权成功后应用将显示返回的授权码。'),
+                  ],
                 ),
-                child: const Text('授权登录'),
               ),
-              const SizedBox(height: 20),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     // 测试OAuth回调功能
-              //     OAuthCallbackHandler.handleCallback(
-              //       'animeflow://auth/callback?code=test123456',
-              //     );
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(
-              //       horizontal: 32,
-              //       vertical: 16,
-              //     ),
-              //     textStyle: const TextStyle(fontSize: 16),
-              //     backgroundColor: Colors.orange,
-              //   ),
-              //   child: const Text('测试OAuth回调'),
-              // ),
-              const SizedBox(height: 40),
-              if (_lastReceivedCode != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green),
-                  ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _startOAuthFlow,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.login),
+              label: Text(_isLoading ? '正在打开授权页面...' : '开始授权'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (_authCode != null) ...[
+              Card(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '最新获取的授权码:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '授权成功',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        _lastReceivedCode!,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'monospace',
+                      const Text('授权码:'),
+                      const SizedBox(height: 4),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
+                        child: SelectableText(
+                          _authCode!,
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ],
-          ),
+            if (_errorMessage != null) ...[
+              Card(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.error,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '授权失败',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
