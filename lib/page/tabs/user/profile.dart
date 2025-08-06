@@ -68,7 +68,6 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('个人中心')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -98,23 +97,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: const Text('授权登录'),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // 测试OAuth回调功能
-                  OAuthCallbackHandler.handleCallback(
-                    'animeflow://auth/callback?code=test123456',
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 16),
-                  backgroundColor: Colors.orange,
-                ),
-                child: const Text('测试OAuth回调'),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // 测试OAuth回调功能
+              //     OAuthCallbackHandler.handleCallback(
+              //       'animeflow://auth/callback?code=test123456',
+              //     );
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 32,
+              //       vertical: 16,
+              //     ),
+              //     textStyle: const TextStyle(fontSize: 16),
+              //     backgroundColor: Colors.orange,
+              //   ),
+              //   child: const Text('测试OAuth回调'),
+              // ),
               const SizedBox(height: 40),
               if (_lastReceivedCode != null) ...[
                 Container(
