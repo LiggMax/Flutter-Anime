@@ -67,40 +67,30 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Bangumi 授权登录',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '点击下方按钮进行 Bangumi 账号授权登录',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _launchAuthUrl,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
+              if (_persistedToken == null) ...[
+                const Text(
+                  'Bangumi 授权登录',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                child: const Text('授权登录'),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _loadPersistedToken,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
+                const SizedBox(height: 20),
+                const Text(
+                  '点击下方按钮进行 Bangumi 账号授权登录',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
-                child: const Text('获取Token'),
-              ),
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: _launchAuthUrl,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                  child: const Text('授权登录'),
+                ),
+              ],
               const SizedBox(height: 40),
               if (_persistedToken != null) ...[
                 Container(

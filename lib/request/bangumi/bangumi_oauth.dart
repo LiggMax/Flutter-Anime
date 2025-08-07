@@ -55,8 +55,6 @@ class OAuthCallbackHandler {
     try {
       final box = await Hive.openBox(_tokenBoxName);
       await box.put('token', {
-        'code': token.code,
-        'message': token.message,
         'accessToken': token.accessToken,
         'refreshToken': token.refreshToken,
         'expiresIn': token.expiresIn,
