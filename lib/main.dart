@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import './page/tabs.dart';
 import './controllers/theme_controller.dart';
 import './routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化Hive
+  await Hive.initFlutter();
+
   MediaKit.ensureInitialized();
   runApp(const MyApp());
 }

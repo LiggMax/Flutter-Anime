@@ -1,4 +1,6 @@
-import 'package:AnimeFlow/request/api/bangumi/bgm_oauth.dart';
+import 'package:AnimeFlow/request/api/bangumi/oauth.dart';
+import 'package:AnimeFlow/request/bangumi/bangumi_oauth.dart';
+import 'package:AnimeFlow/modules/bangumi/token.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
@@ -13,10 +15,35 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   // Bangumi授权登录URL
   final String _authUrl = BangumiOAuthApi.oauthUrl;
+  BangumiToken? _persistedToken;
 
   @override
   void initState() {
     super.initState();
+    _loadPersistedToken();
+  }
+
+  /// 加载持久化的Token
+  Future<void> _loadPersistedToken() async {
+    final token = await OAuthCallbackHandler.getPersistedToken();
+    if (mounted) {
+      setState(() {
+        _persistedToken = token;
+      });
+    }
+  }
+
+  /// 清除Token
+  Future<void> _clearToken() async {
+    await OAuthCallbackHandler.clearPersistedToken();
+    if (mounted) {
+      setState(() {
+        _persistedToken = null;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已清除Token')));
+    }
   }
 
   // 打开授权登录网页
@@ -62,6 +89,65 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: const Text('授权登录'),
               ),
+              const SizedBox(height: 40),
+              if (_persistedToken != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        '已保存的Token:',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Access Token: ${_persistedToken!.accessToken}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Refresh Token: ${_persistedToken!.refreshToken}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Expires In: ${_persistedToken!.expiresIn}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _clearToken,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('清除Token'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),

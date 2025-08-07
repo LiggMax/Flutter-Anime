@@ -5,5 +5,5 @@
 class BangumiOAuthApi {
   static const String oauthUrl = 'https://bgm.tv/oauth/authorize?response_type=code&client_id=bgm42366890dd59f2baf&redirect_uri=animeflow://auth/callback';
   ///AnimeFlow 后端获取token接口
-  static const String tokenUrl = 'http://127.0.0.1:1024/oauth/access_token';
+  static const String tokenUrl = 'http://129.204.224.233:1024/oauth/access_token';
 }

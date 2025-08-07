@@ -4,6 +4,7 @@ import '../page/tabs.dart';
 import '../page/search/search_page.dart';
 import '../page/animeinfos/anime_info.dart';
 import '../page/player/play_info.dart';
+import 'package:AnimeFlow/modules/bangumi/token.dart';
 
 /// 统一的路由系统
 class Routes {
@@ -19,9 +20,19 @@ class Routes {
   // 路由生成器
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final name = settings.name;
+
     // 处理授权回调
     if (name != null && name.startsWith('/callback')) {
-      OAuthCallbackHandler.handleCallback(name);
+      // 获取授权码
+      OAuthCallbackHandler.handleCallback(name).then((code) async {
+        if (code != null) {
+          BangumiToken? token = await OAuthCallbackHandler.getToken(code);
+          if (token != null) {
+            // 持久化Token
+            OAuthCallbackHandler.persistToken(token);
+          }
+        }
+      });
       return MaterialPageRoute(
         builder: (context) {
           Future.microtask(() => Navigator.of(context).pop());
@@ -30,6 +41,7 @@ class Routes {
         settings: settings,
       );
     }
+
     switch (name) {
       case tabs:
         return MaterialPageRoute(

@@ -10,6 +10,6 @@
 
     <!-- 运行的http地址 -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">127.0.0.1:1024</domain>
+        <domain includeSubdomains="true">http://129.204.224.233:1024</domain>
     </domain-config>
 </network-security-config>
