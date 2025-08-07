@@ -10,6 +10,9 @@ class BangumiToken {
   final String refreshToken;
   final int expiresIn;
   final int createdAt;
+  final String tokenType;
+  final String scope;
+  final int userId;
 
   BangumiToken({
     required this.code,
@@ -18,6 +21,9 @@ class BangumiToken {
     required this.refreshToken,
     required this.expiresIn,
     required this.createdAt,
+    required this.tokenType,
+    required this.scope,
+    required this.userId,
   });
 
   /// 从JSON解析Token
@@ -30,6 +36,9 @@ class BangumiToken {
       refreshToken: data['refresh_token'] as String? ?? '',
       expiresIn: data['expires_in'] as int? ?? 0,
       createdAt: data['created_at'] as int? ?? 0,
+      tokenType: data['token_type'] as String? ?? '',
+      scope: data['scope'] as String? ?? '',
+      userId: data['user_id'] as int? ?? 0,
     );
   }
 }

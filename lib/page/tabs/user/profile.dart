@@ -34,17 +34,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// 清除Token
-  Future<void> _clearToken() async {
-    await OAuthCallbackHandler.clearPersistedToken();
-    if (mounted) {
-      setState(() {
-        _persistedToken = null;
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已清除Token')));
-    }
-  }
+  // Future<void> _clearToken() async {
+  //   await OAuthCallbackHandler.clearPersistedToken();
+  //   if (mounted) {
+  //     setState(() {
+  //       _persistedToken = null;
+  //     });
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(const SnackBar(content: Text('已清除Token')));
+  //   }
+  // }
 
   // 打开授权登录网页
   Future<void> _launchAuthUrl() async {
@@ -90,11 +90,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: const Text('授权登录'),
               ),
               const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: _loadPersistedToken,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
+                child: const Text('获取Token'),
+              ),
+              const SizedBox(height: 40),
               if (_persistedToken != null) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withAlpha(51),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.blue),
                   ),
@@ -136,14 +148,32 @@ class _ProfilePageState extends State<ProfilePage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: _clearToken,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                      Text(
+                        'Token Type: ${_persistedToken!.tokenType}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
                         ),
-                        child: const Text('清除Token'),
+                        textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'User Id: ${_persistedToken!.userId}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      // ElevatedButton(
+                      //   onPressed: _clearToken,
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: Colors.red,
+                      //     foregroundColor: Colors.white,
+                      //   ),
+                      //   child: const Text('清除Token'),
+                      // ),
                     ],
                   ),
                 ),

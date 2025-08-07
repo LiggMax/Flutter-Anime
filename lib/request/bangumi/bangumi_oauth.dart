@@ -61,6 +61,9 @@ class OAuthCallbackHandler {
         'refreshToken': token.refreshToken,
         'expiresIn': token.expiresIn,
         'createdAt': token.createdAt,
+        'tokenType': token.tokenType,
+        'userId': token.userId,
+        'scope': token.scope,
       });
       print('Token已持久化到Hive: ${token.accessToken}');
     } catch (e) {
@@ -72,15 +75,22 @@ class OAuthCallbackHandler {
   static Future<BangumiToken?> getPersistedToken() async {
     try {
       final box = await Hive.openBox(_tokenBoxName);
-      final tokenData = box.get('token') as Map<String, dynamic>?;
+      final tokenData = box.get('token');
       if (tokenData != null) {
+        // 安全地转换Map类型
+        final Map<String, dynamic> tokenMap = Map<String, dynamic>.from(
+          tokenData,
+        );
         return BangumiToken(
-          code: tokenData['code'] as int,
-          message: tokenData['message'] as String,
-          accessToken: tokenData['accessToken'] as String,
-          refreshToken: tokenData['refreshToken'] as String,
-          expiresIn: tokenData['expiresIn'] as int,
-          createdAt: tokenData['createdAt'] as int,
+          code: tokenMap['code'] as int? ?? 0,
+          message: tokenMap['message'] as String? ?? '',
+          accessToken: tokenMap['accessToken'] as String? ?? '',
+          refreshToken: tokenMap['refreshToken'] as String? ?? '',
+          expiresIn: tokenMap['expiresIn'] as int? ?? 0,
+          createdAt: tokenMap['createdAt'] as int? ?? 0,
+          tokenType: tokenMap['tokenType'] as String? ?? '',
+          scope: tokenMap['scope'] as String? ?? '',
+          userId: tokenMap['userId'] as int? ?? 0,
         );
       }
     } catch (e) {
