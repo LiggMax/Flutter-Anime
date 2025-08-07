@@ -34,7 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         _persistedToken = token;
       });
-      
+
       // 如果有Token，获取用户信息
       if (_persistedToken != null) {
         _loadUserInfo();
@@ -45,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
   /// 获取用户信息
   Future<void> _loadUserInfo() async {
     if (_persistedToken == null) return;
-    
+
     setState(() {
       _isLoadingUserInfo = true;
     });
@@ -56,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _persistedToken!.userId.toString(),
         token: _persistedToken!.accessToken,
       );
-      
+
       if (mounted) {
         setState(() {
           _userInfo = userInfo;
@@ -140,8 +140,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   const CircularProgressIndicator()
                 else if (_userInfo != null)
                   _buildUserInfoCard()
-                else
-                  _buildTokenInfoCard(),
               ],
             ],
           ),
@@ -155,7 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primaryContainer.withAlpha(52),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.primaryContainer,
@@ -170,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
               backgroundImage: NetworkImage(_userInfo!.avatar.large),
             ),
           const SizedBox(height: 16),
-          
+
           // 用户基本信息
           Text(
             _userInfo!.nickname,
@@ -188,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           const SizedBox(height: 8),
-          
+
           // 签名
           if (_userInfo!.sign.isNotEmpty) ...[
             Text(
@@ -198,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // 统计信息
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -232,84 +230,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ],
-    );
-  }
-
-  /// 构建Token信息卡片
-  Widget _buildTokenInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withAlpha(51),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            '已保存的Token:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Access Token: ${_persistedToken!.accessToken}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Refresh Token: ${_persistedToken!.refreshToken}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Expires In: ${_persistedToken!.expiresIn}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Token Type: ${_persistedToken!.tokenType}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'User Id: ${_persistedToken!.userId}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          // ElevatedButton(
-          //   onPressed: _clearToken,
-          //   style: ElevatedButton.styleFrom(
-          //     backgroundColor: Colors.red,
-          //     foregroundColor: Colors.white,
-          //   ),
-          //   child: const Text('清除Token'),
-          // ),
-        ],
-      ),
     );
   }
 }
