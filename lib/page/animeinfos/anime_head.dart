@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../utils/theme_extensions.dart';
-import 'package:AnimeFlow/modules/bangumi/ata.dart';
+import 'package:AnimeFlow/modules/bangumi/data.dart';
 import 'skeleton/head_skeleton.dart';
 import '../../routes/routes.dart';
 

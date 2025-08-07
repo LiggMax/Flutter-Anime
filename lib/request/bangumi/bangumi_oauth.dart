@@ -3,6 +3,9 @@
   @Time 2025/8/5
  */
 import 'dart:async';
+import 'package:AnimeFlow/modules/bangumi/token.dart';
+import '../api/bangumi/bgm_oauth.dart';
+import '../request.dart';
 
 class OAuthCallbackHandler {
   static StreamSubscription? _subscription;
@@ -21,30 +24,27 @@ class OAuthCallbackHandler {
       print('处理OAuth回调URL: $url');
 
       final uri = Uri.parse(url);
-      if (uri.path == '/callback') {
-        final code = uri.queryParameters['code'];
-        if (code != null) {
-          print('成功获取到授权码: $code');
-          _processAuthorizationCode(code);
+      final code = uri.queryParameters['code'];
+      if (code != null) {
+        print('成功获取到授权码: $code');
 
-          // 通过Stream发送code
-          _codeController?.add(code);
-        } else {
-          print('URL中没有找到code参数');
-        }
+        // 通过Stream发送code
+        _codeController?.add(code);
       } else {
-        print('URL格式不匹配，期望: /callback');
+        return;
       }
     } catch (e) {
       print('处理OAuth回调时出错: $e');
     }
   }
 
-  /// 处理授权码
-  static void _processAuthorizationCode(String code) {
-    print('处理授权码: $code');
-    // 在这里可以添加获取访问令牌的逻辑
-    // 例如调用Bangumi API获取access_token
+  ///获取Token
+  static Future<BangumiToken?> getToken(String code) async {
+    final response = await httpRequest.post(
+      BangumiOAuthApi.tokenUrl,
+      data: {code: code},
+    );
+    return BangumiToken.fromJson(response.data);
   }
 
   /// 释放资源

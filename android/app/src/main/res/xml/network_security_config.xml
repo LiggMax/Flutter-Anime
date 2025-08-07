@@ -7,11 +7,9 @@
         <domain includeSubdomains="true">next.bgm.tv</domain>
         <domain includeSubdomains="true">bgm.tv</domain>
     </domain-config>
-    
-    <!-- 如果需要支持HTTP连接的域名，可以在这里添加 -->
-    <!-- 
+
+    <!-- 运行的http地址 -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">example.com</domain>
+        <domain includeSubdomains="true">127.0.0.1:1024</domain>
     </domain-config>
-    -->
-</network-security-config> 
+</network-security-config>

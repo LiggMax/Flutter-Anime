@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:AnimeFlow/modules/bangumi/ata.dart';
+import 'package:AnimeFlow/modules/bangumi/data.dart';
 import 'detail_info.dart';
 
 /// 标签组件
@@ -124,4 +124,4 @@ class _AnimeTagsRowState extends State<AnimeTagsRow> {
       ],
     );
   }
-} 
+}
