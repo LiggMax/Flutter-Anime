@@ -76,24 +76,25 @@ class _TabsState extends State<Tabs> {
         index: _currentIndex,
         children: const [HomePage(), TimePage(), ProfilePage()],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _navigateTo,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: _navigateTo,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
             label: _pageTitles[0],
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.timeline_sharp),
+          NavigationDestination(
+            icon: const Icon(Icons.timeline_outlined),
+            selectedIcon: const Icon(Icons.timeline),
             label: _pageTitles[1],
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
             label: _pageTitles[2],
           ),
         ],
