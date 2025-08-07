@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
-import '../../../request/bangumi/bangumi_oauth.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -11,46 +10,14 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Bangumi授权登录URL，这里使用占位符，您可以替换为实际的URL
+  // Bangumi授权登录URL
   final String _authUrl =
       'https://bgm.tv/oauth/authorize?response_type=code&client_id=bgm42366890dd59f2baf&redirect_uri=animeflow://auth/callback';
-
-  StreamSubscription<String>? _codeSubscription;
   String? _lastReceivedCode;
 
   @override
   void initState() {
     super.initState();
-    _initializeOAuth();
-  }
-
-  @override
-  void dispose() {
-    _codeSubscription?.cancel();
-    super.dispose();
-  }
-
-  /// 初始化OAuth处理
-  Future<void> _initializeOAuth() async {
-    await OAuthCallbackHandler.initialize();
-
-    // 监听授权码
-    _codeSubscription = OAuthCallbackHandler.codeStream.listen((code) {
-      setState(() {
-        _lastReceivedCode = code;
-      });
-
-      // 显示获取到的授权码
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('成功获取授权码: $code'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    });
   }
 
   // 打开授权登录网页
@@ -96,24 +63,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: const Text('授权登录'),
               ),
-              const SizedBox(height: 20),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     // 测试OAuth回调功能
-              //     OAuthCallbackHandler.handleCallback(
-              //       'animeflow://auth/callback?code=test123456',
-              //     );
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(
-              //       horizontal: 32,
-              //       vertical: 16,
-              //     ),
-              //     textStyle: const TextStyle(fontSize: 16),
-              //     backgroundColor: Colors.orange,
-              //   ),
-              //   child: const Text('测试OAuth回调'),
-              // ),
               const SizedBox(height: 40),
               if (_lastReceivedCode != null) ...[
                 Container(

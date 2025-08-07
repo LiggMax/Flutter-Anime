@@ -280,7 +280,14 @@ class _RankingPageState extends State<RankingPage> {
       child: InkWell(
         onTap: () {
           // 跳转到详情页面
-          Routes.goToAnimeData(context, animeId: link);
+          Navigator.of(context).pushNamed(
+            Routes.animeData,
+            arguments: {
+              'animeId': link,
+              'animeName': title,
+              'imageUrl': coverUrl,
+            },
+          );
         },
         child: Stack(
           fit: StackFit.expand,

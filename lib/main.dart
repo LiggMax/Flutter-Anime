@@ -60,7 +60,6 @@ class _MyAppState extends State<MyApp> {
               themeMode: themeController.isDarkMode
                   ? ThemeMode.dark
                   : ThemeMode.light,
-              home: const Tabs(),
               onGenerateRoute: Routes.generateRoute,
               initialRoute: Routes.tabs,
               debugShowCheckedModeBanner: false,

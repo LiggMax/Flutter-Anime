@@ -1,3 +1,4 @@
+import 'package:AnimeFlow/request/bangumi/bangumi_oauth.dart';
 import 'package:flutter/material.dart';
 import '../page/tabs.dart';
 import '../page/search/search_page.dart';
@@ -17,7 +18,19 @@ class Routes {
 
   // 路由生成器
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+    final name = settings.name;
+    // 处理授权回调
+    if (name != null && name.startsWith('/callback')) {
+      OAuthCallbackHandler.handleCallback(name);
+      return MaterialPageRoute(
+        builder: (context) {
+          Future.microtask(() => Navigator.of(context).pop());
+          return const SizedBox.shrink();
+        },
+        settings: settings,
+      );
+    }
+    switch (name) {
       case tabs:
         return MaterialPageRoute(
           builder: (_) => const Tabs(),
