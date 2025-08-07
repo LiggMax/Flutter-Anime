@@ -53,7 +53,7 @@ AnimeFlow 是一款基于 Flutter 开发的现代化动漫播放器，专注于�
 <div align="center">
 
 ### 搜索功能
-<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
   <img src="lib/assets/describes/SearchList.png" width="45%" alt="搜索列表">
   <img src="lib/assets/describes/SearchGrid.png" width="45%" alt="搜索网格">
 </div>
