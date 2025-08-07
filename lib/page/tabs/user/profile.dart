@@ -1,3 +1,4 @@
+import 'package:AnimeFlow/request/api/bangumi/bgm_oauth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
@@ -11,9 +12,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   // Bangumi授权登录URL
-  final String _authUrl =
-      'https://bgm.tv/oauth/authorize?response_type=code&client_id=bgm42366890dd59f2baf&redirect_uri=animeflow://auth/callback';
-  String? _lastReceivedCode;
+  final String _authUrl = BangumiOAuthApi.oauthUrl;
 
   @override
   void initState() {
@@ -63,38 +62,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: const Text('授权登录'),
               ),
-              const SizedBox(height: 40),
-              if (_lastReceivedCode != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        '最新获取的授权码:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _lastReceivedCode!,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'monospace',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ),
         ),
