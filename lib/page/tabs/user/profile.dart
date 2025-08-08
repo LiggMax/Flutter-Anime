@@ -70,10 +70,6 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _loadUserInfo() async {
     if (_persistedToken == null) return;
 
-    setState(() {
-      _isLoadingUserInfo = true;
-    });
-
     try {
       // 使用Token中的userId或username获取用户信息
       final userInfo = await BangumiUser.getUserinfo(
@@ -150,15 +146,8 @@ class _ProfilePageState extends State<ProfilePage>
             ],
 
             if (_persistedToken != null) ...[
-              if (_isLoadingUserInfo)
-                const Padding(
-                  padding: EdgeInsets.only(top: 80),
-                  child: CircularProgressIndicator(),
-                )
-              else if (_userInfo != null) ...[
-                _buildProfileHeader(),
-                _buildDevPlaceholder(),
-              ],
+              _buildProfileHeader(),
+              _buildDevPlaceholder(),
             ],
           ],
         ),
@@ -203,23 +192,15 @@ class _ProfilePageState extends State<ProfilePage>
               Positioned(
                 left: 0,
                 right: 0,
-                top: centerY + 100,
+                top: centerY + 120,
                 child: Column(
                   children: [
                     Text(
-                      _userInfo!.nickname,
+                      '${_userInfo!.nickname}@${_userInfo!.username}',
                       style: TextStyle(
                         color: colorScheme.onSurface,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '@${_userInfo!.username}',
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 10,
                       ),
                     ),
                   ],
