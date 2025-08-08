@@ -118,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
               //头部信息组件
               UserHeader(userInfo: _userInfo!),
               //收藏信息组件
-              Collection(userInfo: _userInfo!),
+              Collection(userInfo: _userInfo!, token: _persistedToken!),
             ],
           ],
         ),
