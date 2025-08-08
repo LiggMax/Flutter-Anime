@@ -22,7 +22,6 @@ class _ProfilePageState extends State<ProfilePage>
   final String _authUrl = BangumiOAuthApi.oauthUrl;
   BangumiToken? _persistedToken;
   UserInfo? _userInfo;
-  bool _isLoadingUserInfo = false;
 
   late final AnimationController _statsController;
   late final Animation<double> _statsAnimation;
@@ -80,7 +79,6 @@ class _ProfilePageState extends State<ProfilePage>
       if (mounted) {
         setState(() {
           _userInfo = userInfo;
-          _isLoadingUserInfo = false;
         });
         // 用户信息就绪后播放统计动画与环绕轻微动态
         _statsController.forward(from: 0);
@@ -91,7 +89,6 @@ class _ProfilePageState extends State<ProfilePage>
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoadingUserInfo = false;
         });
         ScaffoldMessenger.of(
           context,
