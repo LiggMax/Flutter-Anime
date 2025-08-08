@@ -24,7 +24,7 @@ class _CollectionState extends State<Collection>
   late final List<String> _tabs;
   late final TabController _tabController;
 
-  final Map<int, UserCollection?> _cache = {};
+  final Map<int, UserCollection?> _cache = {}; // type -> data
   UserCollection? _currentCollection;
   bool _isLoading = false;
   String? _error;
@@ -60,7 +60,6 @@ class _CollectionState extends State<Collection>
 
   // 获取用户收藏（带缓存与并发保护）
   Future<void> _getUserCollection({required int type}) async {
-    // 命中缓存
     if (_cache.containsKey(type)) {
       setState(() {
         _currentCollection = _cache[type];
@@ -70,7 +69,6 @@ class _CollectionState extends State<Collection>
       return;
     }
 
-    // 避免重复请求同一类型
     if (_inFlightType == type) return;
     _inFlightType = type;
 
@@ -128,7 +126,6 @@ class _CollectionState extends State<Collection>
             unselectedLabelStyle: const TextStyle(fontSize: 16),
             tabs: _tabs.map((t) => Tab(text: t)).toList(),
             onTap: (index) {
-              // 立即根据点击的标签触发拉取（与滚动监听互补）
               final int type = _items[index]['id'] as int;
               _getUserCollection(type: type);
             },
@@ -136,7 +133,7 @@ class _CollectionState extends State<Collection>
         ),
         const SizedBox(height: 12),
 
-        // 占位内容（后续替换为实际列表），展示加载/错误/结果概要
+        // 内容区：ListView 渲染（先显示加载/错误/空占位）
         SizedBox(
           height: 500,
           child: TabBarView(
@@ -153,15 +150,85 @@ class _CollectionState extends State<Collection>
                   ),
                 );
               }
-              final total = _currentCollection?.total;
-              return Center(
-                child: Text(
-                  total == null ? '$t – 开发中…' : '$t – 数据条数: $total',
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 16,
+              final items =
+                  _currentCollection?.data ?? const <UserCollectionItem>[];
+              if (items.isEmpty) {
+                return Center(
+                  child: Text(
+                    '暂无数据',
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
+                );
+              }
+              return ListView.separated(
+                itemCount: items.length,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final it = items[index];
+                  final s = it.subject;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          s.images.small.isNotEmpty
+                              ? s.images.small
+                              : s.images.grid,
+                          width: 48,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 48,
+                            height: 64,
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        s.nameCN?.isNotEmpty == true ? s.nameCN! : s.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        s.date ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (s.score != null)
+                            Text(
+                              s.score!.toStringAsFixed(1),
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          if (it.epStatus > 0)
+                            Text(
+                              'Ep ${it.epStatus}',
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
+                      ),
+                      onTap: () {},
+                    ),
+                  );
+                },
               );
             }).toList(),
           ),

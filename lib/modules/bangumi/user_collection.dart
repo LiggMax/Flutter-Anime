@@ -2,149 +2,147 @@
   @Author Ligg
   @Time 2025/8/8
  */
-/*
-  @Author Ligg
-  @Time 2025/8/8
- */
 
 class UserCollection {
-  final List<CollectionItem> data;
+  final List<UserCollectionItem> data;
   final int total;
+  final int? limit;
+  final int? offset;
 
   UserCollection({
     required this.data,
     required this.total,
+    this.limit,
+    this.offset,
   });
 
   factory UserCollection.fromJson(Map<String, dynamic> json) {
-    var dataList = json['data'] as List;
-    List<CollectionItem> items = dataList.map((i) => CollectionItem.fromJson(i)).toList();
-
+    final List<dynamic> list = json['data'] as List<dynamic>? ?? [];
     return UserCollection(
-      data: items,
-      total: json['total'],
+      data: list
+          .map((e) => UserCollectionItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: json['total'] as int? ?? 0,
+      limit: json['limit'] as int?,
+      offset: json['offset'] as int?,
     );
   }
 }
 
-class CollectionItem {
+class UserCollectionItem {
+  final String? updatedAt;
+  final String? comment;
+  final List<dynamic> tags;
+  final SubjectSummary subject;
+  final int subjectId;
+  final int volStatus;
+  final int epStatus;
+  final int subjectType;
+  final int type; // 1/2/3/4/5
+  final int rate;
+  final bool private;
+
+  UserCollectionItem({
+    required this.updatedAt,
+    required this.comment,
+    required this.tags,
+    required this.subject,
+    required this.subjectId,
+    required this.volStatus,
+    required this.epStatus,
+    required this.subjectType,
+    required this.type,
+    required this.rate,
+    required this.private,
+  });
+
+  factory UserCollectionItem.fromJson(Map<String, dynamic> json) {
+    return UserCollectionItem(
+      updatedAt: json['updated_at'] as String?,
+      comment: json['comment'] as String?,
+      tags: (json['tags'] as List<dynamic>? ?? const []),
+      subject: SubjectSummary.fromJson(json['subject'] as Map<String, dynamic>),
+      subjectId: json['subject_id'] as int? ?? json['subjectId'] as int? ?? 0,
+      volStatus: json['vol_status'] as int? ?? 0,
+      epStatus: json['ep_status'] as int? ?? 0,
+      subjectType:
+          json['subject_type'] as int? ?? json['subjectType'] as int? ?? 0,
+      type: json['type'] as int? ?? 0,
+      rate: json['rate'] as int? ?? 0,
+      private: json['private'] as bool? ?? false,
+    );
+  }
+}
+
+class SubjectSummary {
   final int id;
   final String name;
-  final String nameCN;
+  final String? nameCN;
+  final String? date;
   final int type;
-  final String info;
-  final Rating rating;
-  final bool locked;
-  final bool nsfw;
-  final Images images;
-  final Interest interest;
+  final int? eps;
+  final int? volumes;
+  final double? score;
+  final int? rank;
+  final int? collectionTotal;
+  final String? shortSummary;
+  final SubjectImages images;
 
-  CollectionItem({
+  SubjectSummary({
     required this.id,
     required this.name,
     required this.nameCN,
+    required this.date,
     required this.type,
-    required this.info,
-    required this.rating,
-    required this.locked,
-    required this.nsfw,
-    required this.images,
-    required this.interest,
-  });
-
-  factory CollectionItem.fromJson(Map<String, dynamic> json) {
-    return CollectionItem(
-      id: json['id'],
-      name: json['name'],
-      nameCN: json['nameCN'],
-      type: json['type'],
-      info: json['info'],
-      rating: Rating.fromJson(json['rating']),
-      locked: json['locked'],
-      nsfw: json['nsfw'],
-      images: Images.fromJson(json['images']),
-      interest: Interest.fromJson(json['interest']),
-    );
-  }
-}
-
-class Rating {
-  final int rank;
-  final List<int> count;
-  final double score;
-  final int total;
-
-  Rating({
-    required this.rank,
-    required this.count,
+    required this.eps,
+    required this.volumes,
     required this.score,
-    required this.total,
+    required this.rank,
+    required this.collectionTotal,
+    required this.shortSummary,
+    required this.images,
   });
 
-  factory Rating.fromJson(Map<String, dynamic> json) {
-    var countList = json['count'] as List;
-    List<int> counts = countList.cast<int>();
-
-    return Rating(
-      rank: json['rank'],
-      count: counts,
-      score: json['score'].toDouble(),
-      total: json['total'],
+  factory SubjectSummary.fromJson(Map<String, dynamic> json) {
+    return SubjectSummary(
+      id: json['id'] as int,
+      name: json['name'] as String? ?? '',
+      nameCN: json['name_cn'] as String?,
+      date: json['date'] as String?,
+      type: json['type'] as int? ?? 0,
+      eps: json['eps'] as int?,
+      volumes: json['volumes'] as int?,
+      score: (json['score'] is num) ? (json['score'] as num).toDouble() : null,
+      rank: json['rank'] as int?,
+      collectionTotal: json['collection_total'] as int?,
+      shortSummary: json['short_summary'] as String?,
+      images: SubjectImages.fromJson(json['images'] as Map<String, dynamic>),
     );
   }
 }
 
-class Images {
-  final String large;
-  final String common;
-  final String medium;
+class SubjectImages {
   final String small;
   final String grid;
+  final String large;
+  final String medium;
+  final String common;
 
-  Images({
-    required this.large,
-    required this.common,
-    required this.medium,
+  SubjectImages({
     required this.small,
     required this.grid,
+    required this.large,
+    required this.medium,
+    required this.common,
   });
 
-  factory Images.fromJson(Map<String, dynamic> json) {
-    return Images(
-      large: json['large'],
-      common: json['common'],
-      medium: json['medium'],
-      small: json['small'],
-      grid: json['grid'],
-    );
-  }
-}
-
-class Interest {
-  final int id;
-  final int rate;
-  final int type;
-  final String comment;
-  final List<dynamic> tags;
-  final int updatedAt;
-
-  Interest({
-    required this.id,
-    required this.rate,
-    required this.type,
-    required this.comment,
-    required this.tags,
-    required this.updatedAt,
-  });
-
-  factory Interest.fromJson(Map<String, dynamic> json) {
-    return Interest(
-      id: json['id'],
-      rate: json['rate'],
-      type: json['type'],
-      comment: json['comment'],
-      tags: json['tags'],
-      updatedAt: json['updatedAt'],
+  factory SubjectImages.fromJson(Map<String, dynamic> json) {
+    return SubjectImages(
+      small: json['small'] as String? ?? '',
+      grid: json['grid'] as String? ?? '',
+      large: json['large'] as String? ?? '',
+      medium: json['medium'] as String? ?? '',
+      common: json['common'] as String? ?? '',
     );
   }
 }
