@@ -6,8 +6,7 @@ import 'package:AnimeFlow/modules/bangumi/user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
+import 'package:AnimeFlow/page/tabs/user/header.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -16,37 +15,15 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with TickerProviderStateMixin {
+class _ProfilePageState extends State<ProfilePage> {
   // Bangumi授权登录URL
   final String _authUrl = BangumiOAuthApi.oauthUrl;
   BangumiToken? _persistedToken;
   UserInfo? _userInfo;
 
-  late final AnimationController _statsController;
-  late final Animation<double> _statsAnimation;
-  late final AnimationController _orbitController;
-  late final Animation<double> _orbitAnimation;
-
   @override
   void initState() {
     super.initState();
-    _statsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _statsAnimation = CurvedAnimation(
-      parent: _statsController,
-      curve: Curves.easeOutBack,
-    );
-    _orbitController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 100),
-    );
-    _orbitAnimation = Tween<double>(
-      begin: 0,
-      end: 2 * math.pi,
-    ).animate(CurvedAnimation(parent: _orbitController, curve: Curves.linear));
     _loadPersistedToken();
   }
 
@@ -80,16 +57,9 @@ class _ProfilePageState extends State<ProfilePage>
         setState(() {
           _userInfo = userInfo;
         });
-        // 用户信息就绪后播放统计动画与环绕轻微动态
-        _statsController.forward(from: 0);
-        _orbitController
-          ..reset()
-          ..repeat();
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-        });
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('获取用户信息失败: $e')));
@@ -142,131 +112,14 @@ class _ProfilePageState extends State<ProfilePage>
               const SizedBox(height: 80),
             ],
 
-            if (_persistedToken != null) ...[
-              _buildProfileHeader(),
+            if (_persistedToken != null && _userInfo != null) ...[
+              UserHeader(userInfo: _userInfo!),
               _buildDevPlaceholder(),
             ],
           ],
         ),
       ),
     );
-  }
-
-  /// 顶部信息头
-  Widget _buildProfileHeader() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: 300,
-      width: double.infinity,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final double centerX = constraints.maxWidth / 2;
-          final double centerY = 150;
-
-          return Stack(
-            children: [
-              // 背景图
-              Positioned.fill(
-                child: ImageFiltered(
-                  imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                  child: Image.network(
-                    _userInfo!.avatar.large,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              // 中心头像
-              Positioned(
-                left: centerX - 44,
-                top: centerY - 44,
-                child: CircleAvatar(
-                  radius: 44,
-                  backgroundImage: NetworkImage(_userInfo!.avatar.large),
-                ),
-              ),
-
-              // 昵称与用户名
-              Positioned(
-                left: 0,
-                right: 0,
-                top: centerY + 120,
-                child: Column(
-                  children: [
-                    Text(
-                      '${_userInfo!.nickname}@${_userInfo!.username}',
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 环绕统计
-              ..._buildOrbitTextStats(
-                center: Offset(centerX, centerY),
-                radius: 80,
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  List<Widget> _buildOrbitTextStats({
-    required Offset center,
-    required double radius,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final Map<String, int> s = _userInfo!.stats.subject['2'] ?? {};
-    final List<Map<String, dynamic>> items = [
-      {'label': '想看', 'count': s['1'] ?? 0},
-      {'label': '再看', 'count': s['3'] ?? 0},
-      {'label': '看过', 'count': s['2'] ?? 0},
-      {'label': '抛弃', 'count': s['5'] ?? 0},
-      {'label': '搁置', 'count': s['4'] ?? 0},
-    ];
-
-    final List<Widget> widgets = [];
-    for (int i = 0; i < items.length; i++) {
-      final double baseAngle = -math.pi / 2 + i * (2 * math.pi / 5);
-      widgets.add(
-        AnimatedBuilder(
-          animation: _orbitAnimation,
-          builder: (context, child) {
-            return AnimatedBuilder(
-              animation: _statsAnimation,
-              builder: (context, child) {
-                final double r = (radius * _statsAnimation.value).clamp(
-                  0.0,
-                  double.infinity,
-                );
-                final double angle = baseAngle + _orbitAnimation.value;
-                final double x = center.dx + r * math.cos(angle);
-                final double y = center.dy + r * math.sin(angle);
-                return Positioned(
-                  left: x,
-                  top: y,
-                  child: FractionalTranslation(
-                    translation: const Offset(-0.5, -0.5),
-                    child: _InlineStat(
-                      label: items[i]['label'] as String,
-                      count: items[i]['count'] as int,
-                      color: colorScheme.onSurface,
-                      subColor: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      );
-    }
-    return widgets;
   }
 
   Widget _buildDevPlaceholder() {
@@ -281,46 +134,6 @@ class _ProfilePageState extends State<ProfilePage>
           fontSize: 16,
         ),
       ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _statsController.dispose();
-    _orbitController.dispose();
-    super.dispose();
-  }
-}
-
-class _InlineStat extends StatelessWidget {
-  const _InlineStat({
-    required this.label,
-    required this.count,
-    required this.color,
-    required this.subColor,
-  });
-
-  final String label;
-  final int count;
-  final Color color;
-  final Color subColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          count.toString(),
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(label, style: TextStyle(color: subColor, fontSize: 12)),
-      ],
     );
   }
 }
