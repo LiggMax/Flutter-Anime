@@ -23,7 +23,7 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 浅色主题 - 完全使用 Material 3 自动管理
+  // 浅色主题 - 使用 Material 3 自动管理
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
@@ -42,10 +42,11 @@ class ThemeController extends ChangeNotifier {
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
       ),
+      scrolledUnderElevation: 0,
     ),
   );
 
-  // 深色主题 - 完全使用 Material 3 自动管理
+  // 深色主题 - 使用 Material 3 自动管理
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
@@ -61,6 +62,8 @@ class ThemeController extends ChangeNotifier {
         systemNavigationBarIconBrightness: Brightness.light,
         systemNavigationBarDividerColor: Colors.transparent,
       ),
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
     ),
   );
 

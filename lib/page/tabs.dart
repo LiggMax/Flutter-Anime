@@ -34,44 +34,47 @@ class _TabsState extends State<Tabs> {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
+    final bool isProfile = _currentIndex == 2;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: Text(_pageTitles[_currentIndex]),
-        centerTitle: false,
-        automaticallyImplyLeading: false,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent, // 状态栏透明
-          statusBarIconBrightness: context.isDarkMode
-              ? Brightness.light
-              : Brightness.dark,
-          statusBarBrightness: context.isDarkMode
-              ? Brightness.dark
-              : Brightness.light,
-          systemNavigationBarColor: Theme.of(
-            context,
-          ).colorScheme.surface,
-          systemNavigationBarIconBrightness: context.isDarkMode
-              ? Brightness.light
-              : Brightness.dark,
-          systemNavigationBarDividerColor: Colors.transparent, // 底部导航栏分割线透明
-        ),
-        actions: [
-          IconButton(
-            onPressed: _navigateToSearch,
-            icon: const Icon(Icons.search_outlined),
-            tooltip: '搜索',
-          ),
-          IconButton(
-            icon: Icon(context.isDarkMode ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () async {
-              await themeController.toggleTheme();
-            },
-            tooltip: context.isDarkMode ? '切换到浅色模式' : '切换到深色模式',
-          ),
-        ],
-      ),
+      appBar: isProfile
+          ? null
+          : AppBar(
+              title: Text(_pageTitles[_currentIndex]),
+              centerTitle: false,
+              automaticallyImplyLeading: false,
+              systemOverlayStyle: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent, // 状态栏透明
+                statusBarIconBrightness: context.isDarkMode
+                    ? Brightness.light
+                    : Brightness.dark,
+                statusBarBrightness: context.isDarkMode
+                    ? Brightness.dark
+                    : Brightness.light,
+                systemNavigationBarColor: Theme.of(context).colorScheme.surface,
+                systemNavigationBarIconBrightness: context.isDarkMode
+                    ? Brightness.light
+                    : Brightness.dark,
+                // systemNavigationBarDividerColor:
+                //     Colors.transparent, // 底部导航栏分割线透明
+              ),
+              actions: [
+                IconButton(
+                  onPressed: _navigateToSearch,
+                  icon: const Icon(Icons.search_outlined),
+                  tooltip: '搜索',
+                ),
+                IconButton(
+                  icon: Icon(
+                    context.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                  ),
+                  onPressed: () async {
+                    await themeController.toggleTheme();
+                  },
+                ),
+              ],
+            ),
       body: IndexedStack(
         index: _currentIndex,
         children: const [HomePage(), TimePage(), ProfilePage()],
