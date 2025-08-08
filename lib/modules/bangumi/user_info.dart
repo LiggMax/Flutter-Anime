@@ -64,6 +64,19 @@ class UserInfo {
       'stats': stats.toJson(),
     };
   }
+
+  // 便于 UI 使用的收藏统计条目（动漫类：subject['2']）
+  // 返回顺序：想看、再看、看过、搁置、抛弃
+  List<Map<String, dynamic>> get collectionItems {
+    final Map<String, int> s = stats.subject['2'] ?? {};
+    return [
+      {'label': '想看', 'id': 1, 'count': s['1'] ?? 0},
+      {'label': '再看', 'id': 3, 'count': s['3'] ?? 0},
+      {'label': '看过', 'id': 2, 'count': s['2'] ?? 0},
+      {'label': '搁置', 'id': 4, 'count': s['4'] ?? 0},
+      {'label': '抛弃', 'id': 5, 'count': s['5'] ?? 0},
+    ];
+  }
 }
 
 class Avatar {
@@ -71,11 +84,7 @@ class Avatar {
   final String medium;
   final String large;
 
-  Avatar({
-    required this.small,
-    required this.medium,
-    required this.large,
-  });
+  Avatar({required this.small, required this.medium, required this.large});
 
   factory Avatar.fromJson(Map<String, dynamic> json) {
     return Avatar(
@@ -86,11 +95,7 @@ class Avatar {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'small': small,
-      'medium': medium,
-      'large': large,
-    };
+    return {'small': small, 'medium': medium, 'large': large};
   }
 }
 
@@ -98,10 +103,7 @@ class Homepage {
   final List<String> left;
   final List<String> right;
 
-  Homepage({
-    required this.left,
-    required this.right,
-  });
+  Homepage({required this.left, required this.right});
 
   factory Homepage.fromJson(Map<String, dynamic> json) {
     return Homepage(
@@ -111,10 +113,7 @@ class Homepage {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'left': left,
-      'right': right,
-    };
+    return {'left': left, 'right': right};
   }
 }
 
@@ -181,22 +180,13 @@ class IndexStats {
   final int create;
   final int collect;
 
-  IndexStats({
-    required this.create,
-    required this.collect,
-  });
+  IndexStats({required this.create, required this.collect});
 
   factory IndexStats.fromJson(Map<String, dynamic> json) {
-    return IndexStats(
-      create: json['create'],
-      collect: json['collect'],
-    );
+    return IndexStats(create: json['create'], collect: json['collect']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'create': create,
-      'collect': collect,
-    };
+    return {'create': create, 'collect': collect};
   }
 }

@@ -78,7 +78,7 @@ class _UserHeaderState extends State<UserHeader> with TickerProviderStateMixin {
               Positioned(
                 left: 0,
                 right: 0,
-                top: centerY + avatarRadius + 32,
+                top: centerY + avatarRadius + 70,
                 child: Text(
                   '${widget.userInfo.nickname}@${widget.userInfo.username}',
                   textAlign: TextAlign.center,
@@ -108,14 +108,7 @@ class _UserHeaderState extends State<UserHeader> with TickerProviderStateMixin {
     required Offset center,
     required double radius,
   }) {
-    final Map<String, int> s = widget.userInfo.stats.subject['2'] ?? {};
-    final List<Map<String, dynamic>> items = [
-      {'label': '想看', 'count': s['1'] ?? 0},
-      {'label': '再看', 'count': s['3'] ?? 0},
-      {'label': '看过', 'count': s['2'] ?? 0},
-      {'label': '抛弃', 'count': s['5'] ?? 0},
-      {'label': '搁置', 'count': s['4'] ?? 0},
-    ];
+    final List<Map<String, dynamic>> items = widget.userInfo.collectionItems;
 
     final List<Widget> widgets = [];
     for (int i = 0; i < items.length; i++) {

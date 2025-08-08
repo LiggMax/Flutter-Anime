@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:AnimeFlow/page/tabs/user/header.dart';
 
+import 'collection.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -113,25 +115,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
 
             if (_persistedToken != null && _userInfo != null) ...[
+              //头部信息组件
               UserHeader(userInfo: _userInfo!),
-              _buildDevPlaceholder(),
+              //收藏信息组件
+              Collection(userInfo: _userInfo!),
             ],
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDevPlaceholder() {
-    return Container(
-      alignment: Alignment.center,
-      height: 400,
-      width: double.infinity,
-      child: Text(
-        '开发中…',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          fontSize: 16,
         ),
       ),
     );
