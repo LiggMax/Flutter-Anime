@@ -190,7 +190,7 @@ class _CollectionState extends State<Collection>
                           errorBuilder: (_, __, ___) => Container(
                             width: 48,
                             height: 64,
-                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           ),
                         ),
                       ),

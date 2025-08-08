@@ -6,7 +6,7 @@ import 'package:AnimeFlow/modules/bangumi/user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
-import 'package:AnimeFlow/page/tabs/user/header.dart';
+import 'package:AnimeFlow/pages/tabs/user/header.dart';
 
 import 'collection.dart';
 
