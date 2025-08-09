@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'tabs/home/home.dart';
 import 'tabs/user/profile.dart';
 import './tabs/time.dart';
-import '../controllers/theme_controller.dart';
-import '../utils/theme_extensions.dart';
-import '../routes/routes.dart';
 
 class Tabs extends StatefulWidget {
   const Tabs({super.key});
@@ -18,7 +13,7 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> {
   int _currentIndex = 0;
 
-  // 页面标题列表
+  // 页面标题列表（用于底部导航标签）
   final List<String> _pageTitles = ["首页", "时间表", "个人中心"];
 
   void _navigateTo(int index) {
@@ -27,54 +22,10 @@ class _TabsState extends State<Tabs> {
     });
   }
 
-  void _navigateToSearch() {
-    Navigator.pushNamed(context, Routes.search);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final themeController = Provider.of<ThemeController>(context);
-    final bool isProfile = _currentIndex == 2;
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: isProfile
-          ? null
-          : AppBar(
-              title: Text(_pageTitles[_currentIndex]),
-              centerTitle: false,
-              automaticallyImplyLeading: false,
-              systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent, // 状态栏透明
-                statusBarIconBrightness: context.isDarkMode
-                    ? Brightness.light
-                    : Brightness.dark,
-                statusBarBrightness: context.isDarkMode
-                    ? Brightness.dark
-                    : Brightness.light,
-                systemNavigationBarColor: Theme.of(context).colorScheme.surface,
-                systemNavigationBarIconBrightness: context.isDarkMode
-                    ? Brightness.light
-                    : Brightness.dark,
-                // systemNavigationBarDividerColor:
-                //     Colors.transparent, // 底部导航栏分割线透明
-              ),
-              actions: [
-                IconButton(
-                  onPressed: _navigateToSearch,
-                  icon: const Icon(Icons.search_outlined),
-                  tooltip: '搜索',
-                ),
-                IconButton(
-                  icon: Icon(
-                    context.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                  ),
-                  onPressed: () async {
-                    await themeController.toggleTheme();
-                  },
-                ),
-              ],
-            ),
       body: IndexedStack(
         index: _currentIndex,
         children: const [HomePage(), TimePage(), ProfilePage()],

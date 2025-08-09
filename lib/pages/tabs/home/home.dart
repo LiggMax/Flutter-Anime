@@ -21,6 +21,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('首页'), centerTitle: false,
+      automaticallyImplyLeading:  false,
+      ),
       body: Column(
         children: [
           // TabBar 导航

@@ -243,10 +243,7 @@ class _WeeklyAnimeGridState extends State<WeeklyAnimeGrid>
             const SizedBox(height: 2),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              child: Text(
-                '$animeCount',
-                style: const TextStyle(fontSize: 10, ),
-              ),
+              child: Text('$animeCount', style: const TextStyle(fontSize: 10)),
             ),
           ],
         ),
@@ -371,15 +368,28 @@ class _TimePageState extends State<TimePage>
   @override
   Widget build(BuildContext context) {
     super.build(context); // 必须调用以支持 keep alive
-    return StreamBuilder<CalendarState>(
-      stream: _calendarProvider.stateStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final state = snapshot.data!;
-          return _buildContent(state);
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('时间表'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: '刷新',
+            icon: const Icon(Icons.refresh),
+            onPressed: () => _calendarProvider.refreshCalendar(),
+          ),
+        ],
+      ),
+      body: StreamBuilder<CalendarState>(
+        stream: _calendarProvider.stateStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final state = snapshot.data!;
+            return _buildContent(state);
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 
