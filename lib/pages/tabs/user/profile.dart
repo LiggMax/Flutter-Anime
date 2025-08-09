@@ -21,7 +21,7 @@ class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
   BangumiToken? _persistedToken;
   UserInfo? _userInfo;
-  final Map<int, UserCollection> _collections = {}; // type -> UserCollection
+  final Map<int, UserCollection> _collections = {};
   bool _isLoadingCollections = false;
 
   late TabController _tabController;
@@ -161,11 +161,30 @@ class _ProfilePageState extends State<ProfilePage>
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        centerTitle: false,
         automaticallyImplyLeading: false,
         backgroundColor: appBarBg,
         elevation: _pinned ? 2 : 0,
-        title: const Text('个人中心'),
+
+        //当导航栏不透明时展示的内容
+        title: _pinned && _userInfo != null
+            ? Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      _userInfo!.avatar.medium,
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${_userInfo!.nickname}@${_userInfo!.username}',
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              )
+            : null,
         actions: [IconButton(icon: const Icon(Icons.logout), onPressed: () {})],
       ),
       body: Stack(
