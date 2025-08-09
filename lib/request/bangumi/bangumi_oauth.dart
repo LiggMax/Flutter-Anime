@@ -12,6 +12,12 @@ class OAuthCallbackHandler {
   static StreamSubscription? _subscription;
   static StreamController<String>? _codeController;
   static const String _tokenBoxName = 'bangumi_token';
+  // 持久化后通知用的广播流
+  static final StreamController<BangumiToken> _tokenController =
+      StreamController<BangumiToken>.broadcast();
+
+  /// 对外暴露的 Token 事件流（授权并持久化成功后触发）
+  static Stream<BangumiToken> get tokenStream => _tokenController.stream;
 
   /// 处理OAuth回调URL
   static Future<String?> handleCallback(String url) async {
@@ -64,6 +70,8 @@ class OAuthCallbackHandler {
         'scope': token.scope,
       });
       print('Token已持久化到Hive: ${token.accessToken}');
+      // 新增：广播通知
+      _tokenController.add(token);
     } catch (e) {
       print('持久化Token失败: $e');
     }
@@ -113,5 +121,6 @@ class OAuthCallbackHandler {
     _subscription?.cancel();
     _codeController?.close();
     _codeController = null;
+    _tokenController.close();
   }
 }

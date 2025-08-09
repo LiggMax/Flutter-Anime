@@ -46,7 +46,6 @@ class _MyAppState extends State<MyApp> {
     if (!_isInitialized) {
       return MaterialApp(
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
-        debugShowCheckedModeBanner: false,
       );
     }
 

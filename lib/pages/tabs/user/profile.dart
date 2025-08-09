@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:AnimeFlow/pages/tabs/user/header.dart';
+import 'package:AnimeFlow/pages/tabs/user/no_login.dart';
 
 import 'collection.dart';
 
@@ -49,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (_persistedToken == null) return;
 
     try {
-      // 使用Token中的userId或username获取用户信息
+      // 使用Token中的userId获取用户信息
       final userInfo = await BangumiUser.getUserinfo(
         _persistedToken!.userId.toString(),
         token: _persistedToken!.accessToken,
@@ -69,16 +70,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // 打开授权登录网页
-  Future<void> _launchAuthUrl() async {
-    final Uri url = Uri.parse(_authUrl);
-    if (!await launchUrl(url)) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('无法打开授权页面')));
-      }
-    }
+  /// 接收子组件授权完成后的 Token
+  Future<void> _onAuthorized(BangumiToken token) async {
+    if (!mounted) return;
+    setState(() {
+      _persistedToken = token;
+    });
+    await _loadUserInfo();
   }
 
   @override
@@ -88,30 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             if (_persistedToken == null) ...[
-              const SizedBox(height: 80),
-              const Text(
-                'Bangumi 授权登录',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '点击下方按钮进行 Bangumi 账号授权登录',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _launchAuthUrl,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                child: const Text('授权登录'),
-              ),
-              const SizedBox(height: 80),
+              NoLogin(onAuthorized: _onAuthorized),
             ],
 
             if (_persistedToken != null && _userInfo != null) ...[
