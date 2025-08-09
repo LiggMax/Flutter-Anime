@@ -122,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage>
           _persistedToken!,
           t,
           subjectType: 2,
-          limit: 20,
+          limit: 2,
           offset: 0,
         );
         if (!mounted) return;
@@ -147,6 +147,14 @@ class _ProfilePageState extends State<ProfilePage>
     setState(() {
       _persistedToken = token;
     });
+    await _loadUserInfo();
+    _initTabs();
+    await _loadUserCollections();
+  }
+
+  /// 下拉刷新：重新获取用户信息与收藏
+  Future<void> _refreshProfile() async {
+    if (_persistedToken == null) return;
     await _loadUserInfo();
     _initTabs();
     await _loadUserCollections();
@@ -194,44 +202,48 @@ class _ProfilePageState extends State<ProfilePage>
               _onScroll();
               return false;
             },
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (_persistedToken == null) ...[
-                    NoLogin(onAuthorized: _onAuthorized),
-                  ] else if (_userInfo != null) ...[
-                    // 头部信息
-                    UserHeader(userInfo: _userInfo!),
-                    // 顶部 Tab 标签
-                    if (_tabs.isNotEmpty)
-                      TabBar(
-                        key: _tabBarKey,
-                        controller: _tabController,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        tabs: _tabs
-                            .map((t) => Tab(text: t['label'] as String))
-                            .toList(),
-                      ),
-                    const SizedBox(height: 12),
-                    // 当前标签内容
-                    if (_isLoadingCollections)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: CircularProgressIndicator(),
+            child: RefreshIndicator(
+              onRefresh: _refreshProfile,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_persistedToken == null) ...[
+                      NoLogin(onAuthorized: _onAuthorized),
+                    ] else if (_userInfo != null) ...[
+                      // 头部信息
+                      UserHeader(userInfo: _userInfo!),
+                      // 顶部 Tab 标签
+                      if (_tabs.isNotEmpty)
+                        TabBar(
+                          key: _tabBarKey,
+                          controller: _tabController,
+                          isScrollable: true,
+                          tabAlignment: TabAlignment.start,
+                          tabs: _tabs
+                              .map((t) => Tab(text: t['label'] as String))
+                              .toList(),
                         ),
-                      )
-                    else if (_tabs.isNotEmpty)
-                      Collection(
-                        userInfo: _userInfo!,
-                        collections: _collections,
-                        currentType: _tabs[_tabController.index]['id'] as int,
-                      ),
+                      const SizedBox(height: 12),
+                      // 当前标签内容
+                      if (_isLoadingCollections)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else if (_tabs.isNotEmpty)
+                        Collection(
+                          userInfo: _userInfo!,
+                          collections: _collections,
+                          currentType: _tabs[_tabController.index]['id'] as int,
+                        ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

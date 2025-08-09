@@ -15,7 +15,7 @@ class Collection extends StatelessWidget {
   });
 
   final UserInfo userInfo;
-  final Map<int, UserCollection> collections; // type -> data
+  final Map<int, UserCollection> collections;
   final int currentType; // 当前选中的类型 id
 
   @override
