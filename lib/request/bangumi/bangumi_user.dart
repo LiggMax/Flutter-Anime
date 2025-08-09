@@ -40,7 +40,7 @@ class BangumiUser {
         },
       ),
       queryParameters: {
-        'subjectType': 2,
+        'subjectType': subjectType,
         'type': type,
         'limit': limit,
         'offset': offset,

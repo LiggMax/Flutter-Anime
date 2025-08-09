@@ -125,9 +125,9 @@ class AnimeCard extends StatelessWidget {
                 child: Text(
                   name ?? '未知动漫',
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color.fromRGBO(255, 255, 255, 0.8),
                     shadows: [
                       Shadow(
                         offset: Offset(1, 1),
@@ -212,7 +212,7 @@ class _WeeklyAnimeGridState extends State<WeeklyAnimeGrid>
               indicatorColor: Theme.of(context).primaryColor,
               indicatorWeight: 2,
               labelStyle: const TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
               unselectedLabelStyle: const TextStyle(
@@ -243,13 +243,9 @@ class _WeeklyAnimeGridState extends State<WeeklyAnimeGrid>
             const SizedBox(height: 2),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(10),
-              ),
               child: Text(
                 '$animeCount',
-                style: const TextStyle(fontSize: 10, color: Colors.white),
+                style: const TextStyle(fontSize: 10, ),
               ),
             ),
           ],
