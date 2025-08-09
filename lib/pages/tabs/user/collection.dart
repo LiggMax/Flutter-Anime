@@ -25,10 +25,14 @@ class Collection extends StatelessWidget {
         collections[currentType]?.data ?? const <UserCollectionItem>[];
 
     if (items.isEmpty) {
-      return Center(
-        child: Text(
-          '暂无数据',
-          style: TextStyle(color: colorScheme.onSurfaceVariant),
+      return SizedBox(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height - kToolbarHeight,
+        child: Center(
+          child: Text(
+            '暂无数据',
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
         ),
       );
     }

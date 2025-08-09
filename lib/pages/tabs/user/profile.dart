@@ -122,7 +122,6 @@ class _ProfilePageState extends State<ProfilePage>
           _persistedToken!,
           t,
           subjectType: 2,
-          limit: 2,
           offset: 0,
         );
         if (!mounted) return;
