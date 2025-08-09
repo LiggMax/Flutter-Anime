@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import './controllers/theme_controller.dart';
-import './routes/routes.dart';
+import 'pages/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

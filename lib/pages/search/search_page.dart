@@ -1,4 +1,4 @@
-import 'package:AnimeFlow/routes/routes.dart';
+import 'package:AnimeFlow/pages/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

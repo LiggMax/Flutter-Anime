@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../utils/theme_extensions.dart';
 import 'package:AnimeFlow/modules/bangumi/data.dart';
 import 'skeleton/head_skeleton.dart';
-import '../../routes/routes.dart';
+import '../routes.dart';
 
 /// 自定义AppBar组件
 class AnimeDetailAppBar extends StatelessWidget {

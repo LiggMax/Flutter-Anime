@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:AnimeFlow/request/bangumi/bangumi.dart';
-import 'package:AnimeFlow/routes/routes.dart';
+import 'package:AnimeFlow/pages/routes.dart';
 
 import '../../utils/fullscreen_utils.dart';
 
@@ -16,6 +16,7 @@ class CalendarState {
 // 数据提供者类
 class CalendarProvider {
   final _stateController = StreamController<CalendarState>();
+
   Stream<CalendarState> get stateStream => _stateController.stream;
 
   // 静态缓存
@@ -372,13 +373,7 @@ class _TimePageState extends State<TimePage>
       appBar: AppBar(
         title: const Text('时间表'),
         centerTitle: false,
-        actions: [
-          IconButton(
-            tooltip: '刷新',
-            icon: const Icon(Icons.refresh),
-            onPressed: () => _calendarProvider.refreshCalendar(),
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: StreamBuilder<CalendarState>(
         stream: _calendarProvider.stateStream,

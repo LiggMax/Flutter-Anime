@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../routes.dart';
 import 'recommend.dart';
 import 'ranking.dart';
+import 'package:provider/provider.dart';
+import '../../../controllers/theme_controller.dart';
+import '../../../utils/theme_extensions.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,8 +25,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('首页'), centerTitle: false,
-      automaticallyImplyLeading:  false,
+      appBar: AppBar(
+        title: const Text('首页'),
+        centerTitle: false,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            tooltip: '搜索',
+            onPressed: () => Navigator.pushNamed(context, Routes.search),
+            icon: const Icon(Icons.search),
+          ),
+          IconButton(
+            icon: Icon(context.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () async {
+              await Provider.of<ThemeController>(
+                context,
+                listen: false,
+              ).toggleTheme();
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

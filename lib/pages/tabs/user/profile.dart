@@ -1,10 +1,8 @@
-import 'package:AnimeFlow/request/api/bangumi/oauth.dart';
 import 'package:AnimeFlow/request/bangumi/bangumi_oauth.dart';
 import 'package:AnimeFlow/request/bangumi/bangumi_user.dart';
 import 'package:AnimeFlow/modules/bangumi/token.dart';
 import 'package:AnimeFlow/modules/bangumi/user_info.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:AnimeFlow/pages/tabs/user/header.dart';
 import 'package:AnimeFlow/pages/tabs/user/no_login.dart';
@@ -19,8 +17,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Bangumi授权登录URL
-  final String _authUrl = BangumiOAuthApi.oauthUrl;
   BangumiToken? _persistedToken;
   UserInfo? _userInfo;
 
@@ -82,7 +78,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('个人中心'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text('个人中心'),
+        centerTitle: false,
+        automaticallyImplyLeading: false,
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [

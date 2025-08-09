@@ -1,9 +1,9 @@
 import 'package:AnimeFlow/request/bangumi/bangumi_oauth.dart';
 import 'package:flutter/material.dart';
-import '../pages/tabs.dart';
-import '../pages/search/search_page.dart';
-import '../pages/animeinfos/anime_info.dart';
-import '../pages/player/play_info.dart';
+import 'tabs.dart';
+import 'search/search_page.dart';
+import 'animeinfos/anime_info.dart';
+import 'player/play_info.dart';
 import 'package:AnimeFlow/modules/bangumi/token.dart';
 
 /// 统一的路由系统
